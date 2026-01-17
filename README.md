@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kharcho - Enterprise Expense Management
 
-## Getting Started
+Kharcho is a modern, full-stack expense management platform built with Next.js 16, Prisma, and Tailwind CSS. It features powerful search capabilities, collaboration tools, and automated workflows.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Power Search & Filters
+- **Advanced Query Syntax**: Search using natural language-like queries (e.g., `amount>100 status:pending merchant:"Uber"`).
+- **Saved Searches**: Save complex filters for quick access, with pinning and sharing capabilities.
+- **Autocomplete**: Intelligent suggestions for fields and values as you type.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Collaboration
+- **Discussion Threads**: Contextual comments on expenses, trips, and reports.
+- **@Mentions**: Tag team members to notify them immediately.
+- **Notifications**: Real-time alerts for approvals, mentions, and comments.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Smart To-do List
+- **Unified Inland**: Aggregates all actionable items (approvals, receipt fixes, reconciliations) in one place.
+- **Quick Actions**: Approve, reject, or reconcile directly from the to-do list.
+- **Prioritization**: Intelligent sorting based on urgency and item age.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Expense Calendar
+- **Visual Timeline**: View expenses in a monthly calendar view.
+- **Daily Summaries**: Quick insight into daily spending volume.
 
-## Learn More
+## 🛠 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Database**: SQLite (Dev) / PostgreSQL (Prod) with Prisma ORM
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Auth**: NextAuth.js v5
+- **Testing**: Playwright (E2E)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚦 Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
 
-## Deploy on Vercel
+### Installation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/kharcho.git
+   cd kharcho
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Copy `.env.example` to `.env` and configure your database URL and NextAuth secret.
+
+4. Initialize the database:
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## 🧪 Running Tests
+
+We use Playwright for End-to-End testing.
+
+1. Install Playwright browsers:
+   ```bash
+   npx playwright install
+   ```
+
+2. Run E2E tests:
+   ```bash
+   npx playwright test
+   ```
+
+## 📝 Query Syntax Guide
+
+The search bar supports specific operators to refine your results:
+
+- **Comparison**: `amount>50`, `amount<=200`
+- **Field Match**: `merchant:Uber`, `category:Travel`
+- **Exact Match**: `status:"Pending Approval"`
+- **Dates**: `date:today`, `date:last-month`, `date>2024-01-01`
+- **Logic**: Use space for AND (implicit).

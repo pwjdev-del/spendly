@@ -1,0 +1,17 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main Vertical Stem of K -->
+  <rect x="40" y="30" width="30" height="140" rx="4" fill="#333333" />
+  
+  <!-- Bottom Leg of K (Dark Grey) -->
+  <path d="M70 110 L120 170 H160 L100 100 Z" fill="#333333" />
+  
+  <!-- Top Arrow Leg (Purple) -->
+  <!-- Diagonal shaft -->
+  <path d="M50 130 L130 50" stroke="#8b5cf6" stroke-width="24" stroke-linecap="round" />
+  
+  <!-- Arrow Head -->
+  <path d="M110 50 L155 50 L155 95 L110 50" fill="#8b5cf6" stroke="#8b5cf6" stroke-width="8" stroke-linejoin="round" />
+  
+  <!-- White cutout to separate arrow from stem if needed, but overlay is fine. -->
+  <!-- Let's make it look interwoven or just on top. On top is fine. -->
+</svg>

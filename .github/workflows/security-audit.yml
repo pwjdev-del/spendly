@@ -1,0 +1,35 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  red-team-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Push Database Schema (SQLite)
+        run: npx prisma db push
+
+      - name: Run Red Team Audit
+        # Fails the build if the audit script exits with non-zero
+        run: npx tsx scripts/red_team_audit.ts
+        env:
+          DATABASE_URL: "file:./audit.db" # Use a separate DB for audit test

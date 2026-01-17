@@ -1,0 +1,14 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "payoutDay" INTEGER DEFAULT 15;
+
+-- CreateTable
+CREATE TABLE "Income" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "amount" REAL NOT NULL,
+    "source" TEXT NOT NULL DEFAULT 'Manual',
+    "date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Income_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);

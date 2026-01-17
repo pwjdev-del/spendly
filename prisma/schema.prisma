@@ -1,0 +1,521 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id           String @id @default(cuid())
+  name         String
+  slug         String @unique
+  inviteCode   String? @unique
+  logoUrl      String?
+  primaryColor String? @default("#09090b") // Default black
+
+  users        User[]
+  expenses     Expense[]
+  cards        Card[]
+  transactions Transaction[]
+  recurringExpenses RecurringExpense[]
+  trips        Trip[]
+  invites      Invite[]
+  
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  auditLogs    AuditLog[]
+
+  // Collaboration feature relations
+  savedSearches   SavedSearch[]
+  discussions     Discussion[]
+  todoItems       TodoItem[]
+}
+
+model User {
+  id             String @id @default(cuid())
+  name           String?
+  image          String? // NextAuth default for avatar
+  email          String @unique
+  emailVerified  DateTime?
+  password       String?
+  role           String @default("MEMBER") // ADMIN, MEMBER
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  
+  canReconcile   Boolean       @default(false)
+  dashboardLayout String? // JSON string for widget layout preferences
+
+  expenses       Expense[]
+  incomes        Income[]
+  cards          Card[]
+  trips          Trip[]
+  approvedTrips  Trip[] @relation("TripApprover")
+  auditedTrips   Trip[] @relation("TripAuditor")
+  reconciliationBatches ReconciliationBatch[]
+
+  transactions   Transaction[]
+  recurringExpenses RecurringExpense[]
+
+  payoutDay      Int?          @default(15) // Default to 15th
+  monthlyLimit   Float?        @default(5000.0)
+
+  // Profile Fields
+  bio            String?
+  avatarUrl      String?
+  phoneNumber    String?
+  preferences    String?       @default("{}") // Stored as JSON string
+
+  resetToken     String?       @unique
+  resetTokenExpiry DateTime?
+  
+  encryptedDataKey String?   // DEK encrypted by Master KEK
+
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+
+  auditLogs      AuditLog[]
+  accounts       Account[]
+
+  // Collaboration feature relations
+  savedSearches     SavedSearch[] @relation("SavedSearchOwner")
+  authoredMessages  Message[]     @relation("MessageAuthor")
+  mentionedIn       MessageMention[] @relation("MentionedInMessage")
+  notifications     Notification[]
+  todoItems         TodoItem[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Income {
+  id        String   @id @default(cuid())
+  amount    Float
+  source    String   @default("Manual")
+  date      DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Expense {
+  id             String @id @default(cuid())
+  amount         Int      // Stored in Cents
+  currency       String   @default("USD") // USD, EUR, GBP, INR
+  merchant       String
+  category       String
+  date           DateTime @default(now())
+  status         String @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  receiptUrl     String?
+  
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  tripId         String?
+  trip           Trip? @relation(fields: [tripId], references: [id])
+
+  transaction    Transaction?
+  reconciliationStatus String @default("UNRECONCILED") // UNRECONCILED, MATCHED, RECONCILED
+  
+  reconciliationBatchId String?
+  reconciliationBatch   ReconciliationBatch? @relation(fields: [reconciliationBatchId], references: [id])
+
+
+  latitude       Float?
+  longitude      Float?
+  locationName   String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Filtering indexes for power search
+  @@index([status])
+  @@index([category])
+  @@index([merchant])
+  @@index([createdAt])
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model Card {
+  id             String @id @default(cuid())
+  nickname       String? // e.g. "AWS Subscription"
+  last4          String
+  limit          Float
+  spent          Float @default(0.0)
+  
+  userId         String
+  user           User @relation(fields: [userId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Trip {
+  id              String    @id @default(cuid())
+  tripNumber      String    // Auto-generated: "TRIP-001", "TRIP-002"
+  name            String    // e.g., "NYC Business Trip"
+  description     String?
+  startDate       DateTime
+  endDate         DateTime?
+  budget          Float?
+  status          String    @default("PLANNING") // PLANNING, ACTIVE, COMPLETED
+  
+  expenses        Expense[]
+  documents       TripDocument[]
+  
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+
+  approverId      String?
+  approver        User?     @relation("TripApprover", fields: [approverId], references: [id])
+  auditorId       String?
+  auditor         User?     @relation("TripAuditor", fields: [auditorId], references: [id])
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  date        DateTime
+  amount      Float    // Positive for deposit, Negative for charge/withdrawal
+  description String
+  source      String   // BANK, CREDIT_CARD, CASH_ADVANCE
+  status      String   @default("PENDING") // PENDING, RECONCILED
+  
+  expenseId   String?  @unique
+  expense     Expense? @relation(fields: [expenseId], references: [id])
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([organizationId])
+
+}
+
+model Invite {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  role           String   // ADMIN, MEMBER
+  expiresAt      DateTime
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt // Added for consistency
+  
+
+  @@index([organizationId])
+  @@index([code])
+}
+
+model ReconciliationBatch {
+  id        String   @id @default(cuid())
+  name      String   // Nickname
+  fileName  String
+  date      DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  expenses  Expense[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TripDocument {
+  id        String   @id @default(cuid())
+  name      String   // Custom name or filename
+  url       String   // Path to file
+  type      String   // MIME type
+  size      Int      // Size in bytes
+  
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  uploadedBy String
+  
+  createdAt DateTime @default(now())
+}
+
+
+model RecurringExpense {
+  id             String   @id @default(cuid())
+  merchant       String
+  amount         Float
+  currency       String   @default("USD")
+  category       String
+  frequency      String   @default("MONTHLY") // WEEKLY, MONTHLY, YEARLY
+  status         String   @default("ACTIVE")  // ACTIVE, PAUSED
+  
+  nextDueDate    DateTime
+  
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  action         String   // e.g. "USER_LOGIN", "ROLE_CHANGE", "VIEW_DECRYPTED_PII"
+  entityType     String   // e.g. "User", "Trip"
+  entityId       String?  // ID of the target entity
+  
+  actorId        String   // Who performed the action
+  actor          User     @relation(fields: [actorId], references: [id])
+  
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  
+  metadata       String?  // JSON string for extra details (IP, UserAgent, OldValue, NewValue)
+  encryptedData  String?  // New: Encrypted payload for sensitive info
+  
+  createdAt      DateTime @default(now())
+  
+  @@index([actorId])
+  @@index([organizationId])
+  @@index([action])
+}
+
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  ipAddress String
+  type      String   // e.g. "ZOD_ERROR", "SQLI_ATTEMPT"
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([ipAddress])
+  @@index([createdAt])
+}
+
+model BlockedIp {
+  ipAddress String   @id
+  reason    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model IdempotencyKey {
+  key        String   @id
+  userId     String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId])
+}
+
+// ============================================================
+// SAVED SEARCHES - Power filters with saved views
+// ============================================================
+model SavedSearch {
+  id          String   @id @default(cuid())
+  name        String
+  typeScope   String   @default("ALL") // EXPENSE, REPORT, TRIP, ALL
+  queryString String   // "status:pending amount>100"
+  uiStateJson String?  // Serialized UI filter state
+  isPinned    Boolean  @default(false)
+  isShared    Boolean  @default(false) // Org-level sharing
+  
+  ownerId        String
+  owner          User         @relation("SavedSearchOwner", fields: [ownerId], references: [id])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+  @@index([organizationId])
+}
+
+// ============================================================
+// DISCUSSIONS - Chat threads on expenses/reports/trips
+// ============================================================
+model Discussion {
+  id         String   @id @default(cuid())
+  entityType String   // EXPENSE, REPORT, TRIP
+  entityId   String
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  messages   Message[]
+  
+  createdAt  DateTime @default(now())
+  
+  @@unique([entityType, entityId])
+  @@index([organizationId])
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  body            String
+  bodyHtml        String?
+  
+  discussionId    String
+  discussion      Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  
+  authorId        String
+  author          User     @relation("MessageAuthor", fields: [authorId], references: [id])
+  
+  parentId        String?  // For threaded replies
+  parent          Message? @relation("MessageReplies", fields: [parentId], references: [id])
+  replies         Message[] @relation("MessageReplies")
+  
+  mentions        MessageMention[]
+  attachments     MessageAttachment[]
+  
+  createdAt       DateTime @default(now())
+  editedAt        DateTime?
+  deletedAt       DateTime?
+  
+  @@index([discussionId])
+  @@index([authorId])
+  @@index([parentId])
+}
+
+model MessageMention {
+  id              String   @id @default(cuid())
+  messageId       String
+  message         Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  mentionedUserId String
+  mentionedUser   User     @relation("MentionedInMessage", fields: [mentionedUserId], references: [id])
+  
+  @@unique([messageId, mentionedUserId])
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  fileName  String
+  fileUrl   String
+  fileType  String
+  fileSize  Int
+  
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// NOTIFICATIONS - User notifications for mentions, comments, etc.
+// ============================================================
+model Notification {
+  id          String   @id @default(cuid())
+  type        String   // MENTION, COMMENT, APPROVAL_REQUEST, TODO
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  entityType  String   // EXPENSE, REPORT, TRIP, MESSAGE
+  entityId    String
+  messageId   String?  // Link to specific message if applicable
+  
+  title       String
+  body        String?
+  
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([userId, readAt])
+}
+
+// ============================================================
+// TODO ITEMS - Aggregated actionable items
+// ============================================================
+model TodoItem {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  
+  entityType  String   // EXPENSE, REPORT, RECONCILIATION
+  entityId    String
+  
+  kind        String   // SUBMIT, APPROVE, RECONCILE, FIX_RECEIPT, RECATEGORIZE
+  priority    Int      @default(0) // Higher = more urgent
+  reason      String
+  
+  primaryAction String  // CTA label
+  
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+  
+  @@index([userId])
+  @@index([organizationId])
+  @@index([resolvedAt])
+}
+
+// Merchant name mappings learned from user corrections
+model MerchantMapping {
+  id             String   @id @default(cuid())
+  bankName       String   // Raw name from bank statement (e.g., "AMZN MKTP")
+  mappedName     String   // Normalized name (e.g., "Amazon")
+  userId         String
+  usageCount     Int      @default(1) // How many times this mapping was used
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([bankName, userId])
+  @@index([userId])
+  @@index([bankName])
+}

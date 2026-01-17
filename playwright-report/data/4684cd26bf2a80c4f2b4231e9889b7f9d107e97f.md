@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - link "Kharcho" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - img "Kharcho" [ref=e9]
+        - generic [ref=e10]:
+          - link "Dashboard" [ref=e11] [cursor=pointer]:
+            - /url: /
+            - img
+            - text: Dashboard
+          - link "To-do" [ref=e12] [cursor=pointer]:
+            - /url: /todo
+            - img
+            - text: To-do
+          - link "Calendar" [ref=e13] [cursor=pointer]:
+            - /url: /calendar
+            - img
+            - text: Calendar
+          - link "Trips" [ref=e14] [cursor=pointer]:
+            - /url: /trips
+            - img
+            - text: Trips
+          - link "Expense Transactions" [ref=e15] [cursor=pointer]:
+            - /url: /expenses
+            - img
+            - text: Expense Transactions
+      - button "Add Expense" [ref=e17]:
+        - img
+        - text: Add Expense
+    - generic [ref=e18]:
+      - banner [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - img [ref=e22]
+            - generic [ref=e27]: Expense Transactions
+          - button [ref=e28]:
+            - img
+          - button "U" [ref=e29]:
+            - generic [ref=e31]: U
+      - main [ref=e32]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e38] [cursor=pointer]:
+    - generic [ref=e41]:
+      - text: Rendering
+      - generic [ref=e42]:
+        - generic [ref=e43]: .
+        - generic [ref=e44]: .
+        - generic [ref=e45]: .
+  - alert [ref=e46]
+```

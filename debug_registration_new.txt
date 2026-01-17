@@ -1,0 +1,153 @@
+
+--------------------------------------------------------------------------------
+Time: 2025-12-15T23:28:12.560Z
+Error: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:318:262
+
+  315 const password = formData.get("password").trim();
+  316 if (!email || !password || !name) return "All fields are required";
+  317 try {
+→ 318     const existingUser = await __TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+Inconsistent column data: Conversion failed: input contains invalid characters
+Stack: PrismaClientKnownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:318:262
+
+  315 const password = formData.get("password").trim();
+  316 if (!email || !password || !name) return "All fields are required";
+  317 try {
+→ 318     const existingUser = await __TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+Inconsistent column data: Conversion failed: input contains invalid characters
+    at $n.handleRequestError (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:7315)
+    at $n.handleAndLogRequestError (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async register (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:318:30)
+    at async executeActionAndPrepareForRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:35:4449)
+    at async /Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:35:2264
+    at async handleAction (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:34:23622)
+    at async renderToHTMLOrFlightImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:40:41714)
+    at async doRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8080:28)
+    at async AppPageRouteModule.handleResponse (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:42:63162)
+    at async handleResponse (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8286:32)
+    at async handler (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8657:20)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/start-server.js:226:13)
+Email Tried: "patelkathan134@gmail.com"
+Name Tried: "Kathan patel"
+Password Length: 6
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Time: 2025-12-15T23:28:27.261Z
+Error: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:318:262
+
+  315 const password = formData.get("password").trim();
+  316 if (!email || !password || !name) return "All fields are required";
+  317 try {
+→ 318     const existingUser = await __TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+Inconsistent column data: Conversion failed: input contains invalid characters
+Stack: PrismaClientKnownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:318:262
+
+  315 const password = formData.get("password").trim();
+  316 if (!email || !password || !name) return "All fields are required";
+  317 try {
+→ 318     const existingUser = await __TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+Inconsistent column data: Conversion failed: input contains invalid characters
+    at $n.handleRequestError (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:7315)
+    at $n.handleAndLogRequestError (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async register (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:318:30)
+    at async executeActionAndPrepareForRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:35:4449)
+    at async /Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:35:2264
+    at async handleAction (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:34:23622)
+    at async renderToHTMLOrFlightImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:40:41714)
+    at async doRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8080:28)
+    at async AppPageRouteModule.handleResponse (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:42:63162)
+    at async handleResponse (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8286:32)
+    at async handler (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8657:20)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/start-server.js:226:13)
+Email Tried: "patelkathan134@gmail.com"
+Name Tried: "Kathan patel"
+Password Length: 6
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+Time: 2025-12-15T23:30:26.339Z
+Error: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:320:262
+
+  317 const password = formData.get("password").trim();
+  318 if (!email || !password || !name) return "All fields are required";
+  319 try {
+→ 320     const existingUser = await __TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+Inconsistent column data: Conversion failed: input contains invalid characters
+Stack: PrismaClientKnownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:320:262
+
+  317 const password = formData.get("password").trim();
+  318 if (!email || !password || !name) return "All fields are required";
+  319 try {
+→ 320     const existingUser = await __TURBOPACK__imported__module__$5b$project$5d2f$Library$2f$CloudStorage$2f$GoogleDrive$2d$patelkathan134$40$gmail$2e$com$2f$My__Drive$2f$KHARCHO$2f$lib$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+Inconsistent column data: Conversion failed: input contains invalid characters
+    at $n.handleRequestError (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:7315)
+    at $n.handleAndLogRequestError (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async register (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/[root-of-the-server]__d92ca5a2._.js:320:30)
+    at async executeActionAndPrepareForRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:35:4449)
+    at async /Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:35:2264
+    at async handleAction (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:34:23622)
+    at async renderToHTMLOrFlightImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:40:41714)
+    at async doRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8080:28)
+    at async AppPageRouteModule.handleResponse (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js:42:63162)
+    at async handleResponse (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8286:32)
+    at async handler (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/.next/dev/server/chunks/ssr/f2802_next_dist_1331273a._.js:8657:20)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/base-server.js:912:17)
+    at async /Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/Users/kathanpatel/Library/CloudStorage/GoogleDrive-patelkathan134@gmail.com/My Drive/KHARCHO/node_modules/next/dist/server/lib/start-server.js:226:13)
+Email Tried: "patelkathan134@gmail.com"
+Name Tried: "kathan"
+Password Length: 6
+--------------------------------------------------------------------------------
