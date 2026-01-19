@@ -3,7 +3,7 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Camera, Plus } from "lucide-react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { ExpenseForm } from "@/components/expenses/ExpenseForm"
 import { useRouter } from "next/navigation"
 
@@ -62,18 +62,22 @@ export function FastExpenseWrapper({ trips = [], trigger }: FastExpenseWrapperPr
                 </Button>
             )}
 
-            <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-                <DialogContent className="max-w-md w-full max-h-[90vh] h-full md:h-auto overflow-y-auto p-0 border-none bg-[#FBF7F2] shadow-2xl rounded-[32px] sm:rounded-[32px]" aria-describedby={undefined}>
-                    <DialogTitle className="sr-only">New Expense</DialogTitle>
-                    <div className="w-full h-full">
+            <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+                <SheetContent
+                    side="right"
+                    className="w-full sm:max-w-md p-0 flex flex-col bg-background dark:bg-[#0A1628] shadow-2xl border-l"
+                >
+                    <SheetTitle className="sr-only">New Expense</SheetTitle>
+                    <div className="w-full h-full flex flex-col">
                         <ExpenseForm
                             trips={trips}
                             initialFile={file}
                             onCancel={handleClose}
+                            isSlideOver={true}
                         />
                     </div>
-                </DialogContent>
-            </Dialog>
+                </SheetContent>
+            </Sheet>
         </>
     )
 }

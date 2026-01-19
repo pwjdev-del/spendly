@@ -68,142 +68,136 @@
 
 :root {
   /* 
-     Stitch Precise Palette
-     Background: Wild Sand (#E7E4DE)
-     Foreground: Mirage (#161928)
-     Primary: Blaze Orange (#FF6700)
-     Cards: White or Mirage/Deep Sea Green variants
+     Kharcho Premium Palette - Light Mode
+     Background: Cool Gray (#F5F7FA)
+     Primary: Teal (#0D9488)
+     Cards: White with blue-tinted borders
   */
 
-  --background: #E7E4DE;
-  /* Wild Sand */
-  --foreground: #161928;
-  /* Mirage */
+  --background: #F5F7FA;
+  --foreground: #0F172A;
 
   --card: #FFFFFF;
-  --card-foreground: #161928;
+  --card-foreground: #0F172A;
 
   --popover: #FFFFFF;
-  --popover-foreground: #161928;
+  --popover-foreground: #0F172A;
 
-  --primary: #FF6700;
-  /* Blaze Orange */
+  --primary: #0D9488;
+  /* Teal 600 */
   --primary-foreground: #FFFFFF;
 
-  --secondary: #D4D1CB;
-  /* Darker Wild Sand */
-  --secondary-foreground: #161928;
+  --secondary: #E2E8F0;
+  --secondary-foreground: #0F172A;
 
-  --muted: #D4D1CB;
-  --muted-foreground: #095859;
-  /* Deep Sea Green as muted text/accents */
+  --muted: #E2E8F0;
+  --muted-foreground: #64748B;
+  /* Slate 500 */
 
-  --accent: #FFFFFF;
-  --accent-foreground: #161928;
+  --accent: #F0FDFA;
+  /* Teal 50 */
+  --accent-foreground: #0F172A;
 
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
 
-  --border: #D4D1CB;
-  --input: #D4D1CB;
-  --ring: #FF6700;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #0D9488;
 
   --radius: 1rem;
-  /* More rounded as per design */
 
-  /* Charts */
-  --chart-1: #FF6700;
-  --chart-2: #095859;
-  /* Deep Sea Green */
-  --chart-3: #161928;
-  /* Mirage */
-  --chart-4: #D4D1CB;
-  --chart-5: #EF4444;
+  /* Charts - Teal/Cyan Family */
+  --chart-1: #0D9488;
+  /* Teal 600 */
+  --chart-2: #2DD4BF;
+  /* Teal 400 */
+  --chart-3: #14B8A6;
+  /* Teal 500 */
+  --chart-4: #5EEAD4;
+  /* Teal 300 */
+  --chart-5: #99F6E4;
+  /* Teal 200 */
 
-  /* Sidebar */
+  /* Sidebar - Light */
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #161928;
-  --sidebar-primary: #FF6700;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #0D9488;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #E7E4DE;
-  --sidebar-accent-foreground: #161928;
-  --sidebar-border: #D4D1CB;
-  --sidebar-ring: #FF6700;
+  --sidebar-accent: #F0FDFA;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #0D9488;
 
   /* Semantic Status Colors */
   --success: #22c55e;
-  /* Green 500 */
   --success-foreground: #FFFFFF;
   --warning: #f59e0b;
-  /* Amber 500 */
   --warning-foreground: #FFFFFF;
-  --info: #3b82f6;
-  /* Blue 500 */
+  --info: #0D9488;
   --info-foreground: #FFFFFF;
 }
 
 .dark {
   /* 
-     Stitch Dark Mode (Mirage Dominated)
-     Background: Mirage (#161928)
-     Foreground: Wild Sand (#E7E4DE)
+     Kharcho Premium Dark Mode
+     Background: Deep Navy (#0A1628)
+     Primary: Bright Cyan (#2DD4BF)
+     Cards: Navy with subtle layering
   */
-  --background: #161928;
-  --foreground: #E7E4DE;
+  --background: #0A1628;
+  --foreground: #F1F5F9;
 
-  --card: #1F2235;
-  /* Lighter Mirage */
-  --card-foreground: #E7E4DE;
+  --card: #0F1D2E;
+  --card-foreground: #F1F5F9;
 
-  --popover: #1F2235;
-  --popover-foreground: #E7E4DE;
+  --popover: #0F1D2E;
+  --popover-foreground: #F1F5F9;
 
-  --primary: #FF6700;
-  --primary-foreground: #FFFFFF;
+  --primary: #2DD4BF;
+  /* Cyan/Teal 400 */
+  --primary-foreground: #0A1628;
 
-  --secondary: #095859;
-  /* Deep Sea Green */
-  --secondary-foreground: #E7E4DE;
+  --secondary: #1A2942;
+  --secondary-foreground: #F1F5F9;
 
-  --muted: #095859;
-  --muted-foreground: #94A3B8;
+  --muted: #1A2942;
+  --muted-foreground: #64748B;
 
-  --accent: #095859;
-  --accent-foreground: #E7E4DE;
+  --accent: #1E3A5F;
+  --accent-foreground: #F1F5F9;
 
-  --destructive: #7f1d1d;
-  --destructive-foreground: #E7E4DE;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
 
-  --border: #334155;
-  /* Slate 700 */
-  --input: #334155;
-  --ring: #FF6700;
+  --border: #1E3A5F;
+  --input: #1A2942;
+  --ring: #2DD4BF;
 
-  --chart-1: #FF6700;
-  --chart-2: #2DD4BF;
-  --chart-3: #FBBF24;
-  --chart-4: #34D399;
-  --chart-5: #94A3B8;
+  /* Charts - Cyan/Teal Family for Dark */
+  --chart-1: #2DD4BF;
+  --chart-2: #14B8A6;
+  --chart-3: #5EEAD4;
+  --chart-4: #0D9488;
+  --chart-5: #99F6E4;
 
-  --sidebar: #161928;
-  --sidebar-foreground: #E7E4DE;
-  --sidebar-primary: #FF6700;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #095859;
-  --sidebar-accent-foreground: #E7E4DE;
-  --sidebar-border: #095859;
-  --sidebar-ring: #FF6700;
+  /* Sidebar - Dark */
+  --sidebar: #0A1628;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #2DD4BF;
+  --sidebar-primary-foreground: #0A1628;
+  --sidebar-accent: #1A2942;
+  --sidebar-accent-foreground: #F1F5F9;
+  --sidebar-border: #1E3A5F;
+  --sidebar-ring: #2DD4BF;
 
   /* Semantic Status Colors (Dark Mode) */
-  --success: #15803d;
-  /* Green 700? Or lighter for dark mode? Usually lighter text. Let's stick to base for now or adjust. */
-  /* Actually for dark mode text we want light colors. */
   --success: #22c55e;
   --success-foreground: #FFFFFF;
   --warning: #f59e0b;
   --warning-foreground: #FFFFFF;
-  --info: #3b82f6;
-  --info-foreground: #FFFFFF;
+  --info: #2DD4BF;
+  --info-foreground: #0A1628;
 }
 
 /* Font Preferences Logic - Global */

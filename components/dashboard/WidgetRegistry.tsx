@@ -54,12 +54,12 @@ export function BalanceWidget({ data }: { data: DashboardData }) {
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Total Balance</h3>
                     </div>
                     <div className={`mt-2 font-bold ${data.balance >= 0 ? "text-foreground" : "text-destructive"} truncate text-3xl tabular-nums`}>
-                        ${data.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${(data.balance / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                 </div>
                 <div className="flex items-center gap-2 mt-4 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 rounded-full w-fit">
                     <TrendingUp className="w-3 h-3" />
-                    <span>Income: ${data.totalIncome.toLocaleString()}</span>
+                    <span>Income: ${(data.totalIncome / 100).toLocaleString()}</span>
                 </div>
             </CardContent>
         </Card>
@@ -69,17 +69,18 @@ export function BalanceWidget({ data }: { data: DashboardData }) {
 // 1b. Total Spend Widget
 export function TotalSpendWidget({ data }: { data: DashboardData }) {
     const budget = 3000; // Mock budget for UI matching
-    const remaining = Math.max(0, budget - data.totalSpend);
-    const percentage = Math.min((data.totalSpend / budget) * 100, 100);
+    const totalSpendDollars = data.totalSpend / 100;
+    const remaining = Math.max(0, budget - totalSpendDollars);
+    const percentage = Math.min((totalSpendDollars / budget) * 100, 100);
 
     return (
-        <Card className="h-full border-none shadow-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white overflow-hidden relative group transition-all hover:scale-[1.02]">
+        <Card className="h-full border-none shadow-xl bg-gradient-to-br from-[#0F1D2E] via-[#1A2942] to-[#0D9488]/30 text-white overflow-hidden relative group transition-all hover:scale-[1.02]">
             <CardContent className="p-6 flex flex-col justify-between h-full relative z-10">
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">Total Spent</h3>
                         <div className="text-4xl font-bold tracking-tight text-white mb-1">
-                            ${data.totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            ${totalSpendDollars.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                     </div>
 
@@ -90,16 +91,17 @@ export function TotalSpendWidget({ data }: { data: DashboardData }) {
                         <span>Remaining Budget</span>
                         <span>${remaining.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
-                    <div className="h-3 w-full bg-[#161928]/30 rounded-full overflow-hidden backdrop-blur-md p-0.5">
+                    <div className="h-3 w-full bg-[#0A1628]/50 rounded-full overflow-hidden backdrop-blur-md p-0.5">
                         <div
-                            className="h-full bg-[#FF6700] rounded-full shadow-sm"
+                            className="h-full bg-gradient-to-r from-[#2DD4BF] to-[#0D9488] rounded-full shadow-sm shadow-[#2DD4BF]/30"
                             style={{ width: `${percentage}%` }}
                         />
                     </div>
                 </div>
             </CardContent>
-            {/* Decorative blob */}
-            <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+            {/* Decorative glow */}
+            <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-[#2DD4BF]/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#0D9488]/10 rounded-full blur-2xl pointer-events-none" />
         </Card>
     )
 }
@@ -164,7 +166,7 @@ export function RecentExpensesWidget({ data }: { data: DashboardData }) {
                                     </div>
                                 </div>
                                 <span className="font-bold text-sm tracking-tight text-foreground">
-                                    ${expense.amount.toFixed(2)}
+                                    ${(expense.amount / 100).toFixed(2)}
                                 </span>
                             </div>
                         ))
@@ -216,7 +218,7 @@ export function ApprovalsWidget({ data }: { data: DashboardData }) {
             <div className="relative z-10">
                 <div className="text-5xl font-bold tracking-tighter text-foreground mb-1">{data.pendingCount}</div>
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>
                     Pending requests
                 </p>
             </div>

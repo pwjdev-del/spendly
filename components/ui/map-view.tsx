@@ -72,7 +72,7 @@ export default function MapView({ expenses }: MapViewProps) {
                         .bindPopup(`
                             <div class="p-1 font-sans">
                                 <div class="font-bold text-sm">${expense.merchant}</div>
-                                <div class="text-lg font-bold text-primary">$${expense.amount.toFixed(2)}</div>
+                                <div className="text-lg font-bold text-primary">$${(expense.amount / 100).toFixed(2)}</div>
                                 <div class="text-xs text-muted-foreground">${expense.category || ''}</div>
                                 ${expense.date ? `<div class="text-xs text-muted-foreground border-t mt-1 pt-1">${new Date(expense.date).toLocaleDateString()}</div>` : ''}
                             </div>

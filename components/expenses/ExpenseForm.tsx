@@ -60,6 +60,7 @@ interface ExpenseFormProps {
     initialFile?: File | null
     onCancel?: () => void
     onSuccess?: () => void
+    isSlideOver?: boolean
 }
 
 interface FormState {
@@ -85,8 +86,11 @@ const CATEGORIES = [
     { value: "Other", label: "Other (Custom)" },
 ]
 
-export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onCancel, onSuccess }: ExpenseFormProps) {
-    // Form State
+export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onCancel, onSuccess, isSlideOver }: ExpenseFormProps) {
+    // State
+    const [step, setStep] = useState<'AMOUNT' | 'DETAILS'>(initialFile || initialData ? 'DETAILS' : 'AMOUNT')
+
+    // ... existing state ...
     const [merchant, setMerchant] = useState(initialData?.merchant || "")
     const [amount, setAmount] = useState(initialData?.amount ? SafeMath.toDollars(initialData.amount).toString() : "")
     const [date, setDate] = useState(
@@ -104,11 +108,11 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
 
     // Auto-focus logic
     useEffect(() => {
-        if (!initialFile && !initialData) {
+        if (!initialFile && !initialData && step === 'DETAILS') { // Only auto-focus merchant if on details step
             // Slight delay to ensure modal animation clears
             setTimeout(() => merchantInputRef.current?.focus(), 100)
         }
-    }, [initialFile, initialData])
+    }, [initialFile, initialData, step])
 
 
     // Location State
@@ -246,24 +250,30 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             toast.dismiss("scan-progress");
             toast.success("Receipt scanned!");
 
-            // Auto-fill form
-            if (data.merchant) setMerchant(data.merchant)
-            if (data.amount) setAmount(data.amount.toString())
-            if (data.date) setDate(data.date)
-            if (data.currency) setCurrency(data.currency)
-            if (data.category) {
-                const validCategories = ["Travel", "Meals", "Software", "Office Supplies", "Marketing"]
-                if (validCategories.includes(data.category)) {
-                    setCategory(data.category)
-                } else {
-                    setCategory("Other")
+            // Ensure we switch to DETAILS after scan
+            if (data) {
+                setStep('DETAILS')
+                // Auto-fill form
+                if (data.merchant) setMerchant(data.merchant)
+                if (data.amount) setAmount(data.amount.toString())
+                if (data.date) setDate(data.date)
+                if (data.currency) setCurrency(data.currency)
+                if (data.category) {
+                    const validCategories = ["Travel", "Meals", "Software", "Office Supplies", "Marketing"]
+                    if (validCategories.includes(data.category)) {
+                        setCategory(data.category)
+                    } else {
+                        setCategory("Other")
+                    }
                 }
             }
+
 
         } catch (error: any) {
             console.error("Scanning Error:", error);
 
             let msg = "Failed to scan receipt.";
+
             if (error?.error) {
                 msg = error.error;
             } else if (error instanceof Error) {
@@ -353,22 +363,101 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
         return formAction(formData)
     }
 
+    const handleContinue = () => {
+        // If user entered nothing, maybe allow them to proceed to enter 0?
+        // But usually we want an amount.
+        // If amount is empty string, we can set it to '0' or just let them go.
+        // Let's require amount if they click Continue, or at least it transitions.
+        // Actually, let's just transition.
+        setStep('DETAILS')
+    }
+
+    // Step 1: Amount UI
+    // Only show if we are in AMOUNT step AND we don't have initial data (editing mode skips this)
+    if (step === 'AMOUNT' && !initialData) {
+        return (
+            <div className="flex flex-col h-full w-full bg-[#0A1628] text-white p-6 justify-between animate-in fade-in slide-in-from-right-4 duration-300">
+
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    {onCancel && (
+                        <button onClick={onCancel} className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
+                            <ArrowLeft className="w-6 h-6 text-slate-400" />
+                        </button>
+                    )}
+                    <span className="text-sm font-bold tracking-widest text-[#2DD4BF] uppercase mx-auto">New Expense</span>
+                    {onCancel && <div className="w-10" />}
+                </div>
+
+                {/* Center: Amount Input */}
+                <div className="flex-1 flex flex-col items-center justify-center gap-8">
+                    <div className="flex items-center justify-center gap-2">
+                        <span className="text-4xl font-light text-slate-400">$</span>
+                        <Input
+                            type="number"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder="0"
+                            className="text-8xl font-light text-white text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[300px] h-auto bg-transparent placeholder:text-slate-700"
+                            autoFocus
+                        />
+                    </div>
+
+                    <div className="bg-[#2DD4BF]/10 text-[#2DD4BF] px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-[#2DD4BF]/20 transition-colors">
+                        {currency} <ChevronDown className="w-3 h-3" />
+                    </div>
+                </div>
+
+                {/* Bottom: Actions */}
+                <div className="space-y-4 pb-8">
+                    <Button
+                        onClick={handleContinue}
+                        className="w-full h-14 bg-white text-[#0A1628] hover:bg-slate-200 rounded-full text-lg font-bold"
+                    >
+                        Continue
+                    </Button>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-slate-700/50" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-[#0A1628] px-2 text-slate-500">Or</span>
+                        </div>
+                    </div>
+
+                    <Button
+                        type="button"
+                        onClick={handleScanClick}
+                        className="w-full h-14 bg-[#1A2942] hover:bg-[#233554] text-white border border-slate-700 rounded-full flex items-center justify-center gap-2 text-base font-semibold"
+                    >
+                        {isScanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <ScanLine className="w-5 h-5 text-[#2DD4BF]" />}
+                        Scan Receipt with AI
+                    </Button>
+                </div>
+
+                {/* Hidden File Input */}
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+            </div>
+        )
+    }
+
     return (
         // STITCH DESIGN UPDATE - BALANCED
         // The main form is now a hidden form that collects values from controlled components
         // The visible UI is built with individual cards and buttons.
-        <div className="flex flex-col h-full w-full max-w-md mx-auto bg-[#FBF7F2] rounded-[32px] overflow-hidden relative font-sans text-slate-800">
-            {/* Top Navigation (Visual) */}
+        <div className="flex flex-col h-full w-full max-w-md mx-auto bg-[#0A1628] rounded-[32px] overflow-hidden relative font-sans text-white shadow-2xl">
+            {/* Top Navigation */}
             <div className="flex items-center justify-between px-6 py-5 shrink-0">
                 {onCancel ? (
-                    <button onClick={onCancel} className="p-2 -ml-2 hover:bg-black/5 rounded-full transition-colors">
-                        <ArrowLeft className="w-6 h-6 text-slate-700" />
+                    <button onClick={onCancel} className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
+                        <ArrowLeft className="w-6 h-6 text-slate-400" />
                     </button>
                 ) : (
-                    <div className="w-10" /> // Spacer
+                    <div className="w-10" />
                 )}
-                <span className="text-sm font-bold tracking-widest text-[#7C7CAA] uppercase">New Expense</span>
-                <button className="p-2 -mr-2 hover:bg-black/5 rounded-full transition-colors">
+                <span className="text-sm font-bold tracking-widest text-[#2DD4BF] uppercase">New Expense</span>
+                <button className="p-2 -mr-2 hover:bg-white/10 rounded-full transition-colors">
                     <MoreHorizontal className="w-6 h-6 text-slate-400" />
                 </button>
             </div>
@@ -377,34 +466,38 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             <div className="flex-1 overflow-y-auto px-6 space-y-3 pb-40 no-scrollbar">
 
                 {/* 1. Amount Card */}
-                <div className="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm shrink-0">
-                    <div className="relative flex items-center justify-center gap-1 mb-3">
-                        <span className="text-3xl font-medium text-slate-400">$</span>
+                <div className="bg-[#0F1D2E] rounded-3xl p-8 flex flex-col items-center justify-center border border-[#1E3A5F] shrink-0">
+                    <div className="relative flex items-center justify-center gap-2 mb-4">
+                        <span className="text-3xl font-light text-slate-400">$</span>
                         <Input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0"
-                            className="text-6xl font-bold text-slate-700 text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[200px] h-auto placeholder:text-slate-200"
+                            className="text-6xl font-light text-white text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[200px] h-auto bg-transparent placeholder:text-slate-600"
                             autoFocus
                         />
+                        <div className="flex flex-col gap-1 text-slate-500">
+                            <ChevronDown className="w-4 h-4 rotate-180" />
+                            <ChevronDown className="w-4 h-4" />
+                        </div>
                     </div>
-                    <div className="bg-[#EFEEFC] text-[#5D5FEF] px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 cursor-pointer hover:bg-[#E0DFF8] transition-colors">
+                    <div className="bg-[#2DD4BF] text-[#0A1628] px-5 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-[#14B8A6] transition-colors shadow-lg shadow-[#2DD4BF]/20">
                         {currency} <ChevronDown className="w-3 h-3" />
                     </div>
                 </div>
 
                 {/* 2. Merchant Card */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm space-y-3 shrink-0">
-                    <Label className="text-[10px] font-bold text-[#9CA3AF] tracking-widest uppercase pl-1">Merchant</Label>
+                <div className="bg-[#0F1D2E] rounded-3xl p-5 border border-[#1E3A5F] space-y-3 shrink-0">
+                    <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Merchant</Label>
                     <div className="relative">
                         <Input
                             value={merchant}
                             onChange={(e) => setMerchant(e.target.value)}
                             placeholder="Netflix, Starbucks, etc."
-                            className="bg-[#F9FAFB] border-none text-base h-12 pl-4 pr-10 rounded-xl text-slate-700 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#5D5FEF]/20"
+                            className="bg-[#1A2942] border-none text-base h-12 pl-4 pr-10 rounded-xl text-white placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-[#2DD4BF]/30"
                         />
-                        <Store className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                        <Store className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     </div>
                     {/* Quick Pills */}
                     <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -413,7 +506,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                 key={brand}
                                 type="button"
                                 onClick={() => setMerchant(brand)}
-                                className="px-3 py-1.5 bg-[#F9FAFB] hover:bg-slate-100 rounded-lg text-xs font-semibold text-slate-600 transition-colors whitespace-nowrap"
+                                className="px-3 py-1.5 bg-[#1A2942] hover:bg-[#1E3A5F] rounded-full text-xs font-semibold text-slate-400 hover:text-white transition-colors whitespace-nowrap border border-transparent hover:border-[#2DD4BF]/20"
                             >
                                 {brand}
                             </button>
@@ -422,13 +515,13 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                 </div>
 
                 {/* 3. Category & Date Split Card */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm shrink-0">
-                    <div className="grid grid-cols-2 gap-4 divide-x divide-slate-100">
+                <div className="bg-[#0F1D2E] rounded-3xl p-5 border border-[#1E3A5F] shrink-0">
+                    <div className="grid grid-cols-2 gap-4">
                         {/* Category */}
-                        <div className="space-y-2 pr-2">
-                            <Label className="text-[10px] font-bold text-[#9CA3AF] tracking-widest uppercase pl-1">Category</Label>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Category</Label>
                             <Select value={category} onValueChange={setCategory}>
-                                <SelectTrigger className="w-full border-none shadow-none bg-[#F9FAFB] rounded-xl text-slate-700 font-medium h-11 focus:ring-0">
+                                <SelectTrigger className="w-full border-none shadow-none bg-[#1A2942] rounded-xl text-white font-medium h-11 focus:ring-0">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -437,53 +530,53 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                             </Select>
                         </div>
                         {/* Date */}
-                        <div className="space-y-2 pl-4">
-                            <Label className="text-[10px] font-bold text-[#9CA3AF] tracking-widest uppercase pl-1">Date</Label>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Date</Label>
                             <div className="relative">
                                 <Input
                                     type="date"
                                     value={date ? date.slice(0, 10) : ''}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="border-none shadow-none bg-[#F9FAFB] rounded-xl text-slate-700 font-medium h-11 w-full px-3 text-sm focus-visible:ring-0"
+                                    className="border-none shadow-none bg-[#1A2942] rounded-xl text-white font-medium h-11 w-full px-3 text-sm focus-visible:ring-0"
                                 />
                             </div>
                         </div>
                     </div>
                     {/* Custom Category Input */}
                     {category === "Other" && (
-                        <div className="mt-3 pt-3 border-t border-slate-50 animate-in fade-in">
+                        <div className="mt-3 pt-3 border-t border-[#1E3A5F] animate-in fade-in">
                             <Input
                                 placeholder="Enter custom category..."
                                 value={customCategory}
                                 onChange={e => setCustomCategory(e.target.value)}
-                                className="bg-[#F9FAFB] border-none h-11"
+                                className="bg-[#1A2942] border-none h-11 text-white"
                             />
                         </div>
                     )}
                 </div>
 
                 {/* 4. Note Card */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm space-y-2 shrink-0">
-                    <Label className="text-[10px] font-bold text-[#9CA3AF] tracking-widest uppercase pl-1">Note</Label>
+                <div className="bg-[#0F1D2E] rounded-3xl p-5 border border-[#1E3A5F] space-y-2 shrink-0">
+                    <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Note</Label>
                     <div className="relative">
                         <Input
                             placeholder="Add details..."
-                            className="bg-[#F9FAFB] border-none text-base h-12 pl-4 pr-10 rounded-xl text-slate-700 placeholder:text-slate-400 focus-visible:ring-0"
+                            className="bg-[#1A2942] border-none text-base h-12 pl-4 pr-10 rounded-xl text-white placeholder:text-slate-500 focus-visible:ring-0"
                         />
-                        <Edit3 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                        <Edit3 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     </div>
                 </div>
 
             </div>
 
-            {/* Bottom Fixed Actions - Floating Buttons (No Panel) */}
-            <div className="absolute bottom-0 left-0 right-0 p-5 pt-8 space-y-3 z-20 pointer-events-none bg-gradient-to-t from-[#FBF7F2]/90 via-[#FBF7F2]/50 to-transparent">
+            {/* Bottom Fixed Actions */}
+            <div className="absolute bottom-0 left-0 right-0 p-5 pt-10 space-y-3 z-20 pointer-events-none bg-gradient-to-t from-[#0A1628] via-[#0A1628]/80 to-transparent">
 
-                {/* Scan Button - Large Orange */}
+                {/* Scan Button - Cyan */}
                 <Button
                     type="button"
                     onClick={handleScanClick}
-                    className="w-full h-12 bg-[#FF6700] hover:bg-[#E65D00] text-white rounded-2xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 text-base font-bold transition-transform active:scale-[0.98] pointer-events-auto"
+                    className="w-full h-12 bg-[#2DD4BF] hover:bg-[#14B8A6] text-[#0A1628] rounded-2xl shadow-lg shadow-[#2DD4BF]/20 flex items-center justify-center gap-2 text-base font-bold transition-transform active:scale-[0.98] pointer-events-auto"
                 >
                     {isScanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <ScanLine className="w-5 h-5" />}
                     Scan Receipt (Auto-Scan)
@@ -501,16 +594,16 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                             setCategory("")
                             setDate(new Date().toISOString().slice(0, 10))
                         }}
-                        className="h-12 w-12 rounded-2xl bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-50 shadow-sm border border-slate-100 flex-shrink-0"
+                        className="h-12 w-12 rounded-2xl bg-[#0F1D2E] text-slate-400 hover:text-white hover:bg-[#1A2942] shadow-sm border border-[#1E3A5F] flex-shrink-0"
                     >
                         <RotateCcw className="w-5 h-5" />
                     </Button>
 
                     {/* Save Button */}
                     <Button
-                        onClick={() => formRef.current?.requestSubmit()} // Trigger the hidden form submission
+                        onClick={() => formRef.current?.requestSubmit()}
                         disabled={isPending}
-                        className="flex-1 h-12 bg-[#5D5FEF] hover:bg-[#4B4DCE] text-white rounded-2xl shadow-lg shadow-indigo-500/20 text-base font-bold transition-transform active:scale-[0.98]"
+                        className="flex-1 h-12 bg-[#2DD4BF] hover:bg-[#14B8A6] text-[#0A1628] rounded-2xl shadow-lg shadow-[#2DD4BF]/20 text-base font-bold transition-transform active:scale-[0.98]"
                     >
                         {isPending ? "Saving..." : "Save Expense"}
                     </Button>
@@ -558,6 +651,6 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     )
 }

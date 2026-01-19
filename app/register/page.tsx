@@ -5,8 +5,6 @@ import { useActionState } from "react"
 import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -18,8 +16,11 @@ import { socialLogin } from "@/app/actions/social-auth"
 function RegisterButton() {
     const { pending } = useFormStatus()
     return (
-        <Button className="w-full rounded-full py-6 font-bold tracking-wider uppercase text-xs bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/30" aria-disabled={pending}>
-            {pending ? "Creating..." : "Sign Up"}
+        <Button
+            className="w-full rounded-xl py-6 font-semibold tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/40"
+            aria-disabled={pending}
+        >
+            {pending ? "Creating..." : "Create Account"}
         </Button>
     )
 }
@@ -36,151 +37,157 @@ export default function RegisterPage() {
     }, [message, router])
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-neutral-100 p-4">
+        <div className="flex items-center justify-center min-h-screen bg-[#0A1628] p-4 relative overflow-hidden">
+            {/* Background Gradient Effects */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/3 -left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
+            </div>
+
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="relative w-full max-w-[850px] h-auto md:min-h-[550px] bg-background rounded-[30px] shadow-2xl overflow-hidden flex flex-col md:flex-row"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="relative w-full max-w-md z-10"
             >
+                {/* Card */}
+                <div className="bg-[#0F1D2E] border border-[#1E3A5F] rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-xl">
 
-                {/* Visual Overlay - Left Side (Welcome Back) - HIDDEN ON MOBILE */}
-                <div className="hidden md:flex w-full md:w-1/2 bg-gradient-to-br from-orange-500 to-orange-600 text-white flex-col justify-center items-center p-10 text-center z-20 relative">
-                    {/* Motion wrapper for the whole panel sliding in */}
-                    <motion.div
-                        className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 z-0"
-                        initial={{ x: "100%" }}
-                        animate={{ x: 0 }}
-                        transition={{ duration: 1.0, ease: [0.6, -0.05, 0.01, 0.99] }}
-                    />
+                    {/* Logo & Title */}
+                    <div className="flex flex-col items-center mb-6">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, duration: 0.4 }}
+                        >
+                            <Image
+                                src="/logo-icon-light.png"
+                                alt="Kharcho"
+                                width={70}
+                                height={70}
+                                className="mb-3 object-contain"
+                                priority
+                            />
+                        </motion.div>
+                        <h1 className="text-2xl font-bold text-white mb-1">Create Account</h1>
+                        <p className="text-[#64748B] text-sm">Join Kharcho today</p>
+                    </div>
 
-                    {/* Content Fade In */}
-                    <motion.div
-                        className="relative z-10"
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                    >
-                        <h1 className="text-3xl font-bold mb-4">Welcome Back!</h1>
-                        <p className="mb-8 text-white/90 leading-relaxed text-sm">
-                            To keep connected with us please login with your personal info
-                        </p>
-                        <Link href="/login">
-                            <Button
-                                variant="outline"
-                                className="rounded-full px-12 py-6 border-2 border-white bg-transparent text-white hover:bg-white hover:text-orange-500 transition-all font-semibold tracking-wide"
+                    {/* Form */}
+                    <form action={dispatch} className="space-y-4" suppressHydrationWarning>
+                        <div className="space-y-1">
+                            <Input
+                                id="name"
+                                name="name"
+                                type="text"
+                                placeholder="Full Name"
+                                required
+                                className="bg-[#1A2942] border-[#1E3A5F] rounded-xl py-6 px-4 placeholder:text-[#64748B] focus-visible:ring-2 focus-visible:ring-primary text-white"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="name@company.com"
+                                required
+                                className="bg-[#1A2942] border-[#1E3A5F] rounded-xl py-6 px-4 placeholder:text-[#64748B] focus-visible:ring-2 focus-visible:ring-primary text-white"
+                            />
+                        </div>
+                        <div className="space-y-1 relative">
+                            <Input
+                                id="password"
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                required
+                                className="bg-[#1A2942] border-[#1E3A5F] rounded-xl py-6 px-4 placeholder:text-[#64748B] focus-visible:ring-2 focus-visible:ring-primary text-white"
+                            />
+                            <button
+                                type="button"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-primary transition-colors"
+                                onClick={() => setShowPassword(!showPassword)}
                             >
-                                SIGN IN
-                            </Button>
-                        </Link>
-                    </motion.div>
-                </div>
-
-                {/* Form Section - Right Side (Create Account) - FULL WIDTH ON MOBILE */}
-                <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center items-center bg-white text-foreground z-10 relative">
-                    {/* Motion wrapper for the white panel sliding in - Desktop Only Effect ideally, but keeping standard for consistency */}
-                    <motion.div
-                        className="absolute inset-0 bg-white z-0 hidden md:block"
-                        initial={{ x: "-100%" }}
-                        animate={{ x: 0 }}
-                        transition={{ duration: 1.0, ease: [0.6, -0.05, 0.01, 0.99] }}
-                    />
-
-                    <div className="relative z-10 w-full flex flex-col items-center">
-                        <Image
-                            src="/logo-full-transparent.png"
-                            alt="Kharcho"
-                            width={220}
-                            height={80}
-                            className="mb-4 object-contain"
-                            priority
-                        />
-                        <h1 className="text-3xl font-bold mb-6 text-orange-500">Create Account</h1>
-
-                        {/* Social Icons */}
-                        <div className="flex gap-4 mb-6">
-                            {[
-                                { id: 'google', label: 'G' },
-                                { id: 'facebook', label: 'f' },
-                            ].map((social) => (
-                                <form key={social.id} action={socialLogin.bind(null, social.id)}>
-                                    <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-orange-50 hover:border-orange-200 transition-colors text-gray-500 text-sm font-bold" type="submit">
-                                        {social.label}
-                                    </button>
-                                </form>
-                            ))}
-                            <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-orange-50 hover:border-orange-200 transition-colors text-gray-500 text-sm font-bold">
-                                in
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+                        <div className="space-y-1">
+                            <Input
+                                id="inviteCode"
+                                name="inviteCode"
+                                type="text"
+                                placeholder="Invite Code (Optional)"
+                                className="bg-[#1A2942] border-[#1E3A5F] rounded-xl py-6 px-4 placeholder:text-[#64748B] focus-visible:ring-2 focus-visible:ring-primary text-white uppercase placeholder:normal-case font-mono"
+                            />
+                        </div>
 
-                        <span className="text-gray-400 text-xs mb-6 lowercase">or use your email for registration</span>
+                        {message && message !== "success" && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-sm text-red-400 text-center bg-red-500/10 border border-red-500/20 p-3 rounded-xl"
+                            >
+                                {message}
+                            </motion.div>
+                        )}
 
-                        <form action={dispatch} className="w-full space-y-4 max-w-xs">
-                            <div className="space-y-1">
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    type="text"
-                                    placeholder="Name"
-                                    required
-                                    className="bg-gray-100/50 border-none rounded-none py-6 px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-orange-500 text-black"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="Email"
-                                    required
-                                    className="bg-gray-100/50 border-none rounded-none py-6 px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-orange-500 text-black"
-                                />
-                            </div>
-                            <div className="space-y-1 relative">
-                                <Input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Password"
-                                    required
-                                    className="bg-gray-100/50 border-none rounded-none py-6 px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-orange-500 text-black"
-                                />
+                        <div className="pt-2">
+                            <RegisterButton />
+                        </div>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-[#1E3A5F]" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                            <span className="bg-[#0F1D2E] px-4 text-[#64748B]">OR CONTINUE WITH</span>
+                        </div>
+                    </div>
+
+                    {/* Social Login */}
+                    <div className="flex justify-center gap-4">
+                        {[
+                            { id: 'google', label: 'G' },
+                            { id: 'facebook', label: 'f' },
+                        ].map((social) => (
+                            <form key={social.id} action={socialLogin.bind(null, social.id)}>
                                 <button
-                                    type="button"
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    type="submit"
+                                    className="w-12 h-12 rounded-xl border border-[#1E3A5F] bg-[#1A2942] flex items-center justify-center hover:bg-[#1E3A5F] hover:border-primary/50 transition-all text-white text-sm font-bold"
                                 >
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    {social.label}
                                 </button>
-                            </div>
-                            <div className="space-y-1">
-                                <Input
-                                    id="inviteCode"
-                                    name="inviteCode"
-                                    type="text"
-                                    placeholder="Invite Code (Optional)"
-                                    className="bg-gray-100/50 border-none rounded-none py-6 px-4 placeholder:text-gray-400 uppercase placeholder:normal-case font-mono focus-visible:ring-1 focus-visible:ring-orange-500 text-black"
-                                />
-                            </div>
-
-                            {message && message !== "success" && (
-                                <div className="text-xs text-red-500 text-center mt-2">
-                                    {message}
-                                </div>
-                            )}
-
-                            <div className="pt-4">
-                                <RegisterButton />
-                            </div>
-
-                            {/* Mobile Only Login Link */}
-                            <div className="mt-6 text-center text-sm text-gray-400 md:hidden">
-                                Already have an account? <Link href="/login" className="text-orange-500 font-bold hover:underline">Sign In</Link>
-                            </div>
+                            </form>
+                        ))}
+                        {/* Apple */}
+                        <form action={socialLogin.bind(null, 'apple')}>
+                            <button
+                                type="submit"
+                                className="w-12 h-12 rounded-xl border border-[#1E3A5F] bg-[#1A2942] flex items-center justify-center hover:bg-white hover:border-white hover:text-black transition-all text-white"
+                            >
+                                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+                                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.66 4.47-1.42 1.7.21 2.92.83 3.66 1.95-.58.33-1.67 1.25-1.67 3.32 0 2.5 1.67 3.66 1.67 3.66-.46 1.25-1.12 2.58-2.21 3.72M14.67 5.08c1.33-1.62 1.12-3.08 1.12-3.08-1.7.08-3.08 1.04-3.5 2.04-.42 1.08.12 2.75 1.46 2.62.04-1.12.5-1.33.92-1.58" />
+                                </svg>
+                            </button>
                         </form>
                     </div>
+
+                    {/* Login Link */}
+                    <div className="mt-6 text-center text-sm text-[#64748B]">
+                        Already have an account?{' '}
+                        <Link href="/login" className="text-primary font-semibold hover:text-primary/80 transition-colors">
+                            Sign In
+                        </Link>
+                    </div>
                 </div>
+
+                {/* Footer Note */}
+                <p className="text-center text-[#64748B] text-xs mt-6">
+                    © 2024 Kharcho. All rights reserved.
+                </p>
             </motion.div>
         </div>
     )

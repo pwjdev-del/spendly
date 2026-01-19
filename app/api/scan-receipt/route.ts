@@ -6,12 +6,15 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
     try {
+        console.log("Scan Receipt API called");
         const formData = await req.formData();
         const file = formData.get("file") as File;
 
         if (!file) {
+            console.error("Scan Receipt: No file uploaded");
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
+        console.log("Scan Receipt: File received", file.name, file.size);
 
         const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
@@ -68,7 +71,38 @@ export async function POST(req: Request) {
             },
         };
 
-        const result = await model.generateContent([prompt, imagePart]);
+        // Retry Logic for Rate Limiting
+        const MAX_RETRIES = 3;
+        let attempt = 0;
+        let result = null;
+        let lastError = null;
+
+        while (attempt < MAX_RETRIES) {
+            try {
+                if (attempt > 0) {
+                    console.log(`Retry attempt ${attempt + 1}/${MAX_RETRIES}...`);
+                    await new Promise(res => setTimeout(res, 2000 * attempt)); // 2s, 4s wait
+                }
+
+                result = await model.generateContent([prompt, imagePart]);
+                break; // Success
+
+            } catch (error: any) {
+                lastError = error;
+                console.warn(`Attempt ${attempt + 1} failed:`, error.message);
+
+                if (error.message?.includes("429") || error.status === 429) {
+                    attempt++;
+                    continue;
+                }
+                throw error; // Non-retryable error
+            }
+        }
+
+        if (!result) {
+            throw lastError || new Error("Failed to generate content after retries");
+        }
+
         const response = await result.response;
         let jsonStr = response.text();
 

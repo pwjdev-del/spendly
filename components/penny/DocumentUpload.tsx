@@ -124,7 +124,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
             onDragLeave={handleDragLeave}
             className={cn(
                 "relative border-2 border-dashed rounded-2xl p-6 transition-all",
-                isDragging && "border-violet-500 bg-violet-500/5",
+                isDragging && "border-primary bg-primary/5",
                 !isDragging && "border-muted-foreground/20 hover:border-muted-foreground/40",
                 isProcessing && "opacity-50 pointer-events-none"
             )}
@@ -140,7 +140,7 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
 
             <div className="flex flex-col items-center gap-3 pointer-events-none">
                 {uploadStatus === 'processing' && (
-                    <Loader2 className="h-10 w-10 text-violet-500 animate-spin" />
+                    <Loader2 className="h-10 w-10 text-primary animate-spin" />
                 )}
                 {uploadStatus === 'success' && (
                     <CheckCircle2 className="h-10 w-10 text-green-500" />
@@ -149,8 +149,8 @@ export function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
                     <XCircle className="h-10 w-10 text-red-500" />
                 )}
                 {uploadStatus === 'idle' && (
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                        <Upload className="h-5 w-5 text-white" />
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shadow-sm shadow-[#2DD4BF]/30">
+                        <Upload className="h-5 w-5 text-[#0A1628]" />
                     </div>
                 )}
 

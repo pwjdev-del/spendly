@@ -76,16 +76,19 @@ function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBE
         <div className={cn("pb-12 w-full h-full bg-sidebar flex flex-col", className)}>
             <div className="space-y-4 py-4 flex-1">
                 <div className="px-3 py-2">
-                    <Link href="/" className="mb-6 flex justify-center px-4">
-                        <Image
-                            src="/logo-icon-transparent.png"
-                            alt="Kharcho"
-                            width={200}
-                            height={200}
-                            className="object-contain w-full h-auto"
-                            unoptimized
-                            priority
-                        />
+                    <Link href="/" className="mb-6 flex flex-col items-center px-4 group">
+                        <div className="w-full aspect-square max-w-[120px] flex items-center justify-center">
+                            <Image
+                                src="/logo-icon-light.png"
+                                alt="Kharcho"
+                                width={120}
+                                height={120}
+                                className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                                unoptimized
+                                priority
+                            />
+                        </div>
+                        <span className="text-lg font-bold text-foreground mt-2">Kharcho</span>
                     </Link>
                     <div className="space-y-1">
                         {filteredNavItems.map((item) => (
@@ -93,16 +96,16 @@ function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBE
                                 key={item.href}
                                 variant={(pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))) ? "secondary" : "ghost"}
                                 className={cn(
-                                    "w-full justify-start transition-all duration-300 mb-1",
+                                    "w-full justify-start transition-all duration-300 mb-1 rounded-xl",
                                     (pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)))
-                                        ? "bg-primary/10 text-primary shadow-[0_0_20px_-5px_var(--primary)] backdrop-blur-md border border-primary/10 hover:bg-primary/15 font-medium translate-x-1"
-                                        : "hover:bg-white/5 hover:translate-x-1"
+                                        ? "bg-primary/15 text-primary shadow-[0_0_25px_-5px_rgba(45,212,191,0.5)] border border-primary/20 hover:bg-primary/20 font-semibold"
+                                        : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
                                 )}
                                 asChild
                                 {...(onNavigate ? { onClick: onNavigate } : {})}
                             >
                                 <Link href={item.href}>
-                                    <item.icon className={cn("mr-2 h-4 w-4", (pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))) ? "text-primary animate-pulse" : "text-muted-foreground")} />
+                                    <item.icon className={cn("mr-3 h-5 w-5", (pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))) ? "text-primary" : "text-muted-foreground")} />
                                     {item.title}
                                 </Link>
                             </Button>
