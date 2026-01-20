@@ -26,8 +26,8 @@ export function SpendingChart({ data }: SpendingChartProps) {
                     <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#2DD4BF" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#2DD4BF" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <XAxis
@@ -47,20 +47,20 @@ export function SpendingChart({ data }: SpendingChartProps) {
                             dx={-10}
                         />
                         <Tooltip
-                            cursor={{ stroke: '#8b5cf6', strokeWidth: 1, strokeDasharray: '4 4' }}
+                            cursor={{ stroke: '#2DD4BF', strokeWidth: 1, strokeDasharray: '4 4' }}
                             contentStyle={{
                                 backgroundColor: 'var(--background)',
                                 borderColor: 'var(--border)',
                                 borderRadius: '12px',
                                 boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.1)'
                             }}
-                            itemStyle={{ color: '#8b5cf6', fontSize: '12px', fontWeight: 'bold' }}
+                            itemStyle={{ color: '#2DD4BF', fontSize: '12px', fontWeight: 'bold' }}
                             labelStyle={{ color: 'var(--muted-foreground)', fontSize: '11px', marginBottom: '4px' }}
                         />
                         <Area
                             type="monotone"
                             dataKey="total"
-                            stroke="#8b5cf6"
+                            stroke="#2DD4BF"
                             strokeWidth={3}
                             fillOpacity={1}
                             fill="url(#colorTotal)"

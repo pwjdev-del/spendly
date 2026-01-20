@@ -176,122 +176,185 @@ export default function ReconciliationPageClient() {
 
             {/* Upload Area & History */}
             {!report && (
-                <div className="grid gap-8 md:grid-cols-2">
-                    {/* Holographic Upload Zone */}
-                    <div
-                        className={cn(
-                            "relative overflow-hidden rounded-3xl transition-all h-80 flex flex-col items-center justify-center text-center cursor-pointer col-span-2 md:col-span-1 border border-dashed border-border/50 bg-card/50 hover:bg-card",
-                            isDragging ? "shadow-lg border-primary" : "hover:border-primary/50 hover:shadow-md"
-                        )}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={() => document.getElementById('file-upload')?.click()}
-                    >
-                        {/* Animated Gradient Border Effect */}
-                        <div className={cn(
-                            "absolute inset-0 bg-gradient-to-br from-primary/10 via-orange-500/10 to-rose-500/10 opacity-0 transition-opacity duration-500",
-                            (isDragging || file) ? "opacity-100" : "group-hover:opacity-50"
-                        )}></div>
-
-                        {/* Grid Pattern Overlay */}
-                        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"></div>
-
-                        <input
-                            id="file-upload"
-                            type="file"
-                            className="hidden"
-                            accept=".csv,.pdf"
-                            onChange={handleFileChange}
-                        />
-
-                        <div className="relative z-10 space-y-6 p-8">
-                            <div className={cn("flex justify-center transition-all duration-500", isDragging ? "scale-110" : "")}>
-                                <div className={cn(
-                                    "w-20 h-20 rounded-full flex items-center justify-center border border-white/10 bg-white/5 backdrop-blur-md shadow-xl",
-                                    isDragging ? "animate-pulse border-primary/50 shadow-[0_0_30px_var(--primary)]" : ""
-                                )}>
-                                    {file ? <FileText className="h-10 w-10 text-primary" /> : <UploadCloud className="h-10 w-10 text-primary/80" />}
+                <div className="space-y-8">
+                    {/* Linked Accounts Grid (Mock) */}
+                    <div>
+                        <h2 className="text-xl font-bold mb-4">Linked Accounts</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card className="bg-gradient-to-br from-card to-secondary/50 border-border shadow-md relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity group-hover:opacity-100"></div>
+                                <CardContent className="p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="h-10 w-16 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold italic text-xs">VISA</div>
+                                        <span className="text-xs font-mono text-muted-foreground">**** 4242</span>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Balance</p>
+                                            <p className="text-2xl font-bold text-foreground">$4,250.00</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs">
+                                                <span className="text-muted-foreground">Reconciled</span>
+                                                <span className="text-green-400">85%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
+                                                <div className="h-full bg-green-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(34,197,94,0.4)]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-card to-secondary/50 border-border shadow-md relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity group-hover:opacity-100"></div>
+                                <CardContent className="p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="h-10 w-16 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold italic text-xs">AMEX</div>
+                                        <span className="text-xs font-mono text-muted-foreground">**** 1001</span>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Balance</p>
+                                            <p className="text-2xl font-bold text-foreground">$1,850.50</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs">
+                                                <span className="text-muted-foreground">Reconciled</span>
+                                                <span className="text-green-400">100%</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
+                                                <div className="h-full bg-green-500 w-[100%] rounded-full shadow-[0_0_10px_rgba(34,197,94,0.4)]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-gradient-to-br from-card to-secondary/50 border-border border-dashed flex flex-col items-center justify-center p-6 cursor-pointer hover:bg-secondary/50 transition-colors gap-2 group">
+                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <UploadCloud className="h-6 w-6 text-primary" />
                                 </div>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-2xl tracking-tight">{file ? file.name : "Upload Statement"}</h3>
-                                <p className="text-sm text-muted-foreground mt-2 max-w-[200px] mx-auto">
-                                    {file ? "Ready to analyze" : "Drop CSV or PDF bank statement to initiate scan"}
-                                </p>
-                            </div>
-                            {file && (
-                                <Button size="lg" className="w-full shadow-lg shadow-primary/20" onClick={(e) => { e.stopPropagation(); handleReconcile(); }} disabled={isProcessing}>
-                                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {isProcessing ? "Analyzing..." : "Initialize Scan"}
-                                </Button>
-                            )}
-                            {error && <p className="text-red-400 text-sm font-medium animate-pulse bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">{error}</p>}
+                                <p className="font-medium text-sm text-center">Link New Card</p>
+                            </Card>
                         </div>
                     </div>
 
-                    {/* History List */}
-                    <Card className="col-span-2 md:col-span-1 bg-card border-border shadow-sm rounded-3xl h-80 flex flex-col">
-                        <CardHeader>
-                            <CardTitle>Saved Ledgers</CardTitle>
-                            <CardDescription>Previous reconciliation sessions</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-1 overflow-y-auto custom-scrollbar pr-2">
-                            <div className="space-y-3">
-                                {history.length === 0 ? (
-                                    <div className="h-full flex items-center justify-center text-muted-foreground">
-                                        <p>No archives found.</p>
-                                    </div>
-                                ) : (
-                                    history.map((batch) => (
-                                        <div
-                                            key={batch.id}
-                                            className="group flex items-center justify-between p-4 border border-border rounded-2xl bg-card hover:bg-accent/50 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg"
-                                            onClick={async () => {
-                                                setIsProcessing(true)
-                                                try {
-                                                    const details = await getBatchDetails(batch.id)
-                                                    if (details) {
-                                                        setReport(details as any)
-                                                    }
-                                                } catch (e) {
-                                                    setError("Failed to load batch details")
-                                                } finally {
-                                                    setIsProcessing(false)
-                                                }
-                                            }}
-                                        >
-                                            <div>
-                                                <p className="font-semibold text-sm">{batch.name}</p>
-                                                <p className="text-xs text-muted-foreground mt-0.5">{new Date(batch.date).toLocaleDateString()}</p>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-[10px] uppercase font-bold bg-primary/20 text-primary px-2 py-1 rounded-full">
-                                                    {batch._count.expenses} Verified
-                                                </span>
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full opacity-0 group-hover:opacity-100 transition-all"
-                                                    onClick={async (e) => {
-                                                        e.stopPropagation()
-                                                        if (!confirm("Are you sure? This will undo the reconciliation for these expenses.")) return
+                    <div className="grid gap-8 md:grid-cols-2">
+                        {/* Holographic Upload Zone */}
+                        <div
+                            className={cn(
+                                "relative overflow-hidden rounded-3xl transition-all h-80 flex flex-col items-center justify-center text-center cursor-pointer col-span-2 md:col-span-1 border border-dashed border-border bg-card/60 hover:bg-card",
+                                isDragging ? "shadow-lg border-primary" : "hover:border-primary/50 hover:shadow-md"
+                            )}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById('file-upload')?.click()}
+                        >
+                            {/* Animated Gradient Border Effect */}
+                            <div className={cn(
+                                "absolute inset-0 bg-gradient-to-br from-primary/10 via-orange-500/10 to-rose-500/10 opacity-0 transition-opacity duration-500",
+                                (isDragging || file) ? "opacity-100" : "group-hover:opacity-50"
+                            )}></div>
 
-                                                        const res = await deleteReconciliationBatch(batch.id)
-                                                        if (res.success) {
-                                                            setHistory(prev => prev.filter(h => h.id !== batch.id))
-                                                        }
-                                                    }}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
+                            {/* Grid Pattern Overlay */}
+                            <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5"></div>
+
+                            <input
+                                id="file-upload"
+                                type="file"
+                                className="hidden"
+                                accept=".csv,.pdf"
+                                onChange={handleFileChange}
+                            />
+
+                            <div className="relative z-10 space-y-6 p-8">
+                                <div className={cn("flex justify-center transition-all duration-500", isDragging ? "scale-110" : "")}>
+                                    <div className={cn(
+                                        "w-20 h-20 rounded-full flex items-center justify-center border border-border bg-card backdrop-blur-md shadow-xl",
+                                        isDragging ? "animate-pulse border-primary/50 shadow-[0_0_30px_var(--primary)]" : ""
+                                    )}>
+                                        {file ? <FileText className="h-10 w-10 text-primary" /> : <UploadCloud className="h-10 w-10 text-primary/80" />}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-2xl tracking-tight text-foreground">{file ? file.name : "Upload Statement"}</h3>
+                                    <p className="text-sm text-muted-foreground mt-2 max-w-[200px] mx-auto">
+                                        {file ? "Ready to analyze" : "Drop CSV or PDF bank statement to initiate scan"}
+                                    </p>
+                                </div>
+                                {file && (
+                                    <Button size="lg" className="w-full shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white" onClick={(e) => { e.stopPropagation(); handleReconcile(); }} disabled={isProcessing}>
+                                        {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isProcessing ? "Analyzing..." : "Initialize Scan"}
+                                    </Button>
                                 )}
+                                {error && <p className="text-red-400 text-sm font-medium animate-pulse bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">{error}</p>}
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+
+                        {/* History List */}
+                        <Card className="col-span-2 md:col-span-1 bg-card border-border shadow-sm rounded-3xl h-80 flex flex-col">
+                            <CardHeader>
+                                <CardTitle>Saved Ledgers</CardTitle>
+                                <CardDescription>Previous sessions</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                                <div className="space-y-3">
+                                    {history.length === 0 ? (
+                                        <div className="h-full flex items-center justify-center text-muted-foreground">
+                                            <p>No archives found.</p>
+                                        </div>
+                                    ) : (
+                                        history.map((batch) => (
+                                            <div
+                                                key={batch.id}
+                                                className="group flex items-center justify-between p-4 border border-border rounded-2xl bg-card hover:bg-secondary/50 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md"
+                                                onClick={async () => {
+                                                    setIsProcessing(true)
+                                                    try {
+                                                        const details = await getBatchDetails(batch.id)
+                                                        if (details) {
+                                                            setReport(details as any)
+                                                        }
+                                                    } catch (e) {
+                                                        setError("Failed to load batch details")
+                                                    } finally {
+                                                        setIsProcessing(false)
+                                                    }
+                                                }}
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-sm text-foreground">{batch.name}</p>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">{new Date(batch.date).toLocaleDateString()}</p>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-[10px] uppercase font-bold bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded-full">
+                                                        {batch._count.expenses} Verified
+                                                    </span>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation()
+                                                            if (!confirm("Are you sure? This will undo the reconciliation for these expenses.")) return
+
+                                                            const res = await deleteReconciliationBatch(batch.id)
+                                                            if (res.success) {
+                                                                setHistory(prev => prev.filter(h => h.id !== batch.id))
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             )}
 
@@ -301,47 +364,38 @@ export default function ReconciliationPageClient() {
 
                     {/* HUD Stats Row */}
                     <div className="grid gap-6 md:grid-cols-4">
-                        <div className="bg-green-500/10 border border-green-500/20 backdrop-blur-md rounded-3xl p-6 relative overflow-hidden group">
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-                            <h3 className="text-green-400 font-medium text-sm uppercase tracking-widest mb-2">Verified (&gt;90%)</h3>
-                            <div className="text-5xl font-bold text-green-400 tracking-tighter text-shadow-lg shadow-green-500/50">
-                                {report.matched_transactions.length}
-                            </div>
-                        </div>
-
-                        <div className={cn(
-                            "border backdrop-blur-md rounded-3xl p-6 relative overflow-hidden group transition-colors",
-                            (report.needs_review_transactions?.length || 0) > 0 ? "bg-orange-500/10 border-orange-500/20" : "bg-white/5 border-white/10"
-                        )}>
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-                            <h3 className={cn("font-medium text-sm uppercase tracking-widest mb-2", (report.needs_review_transactions?.length || 0) > 0 ? "text-orange-400" : "text-muted-foreground")}>
-                                Needs Review
-                            </h3>
-                            <div className={cn("text-5xl font-bold tracking-tighter text-shadow-lg", (report.needs_review_transactions?.length || 0) > 0 ? "text-orange-400 shadow-orange-500/50" : "text-muted-foreground")}>
-                                {report.needs_review_transactions?.length || 0}
-                            </div>
-                        </div>
-
-                        <div className={cn(
-                            "border backdrop-blur-md rounded-3xl p-6 relative overflow-hidden group transition-colors",
-                            report.unauthorized_transactions.length > 0 ? "bg-red-500/10 border-red-500/20" : "bg-white/5 border-white/10"
-                        )}>
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-                            <h3 className={cn("font-medium text-sm uppercase tracking-widest mb-2", report.unauthorized_transactions.length > 0 ? "text-red-400" : "text-muted-foreground")}>
-                                Unauthorized
-                            </h3>
-                            <div className={cn("text-5xl font-bold tracking-tighter text-shadow-lg", report.unauthorized_transactions.length > 0 ? "text-red-400 shadow-red-500/50" : "text-muted-foreground")}>
-                                {report.unauthorized_transactions.length}
-                            </div>
-                        </div>
-
-                        <div className="bg-yellow-500/10 border border-yellow-500/20 backdrop-blur-md rounded-3xl p-6 relative overflow-hidden group">
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-                            <h3 className="text-yellow-400 font-medium text-sm uppercase tracking-widest mb-2">Missing from Bank</h3>
-                            <div className="text-5xl font-bold text-yellow-400 tracking-tighter text-shadow-lg shadow-yellow-500/50">
-                                {report.missing_from_bank.length}
-                            </div>
-                        </div>
+                        <MetricCard
+                            label="Match Rate"
+                            value={`${Math.round((report.matched_transactions.length / (report.matched_transactions.length + report.unauthorized_transactions.length + (report.needs_review_transactions?.length || 0))) * 100 || 0)}%`}
+                            color="text-purple-400"
+                            bg="bg-purple-500/10"
+                            border="border-purple-500/20"
+                            shadow="shadow-purple-500/50"
+                        />
+                        <MetricCard
+                            label="Pending Actions"
+                            value={(report.unauthorized_transactions.length + (report.needs_review_transactions?.length || 0)).toString()}
+                            color="text-orange-400"
+                            bg="bg-orange-500/10"
+                            border="border-orange-500/20"
+                            shadow="shadow-orange-500/50"
+                        />
+                        <MetricCard
+                            label="Reconciled"
+                            value={report.matched_transactions.length.toString()}
+                            color="text-emerald-400"
+                            bg="bg-emerald-500/10"
+                            border="border-emerald-500/20"
+                            shadow="shadow-emerald-500/50"
+                        />
+                        <MetricCard
+                            label="Total Volume"
+                            value={`$${report.matched_transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}`}
+                            color="text-sky-400"
+                            bg="bg-sky-500/10"
+                            border="border-sky-500/20"
+                            shadow="shadow-sky-500/50"
+                        />
                     </div>
 
                     {/* Unauthorized Alerts - Priority Stream */}
@@ -465,13 +519,13 @@ export default function ReconciliationPageClient() {
                     </div>
 
                     {/* Save Actions */}
-                    <div className="flex items-center justify-end gap-4 p-6 border border-white/10 rounded-3xl bg-white/5 backdrop-blur-xl sticky bottom-4 shadow-2xl">
+                    <div className="flex items-center justify-end gap-4 p-6 border border-border rounded-3xl bg-card/95 backdrop-blur-xl sticky bottom-4 shadow-xl">
                         <div className="flex-1 max-w-sm">
                             <Input
                                 placeholder="Name this ledger (e.g. Nov '24 Statement)"
                                 value={nickname}
                                 onChange={(e) => setNickname(e.target.value)}
-                                className="bg-black/20 border-white/10 focus:border-primary/50"
+                                className="bg-background border-input focus:border-primary/50"
                             />
                         </div>
                         <div className="flex items-center gap-3">
@@ -493,6 +547,18 @@ export default function ReconciliationPageClient() {
                     onLinkSuccess={handleLinkSuccess}
                 />
             )}
+        </div>
+    )
+}
+
+function MetricCard({ label, value, color, bg, border, shadow }: any) {
+    return (
+        <div className={cn("backdrop-blur-md rounded-3xl p-6 relative overflow-hidden group transition-colors", bg, border, "border")}>
+            <div className={cn("absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 opacity-50", bg)}></div>
+            <h3 className={cn("font-medium text-sm uppercase tracking-widest mb-2", color)}>{label}</h3>
+            <div className={cn("text-5xl font-bold tracking-tighter text-shadow-lg", color, shadow)}>
+                {value}
+            </div>
         </div>
     )
 }

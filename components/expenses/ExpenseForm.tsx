@@ -12,7 +12,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { useActionState, useEffect, useRef, useState } from "react"
 import { useFormStatus } from "react-dom"
 import { useSearchParams } from "next/navigation"
-import { Camera, Check, ChevronsUpDown, Loader2, MapPin, ArrowLeft, MoreHorizontal, Store, Edit3, ScanLine, RotateCcw, ChevronDown } from "lucide-react"
+import { Camera, Check, ChevronsUpDown, Loader2, MapPin, ArrowLeft, MoreHorizontal, Store, Edit3, ScanLine, RotateCcw, ChevronDown, X } from "lucide-react"
 import { useOffline } from "@/components/providers/OfflineSyncProvider"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -102,6 +102,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
     const [category, setCategory] = useState<string>(initialData?.category || "")
     const [customCategory, setCustomCategory] = useState("")
     const [openCategory, setOpenCategory] = useState(false)
+    const [openCurrency, setOpenCurrency] = useState(false)
 
     // Refs for Focus Management
     const merchantInputRef = useRef<HTMLInputElement>(null)
@@ -231,13 +232,25 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                     throw new Error("HEIC_DETECTED");
                 }
                 const text = await response.text();
-                let errorData;
+                let errorMessage = `Server Error (${response.status})`;
                 try {
-                    errorData = JSON.parse(text);
+                    const errorData = JSON.parse(text);
+                    // Ensure we extract a meaningful error message
+                    if (errorData?.error) {
+                        errorMessage = errorData.error;
+                    } else if (errorData?.message) {
+                        errorMessage = errorData.message;
+                    } else if (errorData?.detail) {
+                        errorMessage = errorData.detail;
+                    } else if (text && text !== '{}') {
+                        errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}`;
+                    }
                 } catch {
-                    errorData = { error: `Server Error (${response.status}): ${text.slice(0, 100)}...` };
+                    if (text) {
+                        errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}`;
+                    }
                 }
-                throw errorData;
+                throw new Error(errorMessage);
             }
             return response.json();
         }
@@ -376,13 +389,13 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
     // Only show if we are in AMOUNT step AND we don't have initial data (editing mode skips this)
     if (step === 'AMOUNT' && !initialData) {
         return (
-            <div className="flex flex-col h-full w-full bg-[#0A1628] text-white p-6 justify-between animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="flex flex-col h-full w-full bg-background text-foreground p-6 justify-between animate-in fade-in slide-in-from-right-4 duration-300">
 
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     {onCancel && (
-                        <button onClick={onCancel} className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
-                            <ArrowLeft className="w-6 h-6 text-slate-400" />
+                        <button onClick={onCancel} className="p-2 -ml-2 hover:bg-secondary rounded-full transition-colors">
+                            {isSlideOver ? <X className="w-6 h-6 text-slate-400" /> : <ArrowLeft className="w-6 h-6 text-slate-400" />}
                         </button>
                     )}
                     <span className="text-sm font-bold tracking-widest text-[#2DD4BF] uppercase mx-auto">New Expense</span>
@@ -395,24 +408,66 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                         <span className="text-4xl font-light text-slate-400">$</span>
                         <Input
                             type="number"
+                            inputMode="decimal"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0"
-                            className="text-8xl font-light text-white text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[300px] h-auto bg-transparent placeholder:text-slate-700"
+                            className="text-8xl font-light text-white text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[300px] h-auto bg-transparent placeholder:text-slate-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             autoFocus
                         />
                     </div>
 
-                    <div className="bg-[#2DD4BF]/10 text-[#2DD4BF] px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-[#2DD4BF]/20 transition-colors">
-                        {currency} <ChevronDown className="w-3 h-3" />
-                    </div>
+                    <Popover open={openCurrency} onOpenChange={setOpenCurrency}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                role="combobox"
+                                aria-expanded={openCurrency}
+                                className="bg-primary/10 text-primary px-4 py-2 h-auto rounded-full text-sm font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-primary/20 transition-colors hover:text-primary"
+                            >
+                                {currency} <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0 bg-card border-border">
+                            <Command className="bg-card">
+                                <CommandInput placeholder="Search currency..." className="h-9 text-white" />
+                                <CommandList>
+                                    <CommandEmpty>No currency found.</CommandEmpty>
+                                    <CommandGroup>
+                                        {CURRENCIES.map((c) => (
+                                            <CommandItem
+                                                key={c.value}
+                                                value={c.value}
+                                                onSelect={(currentValue) => {
+                                                    const matched = CURRENCIES.find(item => item.value.toLowerCase() === currentValue.toLowerCase())
+                                                    if (matched) {
+                                                        setCurrency(matched.value)
+                                                    }
+                                                    setOpenCurrency(false)
+                                                }}
+                                                className="aria-selected:bg-secondary"
+                                            >
+                                                {c.label}
+                                                <Check
+                                                    className={cn(
+                                                        "ml-auto h-4 w-4",
+                                                        currency === c.value ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                 </div>
 
                 {/* Bottom: Actions */}
                 <div className="space-y-4 pb-8">
                     <Button
                         onClick={handleContinue}
-                        className="w-full h-14 bg-white text-[#0A1628] hover:bg-slate-200 rounded-full text-lg font-bold"
+                        className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full text-lg font-bold"
                     >
                         Continue
                     </Button>
@@ -422,14 +477,14 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                             <span className="w-full border-t border-slate-700/50" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-[#0A1628] px-2 text-slate-500">Or</span>
+                            <span className="bg-background px-2 text-muted-foreground">Or</span>
                         </div>
                     </div>
 
                     <Button
                         type="button"
                         onClick={handleScanClick}
-                        className="w-full h-14 bg-[#1A2942] hover:bg-[#233554] text-white border border-slate-700 rounded-full flex items-center justify-center gap-2 text-base font-semibold"
+                        className="w-full h-14 bg-secondary hover:bg-secondary/80 text-foreground border border-border rounded-full flex items-center justify-center gap-2 text-base font-semibold"
                     >
                         {isScanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <ScanLine className="w-5 h-5 text-[#2DD4BF]" />}
                         Scan Receipt with AI
@@ -446,18 +501,18 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
         // STITCH DESIGN UPDATE - BALANCED
         // The main form is now a hidden form that collects values from controlled components
         // The visible UI is built with individual cards and buttons.
-        <div className="flex flex-col h-full w-full max-w-md mx-auto bg-[#0A1628] rounded-[32px] overflow-hidden relative font-sans text-white shadow-2xl">
+        <div className="flex flex-col h-full w-full bg-background overflow-hidden relative font-sans text-foreground">
             {/* Top Navigation */}
             <div className="flex items-center justify-between px-6 py-5 shrink-0">
                 {onCancel ? (
-                    <button onClick={onCancel} className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
+                    <button onClick={onCancel} className="p-2 -ml-2 hover:bg-secondary rounded-full transition-colors">
                         <ArrowLeft className="w-6 h-6 text-slate-400" />
                     </button>
                 ) : (
                     <div className="w-10" />
                 )}
-                <span className="text-sm font-bold tracking-widest text-[#2DD4BF] uppercase">New Expense</span>
-                <button className="p-2 -mr-2 hover:bg-white/10 rounded-full transition-colors">
+                <span className="text-sm font-bold tracking-widest text-primary uppercase">New Expense</span>
+                <button className="p-2 -mr-2 hover:bg-secondary rounded-full transition-colors">
                     <MoreHorizontal className="w-6 h-6 text-slate-400" />
                 </button>
             </div>
@@ -466,7 +521,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             <div className="flex-1 overflow-y-auto px-6 space-y-3 pb-40 no-scrollbar">
 
                 {/* 1. Amount Card */}
-                <div className="bg-[#0F1D2E] rounded-3xl p-8 flex flex-col items-center justify-center border border-[#1E3A5F] shrink-0">
+                <div className="bg-card rounded-3xl p-8 flex flex-col items-center justify-center border border-border shrink-0">
                     <div className="relative flex items-center justify-center gap-2 mb-4">
                         <span className="text-3xl font-light text-slate-400">$</span>
                         <Input
@@ -474,7 +529,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0"
-                            className="text-6xl font-light text-white text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[200px] h-auto bg-transparent placeholder:text-slate-600"
+                            className="text-6xl font-light text-foreground text-center border-none shadow-none focus-visible:ring-0 p-0 w-auto max-w-[200px] h-auto bg-transparent placeholder:text-muted-foreground"
                             autoFocus
                         />
                         <div className="flex flex-col gap-1 text-slate-500">
@@ -482,20 +537,61 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                             <ChevronDown className="w-4 h-4" />
                         </div>
                     </div>
-                    <div className="bg-[#2DD4BF] text-[#0A1628] px-5 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-[#14B8A6] transition-colors shadow-lg shadow-[#2DD4BF]/20">
-                        {currency} <ChevronDown className="w-3 h-3" />
-                    </div>
+                    <Popover open={openCurrency} onOpenChange={setOpenCurrency}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                role="combobox"
+                                aria-expanded={openCurrency}
+                                className="bg-primary text-primary-foreground px-5 py-2 h-auto rounded-full text-sm font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                            >
+                                {currency} <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0 bg-card border-border">
+                            <Command className="bg-card">
+                                <CommandInput placeholder="Search currency..." className="h-9 text-white" />
+                                <CommandList>
+                                    <CommandEmpty>No currency found.</CommandEmpty>
+                                    <CommandGroup>
+                                        {CURRENCIES.map((c) => (
+                                            <CommandItem
+                                                key={c.value}
+                                                value={c.value}
+                                                onSelect={(currentValue) => {
+                                                    const matched = CURRENCIES.find(item => item.value.toLowerCase() === currentValue.toLowerCase())
+                                                    if (matched) {
+                                                        setCurrency(matched.value)
+                                                    }
+                                                    setOpenCurrency(false)
+                                                }}
+                                                className="aria-selected:bg-secondary"
+                                            >
+                                                {c.label}
+                                                <Check
+                                                    className={cn(
+                                                        "ml-auto h-4 w-4",
+                                                        currency === c.value ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                 </div>
 
                 {/* 2. Merchant Card */}
-                <div className="bg-[#0F1D2E] rounded-3xl p-5 border border-[#1E3A5F] space-y-3 shrink-0">
+                <div className="bg-card rounded-3xl p-5 border border-border space-y-3 shrink-0">
                     <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Merchant</Label>
                     <div className="relative">
                         <Input
                             value={merchant}
                             onChange={(e) => setMerchant(e.target.value)}
                             placeholder="Netflix, Starbucks, etc."
-                            className="bg-[#1A2942] border-none text-base h-12 pl-4 pr-10 rounded-xl text-white placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-[#2DD4BF]/30"
+                            className="bg-secondary border-none text-base h-12 pl-4 pr-10 rounded-xl placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary/30"
                         />
                         <Store className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     </div>
@@ -506,7 +602,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                 key={brand}
                                 type="button"
                                 onClick={() => setMerchant(brand)}
-                                className="px-3 py-1.5 bg-[#1A2942] hover:bg-[#1E3A5F] rounded-full text-xs font-semibold text-slate-400 hover:text-white transition-colors whitespace-nowrap border border-transparent hover:border-[#2DD4BF]/20"
+                                className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-full text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap border border-transparent hover:border-primary/20"
                             >
                                 {brand}
                             </button>
@@ -515,13 +611,13 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                 </div>
 
                 {/* 3. Category & Date Split Card */}
-                <div className="bg-[#0F1D2E] rounded-3xl p-5 border border-[#1E3A5F] shrink-0">
+                <div className="bg-card rounded-3xl p-5 border border-border shrink-0">
                     <div className="grid grid-cols-2 gap-4">
                         {/* Category */}
                         <div className="space-y-2">
                             <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Category</Label>
                             <Select value={category} onValueChange={setCategory}>
-                                <SelectTrigger className="w-full border-none shadow-none bg-[#1A2942] rounded-xl text-white font-medium h-11 focus:ring-0">
+                                <SelectTrigger className="w-full border-none shadow-none bg-secondary rounded-xl font-medium h-11 focus:ring-0">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -537,7 +633,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                     type="date"
                                     value={date ? date.slice(0, 10) : ''}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="border-none shadow-none bg-[#1A2942] rounded-xl text-white font-medium h-11 w-full px-3 text-sm focus-visible:ring-0"
+                                    className="border-none shadow-none bg-secondary rounded-xl font-medium h-11 w-full px-3 text-sm focus-visible:ring-0"
                                 />
                             </div>
                         </div>
@@ -549,19 +645,19 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                 placeholder="Enter custom category..."
                                 value={customCategory}
                                 onChange={e => setCustomCategory(e.target.value)}
-                                className="bg-[#1A2942] border-none h-11 text-white"
+                                className="bg-secondary border-none h-11"
                             />
                         </div>
                     )}
                 </div>
 
                 {/* 4. Note Card */}
-                <div className="bg-[#0F1D2E] rounded-3xl p-5 border border-[#1E3A5F] space-y-2 shrink-0">
+                <div className="bg-card rounded-3xl p-5 border border-border space-y-2 shrink-0">
                     <Label className="text-[10px] font-bold text-slate-400 tracking-widest uppercase pl-1">Note</Label>
                     <div className="relative">
                         <Input
                             placeholder="Add details..."
-                            className="bg-[#1A2942] border-none text-base h-12 pl-4 pr-10 rounded-xl text-white placeholder:text-slate-500 focus-visible:ring-0"
+                            className="bg-secondary border-none text-base h-12 pl-4 pr-10 rounded-xl placeholder:text-muted-foreground focus-visible:ring-0"
                         />
                         <Edit3 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     </div>
@@ -570,13 +666,13 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             </div>
 
             {/* Bottom Fixed Actions */}
-            <div className="absolute bottom-0 left-0 right-0 p-5 pt-10 space-y-3 z-20 pointer-events-none bg-gradient-to-t from-[#0A1628] via-[#0A1628]/80 to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 p-5 pt-10 space-y-3 z-20 pointer-events-none bg-gradient-to-t from-background via-background/80 to-transparent">
 
                 {/* Scan Button - Cyan */}
                 <Button
                     type="button"
                     onClick={handleScanClick}
-                    className="w-full h-12 bg-[#2DD4BF] hover:bg-[#14B8A6] text-[#0A1628] rounded-2xl shadow-lg shadow-[#2DD4BF]/20 flex items-center justify-center gap-2 text-base font-bold transition-transform active:scale-[0.98] pointer-events-auto"
+                    className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 text-base font-bold transition-transform active:scale-[0.98] pointer-events-auto"
                 >
                     {isScanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <ScanLine className="w-5 h-5" />}
                     Scan Receipt (Auto-Scan)
@@ -594,7 +690,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                             setCategory("")
                             setDate(new Date().toISOString().slice(0, 10))
                         }}
-                        className="h-12 w-12 rounded-2xl bg-[#0F1D2E] text-slate-400 hover:text-white hover:bg-[#1A2942] shadow-sm border border-[#1E3A5F] flex-shrink-0"
+                        className="h-12 w-12 rounded-2xl bg-card text-muted-foreground hover:text-foreground hover:bg-secondary shadow-sm border border-border flex-shrink-0"
                     >
                         <RotateCcw className="w-5 h-5" />
                     </Button>
@@ -603,7 +699,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                     <Button
                         onClick={() => formRef.current?.requestSubmit()}
                         disabled={isPending}
-                        className="flex-1 h-12 bg-[#2DD4BF] hover:bg-[#14B8A6] text-[#0A1628] rounded-2xl shadow-lg shadow-[#2DD4BF]/20 text-base font-bold transition-transform active:scale-[0.98]"
+                        className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl shadow-lg shadow-primary/20 text-base font-bold transition-transform active:scale-[0.98]"
                     >
                         {isPending ? "Saving..." : "Save Expense"}
                     </Button>
@@ -654,3 +750,14 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
         </div >
     )
 }
+
+const CURRENCIES = [
+    { value: "USD", label: "USD ($)" },
+    { value: "EUR", label: "EUR (€)" },
+    { value: "GBP", label: "GBP (£)" },
+    { value: "INR", label: "INR (₹)" },
+    { value: "CAD", label: "CAD ($)" },
+    { value: "AUD", label: "AUD ($)" },
+    { value: "JPY", label: "JPY (¥)" },
+    { value: "CNY", label: "CNY (¥)" },
+]

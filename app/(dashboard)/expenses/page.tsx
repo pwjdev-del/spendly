@@ -77,7 +77,7 @@ export default async function ExpensesPage() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h1 className="text-2xl font-bold tracking-tight">Expense Transactions</h1>
-                <div className="flex gap-2 self-start md:self-auto">
+                <div className="flex gap-2 self-start md:self-auto overflow-x-auto w-full md:w-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 scrollbar-hide no-scrollbar">
                     <FastExpenseWrapper trips={activeTrips} />
                     <ExportCsvButton expenses={expenses.map(e => ({ ...e, date: e.date, amount: e.amount }))} />
                     <ExportPdfButton expenses={expenses.map(e => ({ ...e, date: e.date, amount: e.amount }))} />

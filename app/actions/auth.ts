@@ -150,25 +150,31 @@ Password Length: ${password?.length}
 
 export async function forgotPassword(prevState: string | undefined, formData: FormData) {
     const email = (formData.get("email") as string).trim()
-    const user = await prisma.user.findUnique({ where: { email } })
 
-    if (user) {
-        const token = nanoid(32)
-        const expiry = new Date(Date.now() + 3600000) // 1 hour
+    try {
+        const user = await prisma.user.findUnique({ where: { email } })
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                resetToken: token,
-                resetTokenExpiry: expiry
-            }
-        })
+        if (user) {
+            const token = nanoid(32)
+            const expiry = new Date(Date.now() + 3600000) // 1 hour
 
-        await sendPasswordResetEmail(email, token)
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    resetToken: token,
+                    resetTokenExpiry: expiry
+                }
+            })
+
+            await sendPasswordResetEmail(email, token)
+        }
+
+        // Always return success to prevent email enumeration
+        return "If an account exists, a reset link has been sent."
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        return "An error occurred. Please try again later."
     }
-
-    // Always return success to prevent email enumeration
-    return "If an account exists, a reset link has been sent."
 }
 
 export async function resetPassword(prevState: string | undefined, formData: FormData) {
@@ -179,25 +185,30 @@ export async function resetPassword(prevState: string | undefined, formData: For
     if (!token || !password) return "Invalid request"
     if (password !== confirmPassword) return "Passwords do not match"
 
-    // Find user with valid token
-    const user = await prisma.user.findUnique({
-        where: { resetToken: token }
-    })
+    try {
+        // Find user with valid token
+        const user = await prisma.user.findUnique({
+            where: { resetToken: token }
+        })
 
-    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
-        return "Invalid or expired reset link"
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    await prisma.user.update({
-        where: { id: user.id },
-        data: {
-            password: hashedPassword,
-            resetToken: null,
-            resetTokenExpiry: null
+        if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+            return "Invalid or expired reset link"
         }
-    })
 
-    return "success"
+        const hashedPassword = await bcrypt.hash(password, 10)
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetToken: null,
+                resetTokenExpiry: null
+            }
+        })
+
+        return "success"
+    } catch (error) {
+        console.error("Reset password error:", error);
+        return "An error occurred. Please try again later."
+    }
 }

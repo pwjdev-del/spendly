@@ -100,44 +100,51 @@ export function TodoList({ todos }: TodoListProps) {
                 <Card
                     key={todo.id}
                     className={cn(
-                        "transition-all",
-                        pending.has(todo.id) && "opacity-50",
-                        todo.priority <= 2 && "border-l-4 border-l-warning"
+                        "transition-all hover:shadow-md border border-border shadow-sm bg-card rounded-[24px] overflow-hidden group",
+                        pending.has(todo.id) && "opacity-50"
                     )}
                 >
-                    <CardContent className="py-4">
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <KindIcon kind={todo.kind} />
-                                    <span className="font-medium truncate">{todo.title}</span>
+                    <CardContent className="p-5">
+                        <div className="flex flex-col gap-4">
+                            {/* Header: Amount & Status */}
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-2">
                                     {todo.amount && (
-                                        <Badge variant="outline">
+                                        <Badge variant="secondary" className="px-2.5 py-0.5 text-sm font-semibold bg-primary/10 text-primary hover:bg-primary/20">
                                             ${(todo.amount / 100).toFixed(2)}
                                         </Badge>
                                     )}
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                    <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        {todo.age}d ago
-                                    </span>
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Badge variant="outline" className="text-xs text-muted-foreground uppercase tracking-wider">
                                         {todo.entityType}
                                     </Badge>
-                                    <span className="truncate">{todo.reason}</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    <span>{todo.age}d ago</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 flex-shrink-0">
+                            {/* Main Content */}
+                            <div className="space-y-1">
+                                <h3 className="font-semibold text-lg leading-tight text-foreground">
+                                    {todo.title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {todo.reason}
+                                </p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end gap-3 pt-2">
                                 {todo.kind === "APPROVE" && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => handleReject(todo)}
                                         disabled={pending.has(todo.id)}
+                                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                     >
-                                        <X className="h-4 w-4 mr-1" />
+                                        <X className="h-4 w-4 mr-1.5" />
                                         Reject
                                     </Button>
                                 )}
@@ -145,8 +152,9 @@ export function TodoList({ todos }: TodoListProps) {
                                     size="sm"
                                     onClick={() => handlePrimaryAction(todo)}
                                     disabled={pending.has(todo.id)}
+                                    className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 px-4 min-w-[100px]"
                                 >
-                                    <Check className="h-4 w-4 mr-1" />
+                                    <Check className="h-4 w-4 mr-1.5" />
                                     {todo.primaryAction}
                                 </Button>
                             </div>

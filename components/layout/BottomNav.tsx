@@ -43,7 +43,7 @@ export function BottomNav({ onAddExpense }: BottomNavProps) {
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t pb-[env(safe-area-inset-bottom)]">
-            <div className="flex items-center justify-between px-4 h-16">
+            <div className="flex items-center justify-between px-4 pt-4 pb-8">
                 {firstHalf.map((item) => (
                     <Link
                         key={item.href}
@@ -62,12 +62,14 @@ export function BottomNav({ onAddExpense }: BottomNavProps) {
 
                 <div className="relative -top-6">
                     <Button
-                        onClick={onAddExpense}
+                        asChild
                         size="icon"
                         className="h-14 w-14 rounded-full shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white border-4 border-background"
                     >
-                        <Camera className="h-7 w-7" />
-                        <span className="sr-only">Scan Expense</span>
+                        <Link href="/scan">
+                            <Camera className="h-7 w-7" />
+                            <span className="sr-only">Scan Expense</span>
+                        </Link>
                     </Button>
                 </div>
 

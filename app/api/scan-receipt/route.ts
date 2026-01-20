@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import sharp from "sharp";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
     try {
-        console.log("Scan Receipt API called");
+        console.log("Scan Receipt API called (NVIDIA Mode)");
         const formData = await req.formData();
         const file = formData.get("file") as File;
 
@@ -16,10 +15,10 @@ export async function POST(req: Request) {
         }
         console.log("Scan Receipt: File received", file.name, file.size);
 
-        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+        const apiKey = process.env.NVIDIA_API_KEY;
 
         if (!apiKey) {
-            console.error("API Error: GEMINI_API_KEY is missing");
+            console.error("API Error: NVIDIA_API_KEY is missing");
             return NextResponse.json({ error: "Server misconfiguration: API Key missing" }, { status: 500 });
         }
 
@@ -34,9 +33,10 @@ export async function POST(req: Request) {
             const metadata = await image.metadata();
             console.log(`Input Image: ${metadata.format} ${metadata.width}x${metadata.height}`);
 
+            // Resize to ensure it fits within token limits and is optimized
             finalBuffer = await image
                 .rotate()
-                .resize(1536, 1536, { fit: 'inside', withoutEnlargement: true })
+                .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
                 .jpeg({ quality: 80 })
                 .toBuffer();
 
@@ -45,12 +45,11 @@ export async function POST(req: Request) {
             finalBuffer = originalBuffer;
         }
 
-        // 2. CALL GOOGLE GEMINI
+        // 2. CALL NVIDIA API (Llama 3.2 Vision)
         const base64Image = finalBuffer.toString("base64");
+        const dataUrl = `data:image/jpeg;base64,${base64Image}`;
 
-        console.log("Using Google Gemini API...");
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+        console.log("Using Nvidia Llama 3.2 Vision API...");
 
         const prompt = `
             Analyze this receipt image and extract the following details into a JSON object.
@@ -64,11 +63,21 @@ export async function POST(req: Request) {
             Return ONLY raw JSON. Do not use Markdown code blocks.
         `;
 
-        const imagePart = {
-            inlineData: {
-                data: base64Image,
-                mimeType: "image/jpeg",
-            },
+        const payload = {
+            model: "meta/llama-3.2-90b-vision-instruct",
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: prompt },
+                        { type: "image_url", image_url: { url: dataUrl } }
+                    ]
+                }
+            ],
+            temperature: 0.1,
+            top_p: 1,
+            max_tokens: 1024,
+            stream: false
         };
 
         // Retry Logic for Rate Limiting
@@ -81,21 +90,37 @@ export async function POST(req: Request) {
             try {
                 if (attempt > 0) {
                     console.log(`Retry attempt ${attempt + 1}/${MAX_RETRIES}...`);
-                    await new Promise(res => setTimeout(res, 2000 * attempt)); // 2s, 4s wait
+                    await new Promise(res => setTimeout(res, 2000 * attempt));
                 }
 
-                result = await model.generateContent([prompt, imagePart]);
+                const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey}`,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    const status = response.status;
+
+                    if (status === 429 || status >= 500) {
+                        throw new Error(`API Error ${status}: ${errorText}`);
+                    }
+                    // Non-retriable error
+                    throw new Error(`Fatal API Error ${status}: ${errorText}`);
+                }
+
+                result = await response.json();
                 break; // Success
 
             } catch (error: any) {
                 lastError = error;
                 console.warn(`Attempt ${attempt + 1} failed:`, error.message);
-
-                if (error.message?.includes("429") || error.status === 429) {
-                    attempt++;
-                    continue;
-                }
-                throw error; // Non-retryable error
+                attempt++;
             }
         }
 
@@ -103,9 +128,7 @@ export async function POST(req: Request) {
             throw lastError || new Error("Failed to generate content after retries");
         }
 
-        const response = await result.response;
-        let jsonStr = response.text();
-
+        let jsonStr = result.choices?.[0]?.message?.content || "";
         console.log("AI Response:", jsonStr);
 
         // 3. PARSE JSON
@@ -131,13 +154,6 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error("Receipt Scan Error:", error);
-
-        if (error.message?.includes("429") || error.status === 429) {
-            return NextResponse.json(
-                { error: "AI Busy: Too many requests. Please wait a moment and try again." },
-                { status: 429 }
-            );
-        }
 
         return NextResponse.json(
             { error: error.message || "Failed to process receipt" },

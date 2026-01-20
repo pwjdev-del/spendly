@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { OfflineIndicator } from "@/components/ui/offline-indicator"
 import { OfflineSyncProvider } from "@/components/providers/OfflineSyncProvider"
 import { PennyProvider } from "@/components/penny/PennyContext"
+import { ExpensePanelProvider } from "@/components/expenses/ExpensePanelContext"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +26,18 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: "Kharcho",
+  title: "Spendly",
   description: "Expense Management for your business",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/logo-icon-filled.png",
+    apple: "/logo-icon-filled.png",
+    shortcut: "/logo-icon-filled.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Kharcho",
+    title: "Spendly",
   },
 };
 
@@ -59,10 +65,12 @@ export default function RootLayout({
         >
           <AppearanceProvider>
             <PennyProvider>
-              <OfflineSyncProvider>
-                {children}
-                <OfflineIndicator />
-              </OfflineSyncProvider>
+              <ExpensePanelProvider>
+                <OfflineSyncProvider>
+                  {children}
+                  <OfflineIndicator />
+                </OfflineSyncProvider>
+              </ExpensePanelProvider>
             </PennyProvider>
             <Toaster />
           </AppearanceProvider>

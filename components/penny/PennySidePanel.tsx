@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Sparkles, User, Bot, CheckCircle2, AlertCircle, X } from "lucide-react"
+import Image from "next/image"
 import { toast } from "sonner"
 import {
     Sheet,
@@ -130,11 +131,17 @@ export function PennyChat({ className }: { className?: string }) {
             {/* Header */}
             <div className="px-6 py-4 border-b flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shadow-lg shadow-[#2DD4BF]/30">
-                        <Sparkles className="h-5 w-5 text-[#0A1628]" />
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shadow-lg shadow-[#2DD4BF]/30 overflow-hidden">
+                        <Image
+                            src="/sia-mascot.png"
+                            alt="Sia Logo"
+                            width={40}
+                            height={40}
+                            className="h-full w-full object-cover scale-125"
+                        />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold">Penny</h2>
+                        <h2 className="text-lg font-semibold">Sia</h2>
                         <p className="text-xs text-muted-foreground">Your personal AI assistant</p>
                     </div>
                 </div>
@@ -148,10 +155,16 @@ export function PennyChat({ className }: { className?: string }) {
                 <div className="space-y-4 py-4" ref={scrollRef}>
                     {messages.length === 0 && (
                         <div className="text-center text-muted-foreground text-sm py-8 space-y-4">
-                            <div className="h-16 w-16 mx-auto rounded-full bg-gradient-to-br from-[#2DD4BF]/20 to-[#0D9488]/20 flex items-center justify-center">
-                                <Bot className="h-8 w-8 opacity-60" />
+                            <div className="h-16 w-16 mx-auto rounded-full bg-gradient-to-br from-[#2DD4BF]/20 to-[#0D9488]/20 flex items-center justify-center overflow-hidden">
+                                <Image
+                                    src="/sia-mascot.png"
+                                    alt="Sia"
+                                    width={64}
+                                    height={64}
+                                    className="h-full w-full object-cover scale-125"
+                                />
                             </div>
-                            <p className="font-medium">Hi! I'm Penny 👋</p>
+                            <p className="font-medium">Hi! I'm Sia 👋</p>
                             <p className="text-xs text-muted-foreground/80">
                                 I can help with expenses, trips, budgets, and more!
                             </p>
@@ -188,8 +201,14 @@ export function PennyChat({ className }: { className?: string }) {
                     {messages.map((m, i) => (
                         <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {m.role === 'assistant' && (
-                                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shrink-0 mt-1 shadow-sm shadow-[#2DD4BF]/20">
-                                    <Sparkles className="h-3.5 w-3.5 text-[#0A1628]" />
+                                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shrink-0 mt-1 shadow-sm shadow-[#2DD4BF]/20 overflow-hidden">
+                                    <Image
+                                        src="/sia-mascot.png"
+                                        alt="Sia"
+                                        width={28}
+                                        height={28}
+                                        className="h-full w-full object-cover scale-125"
+                                    />
                                 </div>
                             )}
                             <div className={cn(
@@ -226,8 +245,14 @@ export function PennyChat({ className }: { className?: string }) {
                     ))}
                     {isLoading && (
                         <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shrink-0 shadow-sm">
-                                <Sparkles className="h-3.5 w-3.5 text-[#0A1628] animate-spin" />
+                            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+                                <Image
+                                    src="/sia-mascot.png"
+                                    alt="Sia"
+                                    width={28}
+                                    height={28}
+                                    className="h-full w-full object-cover animate-pulse scale-125"
+                                />
                             </div>
                             <div className="bg-card border rounded-2xl px-4 py-2.5">
                                 <span className="animate-pulse">Thinking...</span>
@@ -246,7 +271,7 @@ export function PennyChat({ className }: { className?: string }) {
                 <Input
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    placeholder="Ask Penny anything..."
+                    placeholder="Ask Sia anything..."
                     className="flex-1 rounded-full"
                     disabled={isLoading}
                     suppressHydrationWarning
@@ -272,7 +297,7 @@ export function PennySheet() {
         <Sheet modal={false} open={isOpen} onOpenChange={(open) => !open && close()}>
             <SheetContent
                 side="right"
-                className="w-full sm:max-w-md p-0 flex flex-col bg-background shadow-xl border-l"
+                className="w-full sm:max-w-md p-0 flex flex-col bg-background shadow-xl border-l pt-[env(safe-area-inset-top)]"
             >
                 <PennyChat className="h-full" />
             </SheetContent>

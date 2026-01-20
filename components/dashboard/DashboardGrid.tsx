@@ -61,18 +61,21 @@ function SortableItem(props: {
         transform: CSS.Transform.toString(transform),
         transition: isDragging ? undefined : transition, // Disable transition during drag
         opacity: isDragging ? 0.8 : 1,
-        touchAction: props.isEditing ? 'none' : 'auto'
+        // We allow auto touch action on the container so scrolling works
+        // The drag handle will capture the drag events
+        touchAction: 'auto'
     }
 
     const WidgetConfig = WIDGET_REGISTRY[props.widgetType]
     const WidgetComponent = WidgetConfig.component
     const currentSize = props.size || WidgetConfig.defaultSize
+    const visibilityClass = WidgetConfig.mobileVisible ? "" : "hidden md:block"
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className={`${currentSize} relative group h-full`}
+            className={`${currentSize} ${visibilityClass} relative group h-full`}
         >
             {/* Top-right controls */}
             {props.isEditing && (
@@ -115,6 +118,7 @@ function SortableItem(props: {
             {props.isEditing && (
                 <div
                     className="absolute inset-0 flex items-center justify-center z-50 cursor-grab active:cursor-grabbing opacity-0 hover:opacity-100 transition-opacity duration-200 bg-gradient-to-br from-primary/5 to-primary/10 backdrop-blur-[0.5px] rounded-xl"
+                    style={{ touchAction: 'none' }} // Prevent scrolling when touching the drag handle
                     {...attributes}
                     {...listeners}
                 >

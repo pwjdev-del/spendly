@@ -173,7 +173,7 @@ export function ApprovalsList({ expenses }: { expenses: Expense[] }) {
                             exit={{ opacity: 0, scale: 0.5, filter: "blur(10px)", transition: { duration: 0.2 } }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                             key={expense.id}
-                            className="group relative overflow-hidden rounded-[24px] border border-zinc-200/50 dark:border-white/10 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-xl transition-all duration-300 hover:border-primary/20 hover:bg-white/80 dark:hover:bg-zinc-900/60 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1"
+                            className="group relative overflow-hidden rounded-[24px] border border-border bg-card shadow-lg transition-all duration-300 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
                         >
                             {/* Card Decoration - Subtle Gradient Blob */}
                             <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-primary/5 to-orange-500/5 rounded-full blur-[60px] pointer-events-none -z-10 group-hover:from-primary/10 group-hover:to-orange-500/10 transition-colors duration-500"></div>
@@ -186,24 +186,24 @@ export function ApprovalsList({ expenses }: { expenses: Expense[] }) {
                                             {expense.user.name ? expense.user.name.charAt(0).toUpperCase() : "U"}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-zinc-900 dark:text-white">{expense.user.name || expense.user.email}</p>
-                                            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{new Date(expense.date).toLocaleDateString()}</p>
+                                            <p className="text-sm font-bold text-foreground">{expense.user.name || expense.user.email}</p>
+                                            <p className="text-xs font-medium text-muted-foreground">{new Date(expense.date).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                    <div className="px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-[10px] uppercase font-bold tracking-wider text-zinc-500 dark:text-zinc-400">
+                                    <div className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] uppercase font-bold tracking-wider text-amber-500">
                                         Pending
                                     </div>
                                 </div>
 
                                 {/* Main Content */}
                                 <div>
-                                    <h3 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white mb-1 group-hover:text-primary transition-colors">{expense.merchant}</h3>
-                                    <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400 line-clamp-1">{expense.category}</p>
+                                    <h3 className="text-2xl font-bold tracking-tight text-foreground mb-1 group-hover:text-primary transition-colors">{expense.merchant}</h3>
+                                    <p className="text-sm font-medium text-muted-foreground line-clamp-1">{expense.category}</p>
                                 </div>
 
-                                <div className="py-4 border-t border-zinc-100 dark:border-white/5 border-b flex justify-between items-end">
-                                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Total Amount</span>
-                                    <span className="text-3xl font-mono font-bold text-zinc-900 dark:text-white group-hover:scale-105 transition-transform origin-right">
+                                <div className="py-4 border-t border-white/5 flex justify-between items-end">
+                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Amount</span>
+                                    <span className="text-3xl font-mono font-bold text-foreground group-hover:scale-105 transition-transform origin-right">
                                         ${(expense.amount / 100).toFixed(2)}
                                     </span>
                                 </div>
@@ -212,20 +212,19 @@ export function ApprovalsList({ expenses }: { expenses: Expense[] }) {
                                 <div className="grid grid-cols-2 gap-3 pt-2">
                                     <Button
                                         variant="outline"
-                                        className="border-red-200 dark:border-red-500/20 bg-transparent hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-all font-semibold"
+                                        className="border-red-500/20 bg-transparent hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-all font-semibold"
                                         onClick={() => handleReject(expense.id)}
                                     >
                                         <X className="w-4 h-4 mr-2" />
                                         Reject
                                     </Button>
                                     <Button
-                                        className="bg-green-500 hover:bg-green-600 text-white border-none shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-all font-bold"
+                                        className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all font-bold"
                                         onClick={() => handleApprove(expense.id)}
                                     >
                                         <Check className="w-4 h-4 mr-2" />
                                         Approve
                                     </Button>
-
                                 </div>
                             </div>
                         </motion.div>

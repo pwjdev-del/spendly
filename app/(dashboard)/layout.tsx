@@ -21,7 +21,12 @@ export default async function DashboardLayout({
                 canReconcile: true,
                 avatarUrl: true,
                 name: true,
-                organizationId: true // Ensure we have the latest name too
+                organizationId: true,
+                organization: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         if (dbUser?.role) {
@@ -64,6 +69,7 @@ export default async function DashboardLayout({
             userRole={userRole}
             canReconcile={canReconcile}
             trips={trips}
+            organizationName={dbUser?.organization?.name}
         >
             {children}
         </AppShell>

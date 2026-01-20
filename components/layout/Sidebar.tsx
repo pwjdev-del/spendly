@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Receipt, CheckSquare, CreditCard, Settings, Menu, PieChart, Calendar, MapPin, Scale, Plus, ListTodo } from "lucide-react"
+import { LayoutDashboard, Receipt, CheckSquare, CreditCard, Settings, Menu, PieChart, Calendar, MapPin, Scale, Plus, ListTodo, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SignOutButton } from "@/components/auth/SignOutButton"
@@ -15,42 +15,49 @@ const sidebarNavItems = [
         title: "Dashboard",
         href: "/",
         icon: LayoutDashboard,
+        iconClass: "icon-dashboard",
         roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
     },
     {
         title: "To-do",
         href: "/todo",
         icon: ListTodo,
+        iconClass: "icon-todo",
         roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
     },
     {
         title: "Calendar",
         href: "/calendar",
         icon: Calendar,
+        iconClass: "icon-calendar",
         roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
     },
     {
         title: "Trips",
         href: "/trips",
         icon: MapPin,
+        iconClass: "icon-trips",
         roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
     },
     {
         title: "Expense Transactions",
         href: "/expenses",
         icon: Receipt,
+        iconClass: "icon-expenses",
         roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
     },
     {
         title: "Approvals",
         href: "/approvals",
         icon: CheckSquare,
+        iconClass: "icon-approvals",
         roles: ["ADMIN", "APPROVER", "AUDITOR"],
     },
     {
         title: "Reconciliation",
         href: "/reconciliation",
         icon: Scale,
+        iconClass: "icon-reconciliation",
         roles: ["ADMIN", "APPROVER", "AUDITOR"],
     },
 ]
@@ -60,9 +67,10 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
     onAddExpense?: () => void
     userRole?: string
     canReconcile?: boolean
+    organizationName?: string
 }
 
-function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBER", canReconcile = false }: SidebarProps & { onAddExpense?: () => void }) {
+function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBER", canReconcile = false, organizationName }: SidebarProps & { onAddExpense?: () => void }) {
     const pathname = usePathname()
 
     // Filter nav items based on user role
@@ -75,50 +83,67 @@ function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBE
     return (
         <div className={cn("pb-12 w-full h-full bg-sidebar flex flex-col", className)}>
             <div className="space-y-4 py-4 flex-1">
-                <div className="px-3 py-2">
-                    <Link href="/" className="mb-6 flex flex-col items-center px-4 group">
-                        <div className="w-full aspect-square max-w-[120px] flex items-center justify-center">
-                            <Image
-                                src="/logo-icon-light.png"
-                                alt="Kharcho"
-                                width={120}
-                                height={120}
-                                className="w-full h-full object-contain transition-transform group-hover:scale-105"
-                                unoptimized
-                                priority
-                            />
+                <div className="px-4 py-2">
+                    <Link href="/" className="mb-6 flex flex-col items-center gap-3 px-2 group">
+                        {/* New Spendly Horizontal Logo */}
+                        {/* Consistently Branded Sidebar Logo */}
+                        <div className="flex items-center gap-3 py-1 scale-110 origin-left">
+                            <div className="relative h-14 w-14 shrink-0">
+                                <Image
+                                    src="/sia-mascot.png"
+                                    alt="Spendly"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
+                            <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
+                                spendly
+                            </span>
                         </div>
-                        <span className="text-lg font-bold text-foreground mt-2">Kharcho</span>
+
+                        {/* Dynamic Organization Name Pill */}
+                        <div className="w-full max-w-[180px] px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20 text-center">
+                            <span className="text-xs font-bold text-white tracking-wide truncate block">
+                                {(organizationName || "YOUR SPACE").toUpperCase()}
+                            </span>
+                        </div>
                     </Link>
                     <div className="space-y-1">
-                        {filteredNavItems.map((item) => (
-                            <Button
-                                key={item.href}
-                                variant={(pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))) ? "secondary" : "ghost"}
-                                className={cn(
-                                    "w-full justify-start transition-all duration-300 mb-1 rounded-xl",
-                                    (pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href)))
-                                        ? "bg-primary/15 text-primary shadow-[0_0_25px_-5px_rgba(45,212,191,0.5)] border border-primary/20 hover:bg-primary/20 font-semibold"
-                                        : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
-                                )}
-                                asChild
-                                {...(onNavigate ? { onClick: onNavigate } : {})}
-                            >
-                                <Link href={item.href}>
-                                    <item.icon className={cn("mr-3 h-5 w-5", (pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))) ? "text-primary" : "text-muted-foreground")} />
-                                    {item.title}
-                                </Link>
-                            </Button>
-                        ))}
+                        {filteredNavItems.map((item) => {
+                            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                            return (
+                                <Button
+                                    key={item.href}
+                                    variant="ghost"
+                                    className={cn(
+                                        "w-full justify-start mb-1 rounded-xl h-11 transition-all duration-200 group relative overflow-hidden",
+                                        isActive
+                                            ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border shadow-sm"
+                                            : "text-sidebar-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                                    )}
+                                    asChild
+                                    {...(onNavigate ? { onClick: onNavigate } : {})}
+                                >
+                                    <Link href={item.href}>
+                                        {isActive && (
+                                            <div className="absolute right-2 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-primary" />
+                                        )}
+                                        <item.icon className={cn("mr-3 h-5 w-5 transition-transform group-hover:scale-110", isActive ? "text-sidebar-primary" : "text-sidebar-foreground/70 group-hover:text-sidebar-primary")} />
+                                        <span className={cn("font-medium", isActive ? "text-sidebar-primary" : "")}>{item.title}</span>
+                                    </Link>
+                                </Button>
+                            )
+                        })}
                     </div>
                 </div>
             </div>
 
             {onAddExpense && (
-                <div className="px-4 mb-4 mt-auto">
+                <div className="px-4 mb-6 mt-auto">
                     <Button
                         onClick={onAddExpense}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-500 hover:to-emerald-600 text-white shadow-lg shadow-emerald-500/20 border-0 h-12 rounded-xl text-base font-semibold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
                         size="lg"
                     >
                         <Plus className="mr-2 h-5 w-5" />
@@ -130,15 +155,15 @@ function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBE
     )
 }
 
-export function Sidebar({ className, userRole = "MEMBER", canReconcile = false, onAddExpense }: SidebarProps) {
+export function Sidebar({ className, userRole = "MEMBER", canReconcile = false, onAddExpense, organizationName }: SidebarProps) {
     return (
         <div className={cn("hidden md:flex flex-col w-64 h-[calc(100vh-2rem)] m-4 rounded-2xl border shadow-xl bg-sidebar/80 backdrop-blur-xl sticky top-4 overflow-hidden", className)}>
-            <SidebarContent userRole={userRole} canReconcile={canReconcile} onAddExpense={onAddExpense} />
+            <SidebarContent userRole={userRole} canReconcile={canReconcile} onAddExpense={onAddExpense} organizationName={organizationName} />
         </div>
     )
 }
 
-export function MobileSidebar({ userRole = "MEMBER", canReconcile = false }: { userRole?: string, canReconcile?: boolean }) {
+export function MobileSidebar({ userRole = "MEMBER", canReconcile = false, organizationName }: { userRole?: string, canReconcile?: boolean, organizationName?: string }) {
     const [open, setOpen] = useState(false)
     const [isMounted, setIsMounted] = useState(false)
 
@@ -165,7 +190,7 @@ export function MobileSidebar({ userRole = "MEMBER", canReconcile = false }: { u
             </SheetTrigger>
             <SheetContent side="left" className="p-0 border-r w-64">
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <SidebarContent onNavigate={() => setOpen(false)} userRole={userRole} canReconcile={canReconcile} />
+                <SidebarContent onNavigate={() => setOpen(false)} userRole={userRole} canReconcile={canReconcile} organizationName={organizationName} />
             </SheetContent>
         </Sheet>
     )

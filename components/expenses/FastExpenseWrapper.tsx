@@ -3,8 +3,7 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Camera, Plus } from "lucide-react"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { ExpenseForm } from "@/components/expenses/ExpenseForm"
+import { useExpensePanel } from "@/components/expenses/ExpensePanelContext"
 import { useRouter } from "next/navigation"
 
 interface FastExpenseWrapperProps {
@@ -18,28 +17,25 @@ interface FastExpenseWrapperProps {
 }
 
 export function FastExpenseWrapper({ trips = [], trigger }: FastExpenseWrapperProps) {
-    const [isOpen, setIsOpen] = useState(false)
-    const [file, setFile] = useState<File | null>(null)
+    const { open, toggle } = useExpensePanel()
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const router = useRouter()
-
-    const handleCameraClick = () => {
-        fileInputRef.current?.click()
-    }
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0]
         if (selectedFile) {
-            setFile(selectedFile)
-            setIsOpen(true)
+            open(selectedFile)
         }
+        // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = ""
     }
 
-    const handleClose = () => {
-        setIsOpen(false)
-        setFile(null)
-        if (fileInputRef.current) fileInputRef.current.value = ""
-        router.refresh() // Refresh to show new expense if any
+    const handleClick = () => {
+        // If trigger is "Scan Receipt", we might want to open file dialog first?
+        // But for now, let's just open the panel.
+        // Actually, if it's "Scan Receipt" usually we want to click the file input.
+        // But the parent usually handles the click logic if it's a specialized trigger.
+        // Wait, FastExpenseWrapper is often used just to wrap a button that opens the form.
+        open()
     }
 
     return (
@@ -52,32 +48,24 @@ export function FastExpenseWrapper({ trips = [], trigger }: FastExpenseWrapperPr
                 onChange={handleFileChange}
             />
             {trigger ? (
-                <div onClick={() => setIsOpen(true)} className="cursor-pointer h-full w-full">
+                <div onClick={(e) => {
+                    // Check if it's supposed to be a file upload trigger?
+                    // The QuickActionsWidget passes a div that acts as a button.
+                    // If we want to support scanning from here, we might need to know if it's a scan action.
+                    // For now, let's assume if it's "Scan Receipt" text inside, we scan.
+                    // Or better, let's just open the panel, and user can click Scan inside.
+                    // UNLESS the user explicitly wants the camera button behavior.
+                    // Let's keep it simple: just toggle the panel.
+                    toggle()
+                }} className="cursor-pointer h-full w-full">
                     {trigger}
                 </div>
             ) : (
-                <Button onClick={() => setIsOpen(true)} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-sm">
+                <Button onClick={() => toggle()} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-none shadow-sm">
                     <Plus className="h-4 w-4" />
                     <span>New Expense</span>
                 </Button>
             )}
-
-            <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-                <SheetContent
-                    side="right"
-                    className="w-full sm:max-w-md p-0 flex flex-col bg-background dark:bg-[#0A1628] shadow-2xl border-l"
-                >
-                    <SheetTitle className="sr-only">New Expense</SheetTitle>
-                    <div className="w-full h-full flex flex-col">
-                        <ExpenseForm
-                            trips={trips}
-                            initialFile={file}
-                            onCancel={handleClose}
-                            isSlideOver={true}
-                        />
-                    </div>
-                </SheetContent>
-            </Sheet>
         </>
     )
 }

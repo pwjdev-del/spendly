@@ -31,7 +31,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (errorMessage === 'success') {
-            router.push('/')
+            router.push('/dashboard')
         }
     }, [errorMessage, router])
 
@@ -60,15 +60,15 @@ export default function LoginPage() {
                             transition={{ delay: 0.2, duration: 0.4 }}
                         >
                             <Image
-                                src="/logo-icon-light.png"
-                                alt="Kharcho"
-                                width={80}
-                                height={80}
+                                src="/sia-mascot.png"
+                                alt="Spendly"
+                                width={120}
+                                height={120}
                                 className="mb-4 object-contain"
                                 priority
                             />
                         </motion.div>
-                        <h1 className="text-2xl font-bold text-white mb-1">Kharcho</h1>
+                        <h1 className="text-2xl font-bold text-white mb-1">Spendly</h1>
                         <p className="text-[#64748B] text-sm">Enterprise Expense Management</p>
                     </div>
 
@@ -174,14 +174,14 @@ export default function LoginPage() {
                     <div className="mt-8 text-center text-sm text-[#64748B]">
                         Don&apos;t have an account?{' '}
                         <Link href="/register" className="text-primary font-semibold hover:text-primary/80 transition-colors">
-                            Contact Administrator
+                            Sign Up
                         </Link>
                     </div>
                 </div>
 
                 {/* Footer Note */}
                 <p className="text-center text-[#64748B] text-xs mt-6">
-                    © 2024 Kharcho. All rights reserved.
+                    © 2024 Spendly. All rights reserved.
                 </p>
             </motion.div>
         </div>

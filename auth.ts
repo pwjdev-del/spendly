@@ -67,12 +67,16 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     callbacks: {
         async jwt({ token, user, account }) {
             // Fingerprinting
-            const headersList = await headers(); // Next.js headers() is async in newer versions
-            const userAgent = headersList.get("user-agent") || "unknown";
-            const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
-
-            const { createHash } = await import("crypto");
-            const currentHash = createHash("sha256").update(`${userAgent}|${ip.split(',')[0]}`).digest("hex");
+            let currentHash = "unknown";
+            try {
+                const headersList = await headers();
+                const userAgent = headersList.get("user-agent") || "unknown";
+                const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
+                const { createHash } = await import("crypto");
+                currentHash = createHash("sha256").update(`${userAgent}|${ip.split(',')[0]}`).digest("hex");
+            } catch (e) {
+                console.warn("Could not fetch headers for fingerprinting:", e);
+            }
 
             if (user) {
                 // Initial Sign In
@@ -102,8 +106,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         async session({ session, token }) {
             // If token is invalid (empty from hijack check), session should be null/empty
             if (!token || !token.id) {
-                // @ts-ignore
-                return null;
+                // Return default/empty session if token is invalid
+                return session;
             }
             if (token && session.user) {
                 // @ts-ignore

@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LayoutDashboard } from "lucide-react"
 import { MobileSidebar } from "@/components/layout/Sidebar"
 import { NotificationBell } from "@/components/notifications/NotificationBell"
+import Image from "next/image"
 
 interface HeaderProps {
     user?: {
@@ -60,9 +61,19 @@ export function Header({ user, userRole = "MEMBER", canReconcile = false }: Head
     const title = getPageTitle()
 
     return (
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-14 items-center px-6 gap-4">
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-[env(safe-area-inset-top)] transition-all">
+            <div className="flex h-16 md:h-14 items-center px-6 gap-4">
                 <MobileSidebar userRole={userRole} canReconcile={canReconcile} />
+                <div className="flex items-center gap-2 md:hidden">
+                    <Image
+                        src="/sia-mascot.png"
+                        alt="Spendly"
+                        width={44}
+                        height={44}
+                        className="h-11 w-11 object-contain"
+                        unoptimized
+                    />
+                </div>
                 <div className="hidden md:flex items-center gap-2 font-semibold">
                     {/* Icon could be dynamic too, but for now just showing title or generic icon */}
                     <LayoutDashboard className="h-5 w-5 text-muted-foreground" />

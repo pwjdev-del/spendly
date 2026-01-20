@@ -18,6 +18,7 @@ import { ExpenseActions } from "@/components/expenses/ExpenseActions"
 import { sendReceiptRequest, sendTripReportRequest } from "@/app/actions/email-actions"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { getExpenseIcon } from "@/lib/category-icons"
 
 
 interface Expense {
@@ -213,9 +214,17 @@ export function ExpensesTable({ expenses: initialExpenses, userRole = "MEMBER" }
                                         </TableCell>
                                         <TableCell className="py-3">
                                             <Link href={`/expenses/${expense.id}`} className="block group-hover:text-primary transition-colors">
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-zinc-900 dark:text-zinc-200 truncate pr-2">{expense.merchant}</span>
-                                                    {expense.locationName && <div className="flex items-center text-[10px] text-zinc-400 mt-0.5"><MapPin className="h-2.5 w-2.5 mr-0.5" /> <span className="truncate max-w-[150px]">{expense.locationName}</span></div>}
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn("h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0", getExpenseIcon(expense.category, expense.merchant).bg, getExpenseIcon(expense.category, expense.merchant).color)}>
+                                                        {(() => {
+                                                            const Icon = getExpenseIcon(expense.category, expense.merchant).icon;
+                                                            return <Icon className="h-4 w-4" />
+                                                        })()}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold text-zinc-900 dark:text-zinc-200 truncate pr-2">{expense.merchant}</span>
+                                                        {expense.locationName && <div className="flex items-center text-[10px] text-zinc-400 mt-0.5"><MapPin className="h-2.5 w-2.5 mr-0.5" /> <span className="truncate max-w-[150px]">{expense.locationName}</span></div>}
+                                                    </div>
                                                 </div>
                                             </Link>
                                         </TableCell>
@@ -277,7 +286,7 @@ export function ExpensesTable({ expenses: initialExpenses, userRole = "MEMBER" }
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 key={expense.id}
-                                className="group relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer"
+                                className="group relative bg-card rounded-[24px] border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-200 flex flex-col cursor-pointer overflow-hidden"
                             >
                                 <Link href={`/expenses/${expense.id}`} className="block flex-1">
                                     <div className="p-4">

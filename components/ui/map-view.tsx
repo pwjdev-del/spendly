@@ -5,11 +5,11 @@ import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { MapPin } from "lucide-react"
 
-// Custom marker matching Stitch "Blaze Orange" theme
+// Custom marker matching Stitch "Cyan/Teal" theme
 const createCustomIcon = () => L.divIcon({
     className: "bg-transparent border-none",
-    html: `<div class="w-5 h-5 bg-[#FF6700] rounded-full border-2 border-white shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-            <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+    html: `<div class="w-5 h-5 bg-[#2DD4BF] rounded-full border-2 border-white shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+            <div class="w-1.5 h-1.5 bg-[#0A1628] rounded-full"></div>
            </div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10], // Center it
@@ -54,11 +54,10 @@ export default function MapView({ expenses }: MapViewProps) {
         })
         mapInstanceRef.current = map
 
-        // 3. Add Tile Layer (CartoDB Voyager - Clean/Light to match Wild Sand theme)
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 20
+        // 3. Add Tile Layer (Esri World Imagery - Satellite)
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+            maxZoom: 19
         }).addTo(map)
 
         // 4. Add Markers

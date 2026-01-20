@@ -1,0 +1,6 @@
+export { AnimatedMeshGradient } from "./AnimatedMeshGradient"
+export { HeroSection } from "./HeroSection"
+export { FeatureSection } from "./FeatureSection"
+export { PricingSection } from "./PricingSection"
+export { FAQSection } from "./FAQSection"
+export { FooterSection } from "./FooterSection"

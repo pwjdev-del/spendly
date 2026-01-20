@@ -10,7 +10,8 @@ interface CategoryPieChartProps {
     }[]
 }
 
-const COLORS = ['#6366F1', '#8B5CF6', '#D946EF', '#EC4899', '#F43F5E']; // Indigo, Violet, Fuchsia, Pink, Rose
+// Cyan, Teal, Emerald, Sky, Blue - Matching new dark navy theme
+const COLORS = ['#2DD4BF', '#14B8A6', '#10B981', '#0EA5E9', '#3B82F6'];
 
 export function CategoryPieChart({ data }: CategoryPieChartProps) {
     return (
