@@ -80,17 +80,17 @@ export function WhaleMascotBackground() {
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
             {/* Gradient mesh background */}
-            <div className="absolute inset-0 bg-gradient-mesh opacity-30" />
+            <div className="absolute inset-0 bg-gradient-mesh opacity-60" />
 
             {/* Large whale - bottom right */}
             <WhaleShape
-                className="absolute text-primary transition-transform duration-[20s] ease-in-out"
+                className="absolute text-primary transition-transform duration-[20s] ease-in-out animate-gentle-float"
                 style={{
                     width: '400px',
                     height: '240px',
                     right: '-50px',
                     bottom: '10%',
-                    opacity: 0.03,
+                    opacity: 0.10,
                     transform: 'rotate(-15deg)',
                 }}
             />
@@ -103,8 +103,9 @@ export function WhaleMascotBackground() {
                     height: '150px',
                     left: '5%',
                     top: '15%',
-                    opacity: 0.025,
+                    opacity: 0.08,
                     transform: 'rotate(10deg) scaleX(-1)',
+                    animationDelay: '2s',
                 }}
             />
 
@@ -116,7 +117,7 @@ export function WhaleMascotBackground() {
                     height: '90px',
                     right: '20%',
                     top: '40%',
-                    opacity: 0.02,
+                    opacity: 0.06,
                     transform: 'rotate(-5deg)',
                 }}
             />
@@ -134,15 +135,15 @@ export function WhaleMascotBackground() {
 
             {/* Soft glow spots */}
             <div
-                className="absolute w-[600px] h-[600px] rounded-full blur-[150px] bg-primary/5"
+                className="absolute w-[600px] h-[600px] rounded-full blur-[150px] bg-primary/15"
                 style={{ right: '-200px', bottom: '-100px' }}
             />
             <div
-                className="absolute w-[400px] h-[400px] rounded-full blur-[120px] bg-sky-400/5"
+                className="absolute w-[400px] h-[400px] rounded-full blur-[120px] bg-sky-400/12"
                 style={{ left: '-100px', top: '20%' }}
             />
             <div
-                className="absolute w-[300px] h-[300px] rounded-full blur-[100px] bg-indigo-400/3"
+                className="absolute w-[300px] h-[300px] rounded-full blur-[100px] bg-indigo-400/10"
                 style={{ right: '30%', top: '10%' }}
             />
         </div>

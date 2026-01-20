@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { askData, createExpenseFromPenny } from "@/app/actions/ai-analytics"
+import { askData, createExpenseFromPenny, createTaskFromPenny } from "@/app/actions/ai-analytics"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -110,6 +110,42 @@ export function PennyChat({ className }: { className?: string }) {
                             if (lastMsg.action) {
                                 lastMsg.action.status = 'error'
                                 lastMsg.content = `Sorry, I couldn't create that expense: ${expenseResult.error}`
+                            }
+                            return updated
+                        })
+                    }
+                } else if (actionCommand?.action === 'CREATE_TASK') {
+                    // Show pending message
+                    const displayText = actionCommand.cleanResponse ||
+                        `Creating task: ${actionCommand.params.title}`
+
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: displayText,
+                        action: { type: 'CREATE_TASK', status: 'pending', data: actionCommand.params }
+                    }])
+
+                    // Execute the action
+                    const taskResult = await createTaskFromPenny(actionCommand.params)
+
+                    if (taskResult.success) {
+                        setMessages(prev => {
+                            const updated = [...prev]
+                            const lastMsg = updated[updated.length - 1]
+                            if (lastMsg.action) {
+                                lastMsg.action.status = 'success'
+                                lastMsg.content = `Done! I've added the task "${actionCommand.params.title}".`
+                            }
+                            return updated
+                        })
+                        toast.success("Task created!")
+                    } else {
+                        setMessages(prev => {
+                            const updated = [...prev]
+                            const lastMsg = updated[updated.length - 1]
+                            if (lastMsg.action) {
+                                lastMsg.action.status = 'error'
+                                lastMsg.content = `Sorry, I couldn't create that task: ${taskResult.error}`
                             }
                             return updated
                         })

@@ -56,7 +56,7 @@ export default async function CalendarPage() {
     return (
         <div className="flex flex-col gap-6 h-full">
             <h1 className="text-2xl font-bold tracking-tight">Expense Calendar</h1>
-            <CalendarClient expenses={expenses} />
+            <CalendarClient expenses={expenses} recurringExpenses={recurringExpenses} />
         </div>
     )
 }

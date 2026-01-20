@@ -175,6 +175,7 @@ User Query: "${query}"
 3. BUDGET TRACKING - Compare current spending to monthly budget limit
 4. PREDICTIVE SPENDING - Estimate future spending based on historical patterns
 5. EXPENSE CREATION - Help users add new expenses via natural language
+6. TASK CREATION - Help users add to-do items/tasks
 
 === CONTEXT DATA ===
 
@@ -205,6 +206,10 @@ Average Monthly Spending: $${avgMonthlySpending.toFixed(2)}
 7. If asked to CREATE an expense, respond with ONLY this format:
    [ACTION:CREATE_EXPENSE]{"amount":XX,"merchant":"NAME","category":"CATEGORY"}
    Where amount is in dollars, merchant is the business name, category is one of: Food, Transport, Accommodation, Entertainment, Shopping, Utilities, Health, General
+
+8. If asked to CREATE a task/todo, respond with ONLY this format:
+    [ACTION:CREATE_TASK]{"title":"TITLE","priority":X}
+    Where title is the task description. Priority is optional (1=Critical, 2=High, 3=Normal, 4=None). Default to 4.
 
 Answer:
 `
@@ -268,5 +273,33 @@ export async function createExpenseFromPenny(params: {
     } catch (error: any) {
         console.error("CreateExpenseFromPenny Error:", error)
         return { error: "Failed to create expense" }
+    }
+}
+
+// Action to create task from Penny chat
+export async function createTaskFromPenny(params: {
+    title: string
+    priority?: number
+}) {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+
+    try {
+        await prisma.task.create({
+            data: {
+                title: params.title,
+                priority: params.priority || 4,
+                status: "TODO",
+                ownerId: session.user.id,
+                // We could infer date from title in future, or ask LLM to parse date
+            }
+        })
+
+        revalidatePath("/todo")
+
+        return { success: true }
+    } catch (error: any) {
+        console.error("CreateTaskFromPenny Error:", error)
+        return { error: "Failed to create task" }
     }
 }

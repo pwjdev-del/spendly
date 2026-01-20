@@ -89,6 +89,10 @@ model User {
   mentionedIn       MessageMention[] @relation("MentionedInMessage")
   notifications     Notification[]
   todoItems         TodoItem[]
+  // Task Management
+  tasks         Task[]
+  taskLists     TaskList[]
+  tags          Tag[]
 }
 
 model Account {
@@ -518,4 +522,76 @@ model MerchantMapping {
   @@unique([bankName, userId])
   @@index([userId])
   @@index([bankName])
+}
+
+// ============================================================
+// TASK MANAGEMENT
+// ============================================================
+
+model TaskList {
+  id          String   @id @default(cuid())
+  name        String
+  color       String?  // Hex code
+  icon        String?  // Icon name
+  isSystem    Boolean  @default(false) // Inbox, My Day, etc.
+  
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  
+  tasks       Task[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+}
+
+model Tag {
+  id          String   @id @default(cuid())
+  name        String
+  color       String?
+  
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  
+  tasks       Task[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([name, ownerId])
+  @@index([ownerId])
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("TODO") // TODO, IN_PROGRESS, DONE
+  priority    Int      @default(4) // 1=High, 4=None
+  
+  dueDate     DateTime?
+  dueTime     String?  // "14:00"
+  
+  isRecurring Boolean  @default(false)
+  recurrenceRule String? // RRULE string
+  
+  listId      String?
+  list        TaskList? @relation(fields: [listId], references: [id])
+  
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  
+  parentId    String?
+  parent      Task?    @relation("SubTasks", fields: [parentId], references: [id])
+  subTasks    Task[]   @relation("SubTasks")
+  
+  tags        Tag[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+  @@index([listId])
+  @@index([dueDate])
 }

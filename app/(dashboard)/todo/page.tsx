@@ -1,4 +1,4 @@
-import { getTodos } from "@/app/actions/todos";
+import { getUnifiedTasks } from "@/app/actions/tasks";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { TodoList } from "@/components/todo/TodoList";
@@ -14,20 +14,11 @@ export default async function TodoPage() {
         redirect("/login");
     }
 
-    const todos = await getTodos();
+    const { tasks, lists, systemTodos } = await getUnifiedTasks();
 
     return (
-        <div className="container mx-auto py-6 px-4 max-w-4xl">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold">To-do</h1>
-                    <p className="text-muted-foreground mt-1">
-                        {todos.length} actionable {todos.length === 1 ? "item" : "items"}
-                    </p>
-                </div>
-            </div>
-
-            <TodoList todos={todos} />
+        <div className="container mx-auto py-6 px-4 max-w-6xl h-full flex flex-col">
+            <TodoList tasks={tasks} systemTodos={systemTodos} lists={lists} />
         </div>
     );
 }

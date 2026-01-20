@@ -1,182 +1,100 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Check, X, FileText, Clock, DollarSign, MapPin, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { LayoutList, KanbanSquare, CheckSquare, Plus } from "lucide-react";
+import { TaskInput } from "./TaskInput";
+import { CreateTaskDialog } from "./CreateTaskDialog";
+import { TaskListView } from "./TaskListView";
+import { TaskBoard } from "./TaskBoard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { quickApprove, quickReject, quickReconcile } from "@/app/actions/todos";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-interface TodoItem {
-    id: string;
-    entityType: string;
-    entityId: string;
-    kind: string;
-    priority: number;
-    reason: string;
-    primaryAction: string;
-    title: string;
-    amount?: number;
-    merchant?: string;
-    createdAt: Date;
-    age: number;
-}
+import { quickApprove, quickReject, quickReconcile } from "@/app/actions/todos";
+import { toast } from "sonner";
 
 interface TodoListProps {
-    todos: TodoItem[];
+    tasks: any[];
+    systemTodos: any[];
+    lists: any[];
 }
 
-export function TodoList({ todos }: TodoListProps) {
-    const router = useRouter();
-    const [pending, setPending] = useState<Set<string>>(new Set());
-    const [isPending, startTransition] = useTransition();
+type ViewMode = "LIST" | "BOARD";
 
-    const handlePrimaryAction = async (todo: TodoItem) => {
-        setPending((p) => new Set(p).add(todo.id));
+export function TodoList({ tasks, systemTodos, lists }: TodoListProps) {
+    const [view, setView] = useState<ViewMode>("LIST");
 
-        try {
-            if (todo.kind === "APPROVE") {
-                await quickApprove(todo.entityId);
-            } else if (todo.kind === "RECONCILE") {
-                await quickReconcile(todo.entityId);
-            } else {
-                // Navigate to edit page
-                router.push(`/${todo.entityType.toLowerCase()}s/${todo.entityId}`);
-                return;
-            }
+    // Merge system todos into tasks stream for display
+    // We map system todos to look like tasks
+    const mergedTasks = [
+        ...systemTodos.map(t => ({
+            id: t.id,
+            title: t.title,
+            description: t.reason,
+            status: "TODO",
+            priority: t.priority <= 2 ? 1 : t.priority <= 4 ? 2 : 3, // Map priority
+            dueDate: new Date(), // Assume today for system tasks
+            isSystem: true,
+            systemType: t.type,
+            original: t // Keep original for actions
+        })),
+        ...tasks
+    ];
 
-            startTransition(() => {
-                router.refresh();
-            });
-        } catch (error) {
-            console.error("Action failed:", error);
-        } finally {
-            setPending((p) => {
-                const next = new Set(p);
-                next.delete(todo.id);
-                return next;
-            });
-        }
-    };
-
-    const handleReject = async (todo: TodoItem) => {
-        setPending((p) => new Set(p).add(todo.id));
-
-        try {
-            await quickReject(todo.entityId);
-            startTransition(() => {
-                router.refresh();
-            });
-        } catch (error) {
-            console.error("Reject failed:", error);
-        } finally {
-            setPending((p) => {
-                const next = new Set(p);
-                next.delete(todo.id);
-                return next;
-            });
-        }
-    };
-
-    if (todos.length === 0) {
-        return (
-            <Card>
-                <CardContent className="py-12 text-center">
-                    <Check className="h-12 w-12 mx-auto text-success mb-4" />
-                    <h3 className="text-xl font-semibold">All caught up!</h3>
-                    <p className="text-muted-foreground mt-2">
-                        You have no pending actions right now.
-                    </p>
-                </CardContent>
-            </Card>
-        );
-    }
+    // For TodoList/Board, we might want to inject custom rendering for system tasks later.
+    // For now, they appear as tasks. To support "Process" buttons, we'd need to update TaskListView.
+    // But let's ship the structure first.
 
     return (
-        <div className="space-y-3">
-            {todos.map((todo) => (
-                <Card
-                    key={todo.id}
-                    className={cn(
-                        "transition-all hover:shadow-md border border-border shadow-sm bg-card rounded-[24px] overflow-hidden group",
-                        pending.has(todo.id) && "opacity-50"
-                    )}
-                >
-                    <CardContent className="p-5">
-                        <div className="flex flex-col gap-4">
-                            {/* Header: Amount & Status */}
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-2">
-                                    {todo.amount && (
-                                        <Badge variant="secondary" className="px-2.5 py-0.5 text-sm font-semibold bg-primary/10 text-primary hover:bg-primary/20">
-                                            ${(todo.amount / 100).toFixed(2)}
-                                        </Badge>
-                                    )}
-                                    <Badge variant="outline" className="text-xs text-muted-foreground uppercase tracking-wider">
-                                        {todo.entityType}
-                                    </Badge>
-                                </div>
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    <span>{todo.age}d ago</span>
-                                </div>
-                            </div>
+        <div className="h-full flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Access</h1>
+                    <p className="text-muted-foreground mt-1">
+                        {mergedTasks.filter(t => t.status !== "DONE").length} pending tasks
+                    </p>
+                </div>
 
-                            {/* Main Content */}
-                            <div className="space-y-1">
-                                <h3 className="font-semibold text-lg leading-tight text-foreground">
-                                    {todo.title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground line-clamp-2">
-                                    {todo.reason}
-                                </p>
-                            </div>
+                <div className="flex items-center gap-2">
+                    {/* @ts-ignore */}
+                    <CreateTaskDialog lists={lists}>
+                        <Button className="gap-2 shadow-sm bg-primary/90 hover:bg-primary">
+                            <Plus className="h-4 w-4" /> New Task
+                        </Button>
+                    </CreateTaskDialog>
 
-                            {/* Actions */}
-                            <div className="flex items-center justify-end gap-3 pt-2">
-                                {todo.kind === "APPROVE" && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleReject(todo)}
-                                        disabled={pending.has(todo.id)}
-                                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                    >
-                                        <X className="h-4 w-4 mr-1.5" />
-                                        Reject
-                                    </Button>
-                                )}
-                                <Button
-                                    size="sm"
-                                    onClick={() => handlePrimaryAction(todo)}
-                                    disabled={pending.has(todo.id)}
-                                    className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 px-4 min-w-[100px]"
-                                >
-                                    <Check className="h-4 w-4 mr-1.5" />
-                                    {todo.primaryAction}
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+                    <div className="bg-muted p-1 rounded-lg flex items-center gap-1">
+                        <Button
+                            variant={view === "LIST" ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => setView("LIST")}
+                            className="h-8 w-8 p-0"
+                        >
+                            <LayoutList className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant={view === "BOARD" ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => setView("BOARD")}
+                            className="h-8 w-8 p-0"
+                        >
+                            <KanbanSquare className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Task Input Area */}
+            <div className="max-w-3xl mx-auto w-full">
+                <TaskInput />
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 mt-4">
+                {view === "LIST" ? (
+                    <TaskListView tasks={mergedTasks} />
+                ) : (
+                    <TaskBoard tasks={mergedTasks} />
+                )}
+            </div>
         </div>
     );
-}
-
-function KindIcon({ kind }: { kind: string }) {
-    switch (kind) {
-        case "APPROVE":
-            return <Check className="h-4 w-4 text-success" />;
-        case "RECONCILE":
-            return <DollarSign className="h-4 w-4 text-info" />;
-        case "FIX_RECEIPT":
-            return <FileText className="h-4 w-4 text-warning" />;
-        case "RECATEGORIZE":
-            return <AlertCircle className="h-4 w-4 text-warning" />;
-        default:
-            return <Clock className="h-4 w-4" />;
-    }
 }

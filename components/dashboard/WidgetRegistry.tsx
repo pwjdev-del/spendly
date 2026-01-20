@@ -221,10 +221,10 @@ export function ApprovalsWidget({ data }: { data: DashboardData }) {
     const router = useRouter()
     return (
         <Card
-            className="h-full cursor-pointer border border-border bg-card shadow-sm hover:border-primary/50 transition-all duration-200 group relative overflow-hidden"
+            className="h-full cursor-pointer border border-border bg-card shadow-sm hover:border-primary/50 transition-all duration-200 group relative overflow-hidden widget-interactive"
             onClick={() => router.push('/approvals')}
         >
-            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-300 pointer-events-none">
                 <CheckSquare className="w-24 h-24" />
             </div>
 
@@ -232,11 +232,11 @@ export function ApprovalsWidget({ data }: { data: DashboardData }) {
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="text-sm font-medium text-muted-foreground">Pending Approvals</h3>
-                        <div className="mt-2 text-4xl font-bold text-foreground tracking-tight">
-                            {data.pendingCount}
+                        <div className="mt-2 text-4xl font-bold text-foreground tracking-tight number-glow">
+                            <AnimatedCounter value={data.pendingCount} decimals={0} duration={1000} />
                         </div>
                     </div>
-                    <div className="p-3 bg-orange-500/10 rounded-xl">
+                    <div className="p-3 bg-orange-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300">
                         <CheckSquare className="w-6 h-6 text-orange-500" />
                     </div>
                 </div>
@@ -255,7 +255,7 @@ export function ApprovalsWidget({ data }: { data: DashboardData }) {
 export function ActiveTripsWidget({ data }: { data: DashboardData }) {
     const router = useRouter()
     return (
-        <Card className="h-full col-span-2 border border-border bg-card shadow-sm">
+        <Card className="h-full col-span-2 border border-border bg-card shadow-sm widget-interactive">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-base font-semibold text-foreground">Active Trips</CardTitle>
                 <Link href="/trips" className="text-xs font-medium text-primary hover:text-primary/80 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
