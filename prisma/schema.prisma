@@ -17,6 +17,7 @@ model Organization {
   inviteCode   String? @unique
   logoUrl      String?
   primaryColor String? @default("#09090b") // Default black
+  requireApproval Boolean @default(true) // Default to secure
 
   users        User[]
   expenses     Expense[]
@@ -51,6 +52,7 @@ model User {
   
   canReconcile   Boolean       @default(false)
   dashboardLayout String? // JSON string for widget layout preferences
+  status         String        @default("ACTIVE") // ACTIVE, PENDING, SUSPENDED
 
   expenses       Expense[]
   incomes        Income[]

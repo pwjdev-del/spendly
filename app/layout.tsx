@@ -6,7 +6,7 @@ import { AppearanceProvider } from "@/components/appearance-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { OfflineIndicator } from "@/components/ui/offline-indicator"
 import { OfflineSyncProvider } from "@/components/providers/OfflineSyncProvider"
-import { PennyProvider } from "@/components/penny/PennyContext"
+import { SiaProvider } from "@/components/sia/SiaContext"
 import { ExpensePanelProvider } from "@/components/expenses/ExpensePanelContext"
 
 const geistSans = Geist({
@@ -64,14 +64,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppearanceProvider>
-            <PennyProvider>
+            <SiaProvider>
               <ExpensePanelProvider>
                 <OfflineSyncProvider>
                   {children}
                   <OfflineIndicator />
                 </OfflineSyncProvider>
               </ExpensePanelProvider>
-            </PennyProvider>
+            </SiaProvider>
             <Toaster />
           </AppearanceProvider>
         </ThemeProvider>

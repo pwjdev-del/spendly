@@ -90,3 +90,22 @@ export async function getBillingPortal() {
     // Stub for future billing integration (Stripe/LemonSqueezy)
     return { url: "#" }
 }
+
+export async function updateUserAvatar(avatarUrl: string) {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+        throw new Error("Unauthorized")
+    }
+
+    await prisma.user.update({
+        where: { id: session.user.id },
+        data: {
+            avatarUrl: avatarUrl
+        }
+    })
+
+    revalidatePath("/dashboard/profile")
+    revalidatePath("/dashboard")
+    return { success: true }
+}

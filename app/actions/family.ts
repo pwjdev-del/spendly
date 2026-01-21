@@ -38,6 +38,7 @@ export async function getFamilyDetails() {
                     name: true,
                     email: true,
                     role: true,
+                    status: true,
                     createdAt: true
                 },
                 orderBy: { createdAt: 'asc' }
@@ -54,6 +55,19 @@ export async function getFamilyDetails() {
 
     const isAdmin = user.role === 'ADMIN'
 
+    // Fetch active invite code
+    const activeInvite = await prisma.invite.findFirst({
+        where: {
+            organizationId: user.organizationId,
+            role: 'MEMBER',
+            expiresAt: { gt: new Date() }
+        },
+        orderBy: { createdAt: 'desc' }
+    })
+
+    const inviteCode = isAdmin ? activeInvite?.code || null : null
+    const inviteCodeExpiresAt = isAdmin ? activeInvite?.expiresAt || null : null
+
     // Determine Owner (First member)
     const sortedMembers = [...organization.users].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
     const ownerId = sortedMembers[0]?.id
@@ -61,7 +75,8 @@ export async function getFamilyDetails() {
 
     return {
         organizationName: organization.name,
-        inviteCode: isAdmin ? organization.inviteCode : null, // Mask code for children
+        inviteCode,
+        inviteCodeExpiresAt,
         members: organization.users,
         currentUserRole: user.role,
         currentUserId: user.id,
@@ -70,7 +85,7 @@ export async function getFamilyDetails() {
     }
 }
 
-export async function generateInviteCode() {
+export async function generateInviteCode(expiresInHours: number = 24) {
     const user = await getUser()
 
     if (user.role !== 'ADMIN') {
@@ -79,13 +94,36 @@ export async function generateInviteCode() {
 
     if (!user.organizationId) throw new Error("No organization")
 
-    // Generate a simple 6-char code
-    const code = nanoid(6).toUpperCase()
-
-    await prisma.organization.update({
-        where: { id: user.organizationId },
-        data: { inviteCode: code }
+    // Expire old active member invites for this organization
+    await prisma.invite.updateMany({
+        where: {
+            organizationId: user.organizationId,
+            role: 'MEMBER',
+            expiresAt: { gt: new Date() }
+        },
+        data: { expiresAt: new Date() } // Expire them immediately
     })
+
+    // Generate a complex code: SPND-XXXX-XXXX
+    const randomPart = nanoid(8).toUpperCase().match(/.{1,4}/g)?.join('-')
+    const code = `FAM-${randomPart}`
+
+    const expiresAt = new Date()
+    expiresAt.setHours(expiresAt.getHours() + expiresInHours)
+
+    await prisma.invite.create({
+        data: {
+            code,
+            organizationId: user.organizationId,
+            role: 'MEMBER',
+            expiresAt
+        }
+    })
+
+    // Also update legacy field for backward compatibility if needed, 
+    // OR just clear it to force new flow. Let's keep it in sync for now 
+    // but the auth flow should prioritize the Invite table.
+    // Actually, let's NOT update legacy to avoid confusion. Auth should look at Invite table.
 
     revalidatePath("/settings/family")
     return code

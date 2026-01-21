@@ -1,14 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { BottomNav } from "@/components/layout/BottomNav"
 import { Header } from "@/components/layout/Header"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { ExpenseForm } from "@/components/expenses/ExpenseForm"
-import { PennyButton } from "@/components/penny/PennyButton"
-import { PennyChat, PennySheet } from "@/components/penny/PennySidePanel"
-import { usePenny } from "@/components/penny/PennyContext"
+import { SiaButton } from "@/components/sia/SiaButton"
+import { SiaChat, SiaSheet } from "@/components/sia/SiaSidePanel"
+import { useSia } from "@/components/sia/SiaContext"
 import { useExpensePanel } from "@/components/expenses/ExpensePanelContext"
 import { WhaleMascotBackground } from "@/components/ui/WhaleMascotBackground"
 
@@ -22,7 +23,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, userRole, canReconcile, trips, user, organizationName }: AppShellProps) {
-    const { isOpen: isPennyOpen } = usePenny()
+    const { isOpen: isSiaOpen } = useSia()
     const { isOpen: isExpenseOpen, open: openExpensePanel, close: closeExpensePanel, toggle: toggleExpensePanel, file: expenseFile } = useExpensePanel()
     const [isMobile, setIsMobile] = useState(false)
 
@@ -82,13 +83,15 @@ export function AppShell({ children, userRole, canReconcile, trips, user, organi
                         </div>
                     </aside>
 
-                    {/* Desktop Penny Panel (Slide-in) */}
+                    {/* Desktop Sia Panel (Slide-in / Push) */}
                     <aside
-                        className={`hidden md:block transition-all duration-300 ease-in-out border-l bg-background shadow-xl z-20 overflow-hidden ${isPennyOpen ? 'w-[400px] opacity-100' : 'w-0 opacity-0 border-none'
-                            }`}
+                        className={cn(
+                            "hidden md:block transition-all duration-300 ease-in-out border-l bg-background shadow-xl z-30 overflow-hidden",
+                            isSiaOpen ? "w-[400px] opacity-100" : "w-0 opacity-0 border-none"
+                        )}
                     >
-                        <div className="w-[400px] h-full">
-                            <PennyChat />
+                        <div className="w-[400px] h-full bg-background/95 backdrop-blur-2xl">
+                            <SiaChat />
                         </div>
                     </aside>
                 </div>
@@ -120,13 +123,13 @@ export function AppShell({ children, userRole, canReconcile, trips, user, organi
                 </Sheet>
             )}
 
-            {/* Penny Components */}
-            <PennyButton />
+            {/* Sia Components */}
+            <SiaButton />
 
-            {/* Mobile Penny Sheet (Hidden on Desktop) */}
+            {/* Mobile Sia Sheet (Hidden on Desktop) */}
             {isMobile && (
                 <div className="md:hidden">
-                    <PennySheet />
+                    <SiaSheet />
                 </div>
             )}
         </div>

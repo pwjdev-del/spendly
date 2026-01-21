@@ -106,13 +106,24 @@ export async function register(
             organizationId = organization.id
         }
 
+        let status = "ACTIVE"
+        if (organizationId) {
+            const org = await prisma.organization.findUnique({
+                where: { id: organizationId }
+            })
+            if (org?.requireApproval && role !== 'ADMIN') {
+                status = "PENDING"
+            }
+        }
+
         await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
                 organizationId: organizationId,
-                role: role
+                role: role,
+                status: status
             }
         })
 

@@ -164,7 +164,7 @@ export async function askData(query: string) {
         const avgMonthlySpending = historicalSpending.reduce((sum, m) => sum + m.total, 0) / historicalSpending.length
 
         const prompt = `
-You are Penny, a friendly and helpful financial assistant for "Kharcho" expense management app.
+You are Sia, a senior experienced banker and financial assistant for "Spendly" expense management app. You are professional, knowledgeable, and concise.
 
 User Query: "${query}"
 
@@ -223,8 +223,8 @@ Answer:
     }
 }
 
-// Action to create expense from Penny chat
-export async function createExpenseFromPenny(params: {
+// Action to create expense from Sia chat
+export async function createExpenseFromSia(params: {
     amount: number      // In dollars
     merchant: string
     category?: string
@@ -271,13 +271,13 @@ export async function createExpenseFromPenny(params: {
             }
         }
     } catch (error: any) {
-        console.error("CreateExpenseFromPenny Error:", error)
+        console.error("CreateExpenseFromSia Error:", error)
         return { error: "Failed to create expense" }
     }
 }
 
-// Action to create task from Penny chat
-export async function createTaskFromPenny(params: {
+// Action to create task from Sia chat
+export async function createTaskFromSia(params: {
     title: string
     priority?: number
 }) {
@@ -299,7 +299,7 @@ export async function createTaskFromPenny(params: {
 
         return { success: true }
     } catch (error: any) {
-        console.error("CreateTaskFromPenny Error:", error)
+        console.error("CreateTaskFromSia Error:", error)
         return { error: "Failed to create task" }
     }
 }

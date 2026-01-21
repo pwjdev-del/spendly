@@ -33,7 +33,7 @@ interface CreateTaskDialogProps {
     children?: React.ReactNode;
 }
 
-export function CreateTaskDialog({ lists, children }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ lists = [], children }: CreateTaskDialogProps) {
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");

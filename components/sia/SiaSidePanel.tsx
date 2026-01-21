@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { askData, createExpenseFromPenny, createTaskFromPenny } from "@/app/actions/ai-analytics"
+import { askData, createExpenseFromSia, createTaskFromSia } from "@/app/actions/ai-analytics"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -15,7 +15,7 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet"
-import { usePenny } from "./PennyContext"
+import { useSia } from "./SiaContext"
 import { cn } from "@/lib/utils"
 import { DocumentUpload } from "./DocumentUpload"
 
@@ -45,8 +45,8 @@ function parseActionFromResponse(response: string): { action: string; params: an
     return null
 }
 
-export function PennyChat({ className }: { className?: string }) {
-    const { close } = usePenny()
+export function SiaChat({ className }: { className?: string }) {
+    const { close } = useSia()
     const [query, setQuery] = useState("")
     const [messages, setMessages] = useState<Message[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -90,7 +90,7 @@ export function PennyChat({ className }: { className?: string }) {
                     }])
 
                     // Execute the action
-                    const expenseResult = await createExpenseFromPenny(actionCommand.params)
+                    const expenseResult = await createExpenseFromSia(actionCommand.params)
 
                     if (expenseResult.success) {
                         setMessages(prev => {
@@ -126,7 +126,7 @@ export function PennyChat({ className }: { className?: string }) {
                     }])
 
                     // Execute the action
-                    const taskResult = await createTaskFromPenny(actionCommand.params)
+                    const taskResult = await createTaskFromSia(actionCommand.params)
 
                     if (taskResult.success) {
                         setMessages(prev => {
@@ -155,7 +155,7 @@ export function PennyChat({ className }: { className?: string }) {
                 }
             }
         } catch (error) {
-            toast.error("Failed to connect to AI")
+            toast.error("Failed to connect to Sia")
             setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting right now. Please try again." }])
         } finally {
             setIsLoading(false)
@@ -326,8 +326,8 @@ export function PennyChat({ className }: { className?: string }) {
 }
 
 // Mobile Sheet Wrapper
-export function PennySheet() {
-    const { isOpen, close } = usePenny()
+export function SiaSheet() {
+    const { isOpen, close } = useSia()
 
     return (
         <Sheet modal={false} open={isOpen} onOpenChange={(open) => !open && close()}>
@@ -335,13 +335,14 @@ export function PennySheet() {
                 side="right"
                 className="w-full sm:max-w-md p-0 flex flex-col bg-background shadow-xl border-l pt-[env(safe-area-inset-top)]"
             >
-                <PennyChat className="h-full" />
+                <SiaChat className="h-full" />
             </SheetContent>
         </Sheet>
     )
 }
 
 // Backwards compatibility default export
-export function PennySidePanel() {
-    return <PennySheet />
+// Backwards compatibility default export
+export function SiaSidePanel() {
+    return <SiaSheet />
 }

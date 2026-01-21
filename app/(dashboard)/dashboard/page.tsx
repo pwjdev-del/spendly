@@ -7,6 +7,7 @@ import { resetBalance } from "@/app/actions/income"
 import { redirect } from "next/navigation"
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid"
 import { DEFAULT_LAYOUT, WidgetId } from "@/components/dashboard/WidgetRegistry"
+import { MagicInput } from "@/components/expenses/MagicInput"
 
 async function getGraphData(userId: string) {
   const expenses = await prisma.expense.findMany({
@@ -168,6 +169,13 @@ export default async function DashboardPage() {
     take: 5
   }) : [];
 
+  // Fetch Task Lists for Quick Action "Add Task"
+  // @ts-ignore
+  const taskLists = prisma.taskList ? await prisma.taskList.findMany({
+    where: { ownerId: user.id },
+    orderBy: { createdAt: "asc" }
+  }) : [];
+
   /* Dashboard Data Construction for Widget Grid */
   const dashboardData = {
     balance: balance,
@@ -179,7 +187,8 @@ export default async function DashboardPage() {
     categoryData: categoryData,
     recentExpenses: expenses,
     trips: activeTrips,
-    role: user.role as "ADMIN" | "MEMBER"
+    role: user.role as "ADMIN" | "MEMBER",
+    taskLists: taskLists
   }
 
   // Parse layout from user preferences or use default
@@ -202,7 +211,7 @@ export default async function DashboardPage() {
   return (
     <main className="flex flex-col gap-4" suppressHydrationWarning>
       {/* Header with Fluid Typography */}
-      <div className="w-full h-auto py-2">
+      <div className="w-full h-auto py-2 flex flex-col gap-4">
         <h1 className="text-fluid-heading font-bold text-safe text-foreground">
           Dashboard
         </h1>

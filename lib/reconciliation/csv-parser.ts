@@ -260,6 +260,27 @@ export function parseCSV(
     return transactions;
 }
 
+// Levenshtein distance for fuzzy matching
+function levenshteinDistance(a: string, b: string): number {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
 // Deterministic matching for amounts
 export function findExactAmountMatches(
     bankTransactions: ParsedTransaction[],
@@ -276,8 +297,12 @@ export function findExactAmountMatches(
         for (const expense of ledgerExpenses) {
             if (usedExpenseIds.has(expense.id)) continue;
 
+            // Expense amount is in Cents (Integer), Bank is in Dollars (Float)
+            // Convert expense cents to dollars for comparison
+            const expenseAmountDollars = expense.amount / 100;
+
             // Amount must match exactly (or within 1 cent for rounding)
-            const amountMatch = Math.abs(bankTx.amount - expense.amount) < 0.02;
+            const amountMatch = Math.abs(bankTx.amount - expenseAmountDollars) < 0.02;
 
             if (amountMatch) {
                 // Calculate date proximity (within 7 days)
@@ -287,8 +312,8 @@ export function findExactAmountMatches(
 
                 if (daysDiff <= 7) {
                     // Calculate merchant similarity
-                    const bankMerchant = bankTx.description.toLowerCase();
-                    const expenseMerchant = expense.merchant.toLowerCase();
+                    const bankMerchant = bankTx.description.toLowerCase().replace(/[^a-z0-9 ]/g, "");
+                    const expenseMerchant = expense.merchant.toLowerCase().replace(/[^a-z0-9 ]/g, "");
 
                     let merchantSimilarity = 0;
                     if (bankMerchant === expenseMerchant) {
@@ -296,11 +321,19 @@ export function findExactAmountMatches(
                     } else if (bankMerchant.includes(expenseMerchant) || expenseMerchant.includes(bankMerchant)) {
                         merchantSimilarity = 0.8;
                     } else {
-                        // Check for partial word matches
+                        // Levenshtein fuzzy match
+                        const dist = levenshteinDistance(bankMerchant, expenseMerchant);
+                        const maxLength = Math.max(bankMerchant.length, expenseMerchant.length);
+                        // Prevent division by zero
+                        const similarity = maxLength === 0 ? 0 : (maxLength - dist) / maxLength;
+
+                        // Check for partial word matches to boost similarity if Levenshtein is low but words match
                         const bankWords = bankMerchant.split(/\s+/);
                         const expenseWords = expenseMerchant.split(/\s+/);
                         const matchingWords = bankWords.filter(w => expenseWords.some(ew => ew.includes(w) || w.includes(ew)));
-                        merchantSimilarity = matchingWords.length / Math.max(bankWords.length, expenseWords.length);
+                        const wordScore = matchingWords.length / Math.max(bankWords.length, expenseWords.length);
+
+                        merchantSimilarity = Math.max(similarity, wordScore * 0.9); // Word score is slightly discounted
                     }
 
                     // Calculate overall confidence

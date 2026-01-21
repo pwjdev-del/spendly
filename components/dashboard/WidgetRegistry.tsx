@@ -6,13 +6,15 @@ import { SpendingChart } from "@/components/dashboard/SpendingChart"
 import { CategoryPieChart } from "@/components/dashboard/CategoryPieChart"
 import { AddFundsDialog } from "@/components/dashboard/AddFundsDialog"
 import Link from "next/link"
-import { AskDataWidget } from "@/components/dashboard/AskDataWidget"
+import { AskSiaWidget } from "@/components/dashboard/AskDataWidget"
 import { ArrowRight, Wallet, Receipt, CreditCard, Calendar, BarChart3, Settings, Plus, CheckSquare, MapPin, TrendingUp, TrendingDown, History, Utensils, Car, ShoppingBag, Camera } from "lucide-react"
 import { SpendingMapWidget } from "@/components/dashboard/SpendingMapWidget"
 import { FastExpenseWrapper } from "@/components/expenses/FastExpenseWrapper"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { AnimatedCurrency, AnimatedCounter } from "@/components/ui/AnimatedCounter"
+import { CreateTaskDialog } from "@/components/todo/CreateTaskDialog"
+import { SpendingPulse } from "@/components/dashboard/SpendingPulse"
 
 export type WidgetId =
     | "balance"
@@ -26,7 +28,8 @@ export type WidgetId =
     | "trips"
     | "ask-kharcho"
     | "quick-actions"
-    | "spending-map";
+    | "spending-map"
+    | "spending-pulse";
 
 export interface DashboardData {
     balance: number
@@ -39,6 +42,7 @@ export interface DashboardData {
     recentExpenses: any[]
     trips: any[]
     role: "ADMIN" | "MEMBER"
+    taskLists: any[]
 }
 
 // 1. Metrics Widget (Balance, Income, Spend)
@@ -114,6 +118,18 @@ export function TotalSpendWidget({ data }: { data: DashboardData }) {
             <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mb-16 pointer-events-none group-hover:bg-indigo-500/10 transition-colors duration-500" />
         </Card>
     )
+}
+
+// 1c. Spending Pulse Widget
+export function SpendingPulseWidget({ data }: { data: DashboardData }) {
+    // Assuming we can calculate daily total from recentExpenses or pass it in data
+    // For now, let's filter recent expenses for "today" on the client
+    const today = new Date().toDateString()
+    const dailyTotal = data.recentExpenses
+        .filter(e => new Date(e.date).toDateString() === today)
+        .reduce((sum, e) => sum + e.amount, 0)
+
+    return <SpendingPulse dailyTotal={dailyTotal} weeklyAverage={5000} /> // Mock avg
 }
 
 // 1d. Payout Widget (Admin Only) - HIDDEN
@@ -309,7 +325,7 @@ export function QuickActionsWidget({ data }: { data: DashboardData }) {
 
     const actions = [
         { label: "Scan Receipt", icon: Camera, path: "/expenses/new", color: "text-sky-400", bg: "bg-sky-400/10", border: 'border-sky-400/20' },
-        { label: "New Expense", icon: Plus, path: "/expenses/new", color: "text-emerald-400", bg: "bg-emerald-400/10", border: 'border-emerald-400/20' },
+        { label: "Add Task", icon: CheckSquare, path: "#", color: "text-emerald-400", bg: "bg-emerald-400/10", border: 'border-emerald-400/20' },
         { label: "New Trip", icon: MapPin, path: "/trips/new", color: "text-indigo-400", bg: "bg-indigo-400/10", border: 'border-indigo-400/20' },
         { label: "Settings", icon: Settings, path: "/settings", color: "text-slate-400", bg: "bg-slate-400/10", border: 'border-slate-400/20' },
     ]
@@ -319,12 +335,13 @@ export function QuickActionsWidget({ data }: { data: DashboardData }) {
             <h3 className="text-sm font-medium text-foreground mb-4">Quick Actions</h3>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 h-full">
                 {actions.map((action) => {
-                    const isExpenseAction = action.label === "Scan Receipt" || action.label === "New Expense"
+                    const isScanAction = action.label === "Scan Receipt"
+                    const isTaskAction = action.label === "Add Task"
 
                     const ActionButton = (
                         <div
                             className={`flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer transition-all border ${action.border} bg-card hover:bg-secondary/50 hover:border-primary/20 group h-full`}
-                            onClick={isExpenseAction ? undefined : () => router.push(action.path)}
+                            onClick={(isScanAction || isTaskAction) ? undefined : () => router.push(action.path)}
                         >
                             <div className={`p-3 rounded-full mb-3 ${action.bg} ${action.color} group-hover:scale-110 transition-transform`}>
                                 <action.icon className="h-6 w-6" />
@@ -333,9 +350,17 @@ export function QuickActionsWidget({ data }: { data: DashboardData }) {
                         </div>
                     )
 
-                    if (isExpenseAction) {
+                    if (isScanAction) {
                         return (
                             <FastExpenseWrapper key={action.label} trips={data.trips} trigger={ActionButton} />
+                        )
+                    }
+
+                    if (isTaskAction) {
+                        return (
+                            <CreateTaskDialog key={action.label} lists={data.taskLists}>
+                                {ActionButton}
+                            </CreateTaskDialog>
                         )
                     }
 
@@ -349,7 +374,7 @@ export function QuickActionsWidget({ data }: { data: DashboardData }) {
 
 // 8. Ask Kharcho AI Widget
 export function AskKharchoWidget({ data }: { data: DashboardData }) {
-    return <AskDataWidget />
+    return <AskSiaWidget />
 }
 
 // Registry mapping ID to Component
@@ -363,9 +388,10 @@ export const WIDGET_REGISTRY: Record<WidgetId, { component: React.FC<{ data: Das
     "approvals": { component: ApprovalsWidget, title: "Approvals", defaultSize: "col-span-1 md:col-span-2", mobileVisible: true }, // Essentials
     "cards": { component: () => null, title: "My Cards (Hidden)", defaultSize: "hidden" },
     "trips": { component: ActiveTripsWidget, title: "Active Trips", defaultSize: "col-span-1 md:col-span-4" },
-    "ask-kharcho": { component: AskKharchoWidget, title: "Ask Penny", defaultSize: "col-span-1 md:col-span-2 lg:col-span-3" },
+    "ask-kharcho": { component: AskSiaWidget, title: "Ask Sia", defaultSize: "col-span-1 md:col-span-2 lg:col-span-3" },
     "quick-actions": { component: QuickActionsWidget, title: "Quick Actions", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4", mobileVisible: true }, // Essentials
-    "spending-map": { component: SpendingMapWidget, title: "Spending Map", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4" }
+    "spending-map": { component: SpendingMapWidget, title: "Spending Map", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4" },
+    "spending-pulse": { component: SpendingPulseWidget, title: "Spending Pulse", defaultSize: "col-span-1 md:col-span-2", mobileVisible: true }
 }
 
 export const WIDGET_SIZES = [
@@ -383,6 +409,7 @@ export const DEFAULT_LAYOUT = [
     { id: "approvals", type: "approvals" },
     { id: "spending-chart", type: "spending-chart" },
     { id: "recent-expenses", type: "recent-expenses" },
+    { id: "spending-pulse", type: "spending-pulse" },
     { id: "spending-map", type: "spending-map" },
     { id: "trips", type: "trips" },
     { id: "ask-kharcho", type: "ask-kharcho" },

@@ -104,11 +104,7 @@ export function Header({ user, userRole = "MEMBER", canReconcile = false }: Head
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href="/settings/profile" className="cursor-pointer">
-                                    Profile
-                                </Link>
-                            </DropdownMenuItem>
+
                             <DropdownMenuItem asChild>
                                 <Link href="/settings/billing" className="cursor-pointer">
                                     Billing

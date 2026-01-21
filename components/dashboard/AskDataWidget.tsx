@@ -14,7 +14,7 @@ interface Message {
     content: string
 }
 
-export function AskDataWidget() {
+export function AskSiaWidget() {
     const [query, setQuery] = useState("")
     const [messages, setMessages] = useState<Message[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -54,7 +54,7 @@ export function AskDataWidget() {
         <div className="flex flex-col h-full bg-[#0B1020] rounded-xl border border-[#E9ECF7]/20 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-[#E9ECF7]/20 bg-[#141C3A]/50 flex items-center gap-2">
                 <div className="h-4 w-4 relative overflow-hidden">
-                    <Image src="/sia-mascot.png" alt="Sia" fill className="object-cover scale-125" />
+                    <Image src="/sia-mascot-new.png" alt="Sia" fill className="object-cover scale-125" />
                 </div>
                 <h3 className="font-semibold text-sm text-[#E9ECF7]">Ask Sia</h3>
             </div>
@@ -64,17 +64,17 @@ export function AskDataWidget() {
                     {messages.length === 0 && (
                         <div className="text-center text-[#E9ECF7]/70 text-sm py-8 space-y-2">
                             <div className="h-8 w-8 mx-auto relative opacity-50 overflow-hidden">
-                                <Image src="/sia-mascot.png" alt="Sia" fill className="object-cover scale-125" />
+                                <Image src="/sia-mascot-new.png" alt="Sia" fill className="object-cover scale-125" />
                             </div>
-                            <p>Ask me about your spending!</p>
-                            <p className="text-xs">"How much spent on Food?"</p>
+                            <p>I am your Senior Financial Assistant.</p>
+                            <p className="text-xs">"Add expense $50 for dinner"</p>
                         </div>
                     )}
                     {messages.map((m, i) => (
                         <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             {m.role === 'assistant' && (
                                 <div className="h-6 w-6 rounded-full bg-[#E9ECF7]/10 flex items-center justify-center shrink-0 mt-1 overflow-hidden relative">
-                                    <Image src="/sia-mascot.png" alt="Sia" fill className="object-cover p-0.5 scale-125" />
+                                    <Image src="/sia-mascot-new.png" alt="Sia" fill className="object-cover scale-150" />
                                 </div>
                             )}
                             <div className={`rounded-lg px-3 py-2 text-sm max-w-[80%] ${m.role === 'user'
@@ -92,7 +92,7 @@ export function AskDataWidget() {
                     ))}
                     {isLoading && (
                         <div className="flex items-center gap-2 text-[#E9ECF7]/60 text-xs ml-8">
-                            <span className="animate-pulse">Thinking...</span>
+                            <span className="animate-pulse">Sia is thinking...</span>
                         </div>
                     )}
                 </div>
@@ -102,7 +102,7 @@ export function AskDataWidget() {
                 <Input
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    placeholder="Ask a question..."
+                    placeholder="Ask Sia or add expense..."
                     className="flex-1 bg-[#1F2A5A] border-[#E9ECF7]/20 text-[#E9ECF7] placeholder:text-[#E9ECF7]/50"
                     disabled={isLoading}
                     suppressHydrationWarning

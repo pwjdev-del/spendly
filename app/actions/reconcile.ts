@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { parseCSV, findExactAmountMatches, applyMerchantMapping, type ParsedTransaction } from "@/lib/reconciliation/csv-parser"
+import { weightedMatching } from "@/lib/reconciliation/matching"
 
 // Types for the Reconciliation Report
 export interface Transaction {
@@ -187,8 +188,23 @@ export async function reconcileStatements(formData: FormData): Promise<Reconcili
                 return { error: "No transactions found in CSV. Check the file format." }
             }
 
-            // Run deterministic matching
-            const { matched, unmatched } = findExactAmountMatches(bankTransactions, existingExpenses);
+            // Run matching based on preference
+            let matched, unmatched;
+
+            const userPrefs = JSON.parse(user.preferences || "{}");
+            const useSmartRecon = userPrefs.enableSmartReconciliation === true;
+
+            if (useSmartRecon) {
+                console.log("Using SMART Reconciliation (Weighted Matching)");
+                const result = weightedMatching(bankTransactions, existingExpenses);
+                matched = result.matched;
+                unmatched = result.unmatched;
+            } else {
+                console.log("Using STANDARD Reconciliation (Exact Amount)");
+                const result = findExactAmountMatches(bankTransactions, existingExpenses);
+                matched = result.matched;
+                unmatched = result.unmatched;
+            }
 
             // Categorize by confidence
             const highConfidence: Transaction[] = [];

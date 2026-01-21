@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Copy, RefreshCw, Users, ShieldPlus } from "lucide-react"
+import { Copy, RefreshCw, Users, ShieldPlus, Building2 } from "lucide-react"
 import { InviteCodeDisplay } from "./invite-code-display"
 import { AdminInviteGenerator } from "./admin-invite-generator"
 import { PromoteAdminForm } from "./promote-admin-form"
 import { DemoteAdminButton } from "./demote-admin-button"
 import { UserRoleSelector } from "./user-role-selector"
+import { OrganizationSettings } from "@/components/settings/OrganizationSettings"
 
 import { redirect } from "next/navigation"
 
@@ -23,20 +24,23 @@ export default async function FamilySettingsPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Family Management</h1>
-                    <p className="text-muted-foreground">Manage your family group: {organizationName}</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Organization & Family</h1>
+                    <p className="text-muted-foreground">Manage your organization details and family members.</p>
                 </div>
             </div>
+
+            {/* Organization Name Settings */}
+            <OrganizationSettings initialName={organizationName || "Your Space"} />
 
             {currentUserRole === 'ADMIN' && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Users className="h-5 w-5" />
-                            Invite Family Members
+                            Invite Members
                         </CardTitle>
                         <CardDescription>
-                            Share this code with your family members. They can enter it when signing up to join your family.
+                            Share this code with your family members. They can enter it when signing up to join.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

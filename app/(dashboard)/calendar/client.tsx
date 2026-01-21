@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { format } from "date-fns"
+import { format, addMonths, subMonths } from "date-fns"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus } from "lucide-react"
@@ -30,11 +30,45 @@ export interface RecurringExpense {
     frequency: string
 }
 
-
-
-export function CalendarClient({ expenses, recurringExpenses }: { expenses: Expense[], recurringExpenses: RecurringExpense[] }) {
+export function CalendarClient({ expenses, recurringExpenses, balance = 0, enableTimeTravel = false }: { expenses: Expense[], recurringExpenses: RecurringExpense[], balance?: number, enableTimeTravel?: boolean }) {
     const [date, setDate] = useState<Date | undefined>(new Date())
     const [viewDate, setViewDate] = useState<Date>(new Date())
+    const [direction, setDirection] = useState(0)
+
+    const onMonthChange = (newDate: Date) => {
+        setDirection(newDate > viewDate ? 1 : -1)
+        setViewDate(newDate)
+    }
+
+    const handleSwipe = (_: any, info: any) => {
+        const swipeThreshold = 50;
+        if (info.offset.x < -swipeThreshold) {
+            onMonthChange(addMonths(viewDate, 1))
+        } else if (info.offset.x > swipeThreshold) {
+            onMonthChange(subMonths(viewDate, 1))
+        }
+    }
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? 50 : -50,
+            opacity: 0,
+            scale: 0.95,
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            scale: 1,
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: direction < 0 ? 50 : -50, // Inverse exit direction
+            opacity: 0,
+            scale: 0.95,
+            position: "absolute" as const, // Fix layout shift
+        })
+    };
 
     // Helper to adjust date for timezone offset
     const normalizeDate = (dateDisplay: Date | string) => {
@@ -105,8 +139,65 @@ export function CalendarClient({ expenses, recurringExpenses }: { expenses: Expe
         nextDueDate: normalizeDate(e.nextDueDate)
     }));
 
-    // --- PROJECTION LOGIC ---
-    // Calculate projected occurrences for the current view month
+    // --- PROJECTION LOGIC: TIME TRAVEL ENGINE ---
+    // Start with the user's current actual balance
+    // We want to project this into the future
+    const dailyForecast: Record<string, number> = {};
+    let runningBalance = balance; // Start with current wallet balance
+
+    // Let's simulate 365 days into the future to cover most views
+    const forecastMap = new Map<string, number>();
+    const simulationStart = new Date();
+    simulationStart.setHours(0, 0, 0, 0);
+
+    const dangerDates: Date[] = [];
+    const warningDates: Date[] = [];
+
+    // Only run projection if Time Travel is enabled
+    if (enableTimeTravel) {
+        // Sort recurring expenses by day of month for easier lookup?
+        // Actually, iterating days is safer.
+        for (let d = 0; d < 365; d++) {
+            const currentDate = new Date(simulationStart);
+            currentDate.setDate(simulationStart.getDate() + d);
+            const dateStr = currentDate.toDateString();
+
+            // Check for recurring expenses due on this date
+            // (In a real app, we'd handle One-Time Future Expenses too, but here we only have Recurring schema available for future)
+            const billsDue = normalizedRecurring.filter(r => {
+                // Check if this date matches the recurring rule
+                // Simplified: Just matching day of month for MONTHLY
+                if (r.frequency.toUpperCase() === 'MONTHLY') {
+                    return r.nextDueDate.getDate() === currentDate.getDate();
+                }
+                return false;
+            });
+
+            const dailyBillTotal = billsDue.reduce((sum, b) => sum + b.amount, 0);
+
+            // Subtract from running balance
+            runningBalance -= dailyBillTotal;
+
+            // Store result
+            forecastMap.set(dateStr, runningBalance);
+
+            // Populate Visual State Arrays
+            if (runningBalance < 0) {
+                dangerDates.push(new Date(currentDate));
+            } else if (runningBalance < 50000) { // Warning under $500.00
+                warningDates.push(new Date(currentDate));
+            }
+        }
+    }
+
+    const getDailyForecast = (d: Date) => {
+        // Only show forecast for Today and Future
+        if (d < simulationStart) return null;
+        return forecastMap.get(d.toDateString()) ?? null;
+    };
+
+    // --- RESTORED LOGIC ---
+    // Calculate projected occurrences for the current view month (For Stats at top)
     const projectedOccurrences: { date: Date, amount: number }[] = [];
 
     normalizedRecurring.forEach(r => {
@@ -172,9 +263,7 @@ export function CalendarClient({ expenses, recurringExpenses }: { expenses: Expe
                 transition={{ duration: 0.5 }}
                 className="flex-none w-full lg:w-auto lg:min-w-[400px]"
             >
-                <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6 space-y-6">
-
-
+                <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6 space-y-6 relative z-10">
                     <div>
                         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">
                             {format(viewDate, "MMMM yyyy")}
@@ -208,36 +297,68 @@ export function CalendarClient({ expenses, recurringExpenses }: { expenses: Expe
                         </div>
                     </div>
 
-                    <div className="flex justify-center">
-                        <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            onMonthChange={setViewDate}
-                            className="p-0 bg-transparent border-none shadow-none"
-                            modifiers={{
-                                high: highDates,
-                                medium: mediumDates,
-                                low: lowDates,
-                                projected: projectedDates,
-                                streak: streakDates
-                            }}
-                            modifiersClassNames={{
-                                high: "before:content-[''] before:absolute before:inset-1 before:rounded-full before:bg-rose-500/20 after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-rose-500 after:rounded-full",
-                                medium: "before:content-[''] before:absolute before:inset-1 before:rounded-full before:bg-amber-500/20 after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-amber-500 after:rounded-full",
-                                low: "before:content-[''] before:absolute before:inset-1 before:rounded-full before:bg-emerald-500/20 after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-emerald-500 after:rounded-full",
-                                projected: "border-2 border-dashed border-zinc-300 dark:border-zinc-700 opacity-80",
-                                streak: "after:content-['✨'] after:absolute after:-top-1 after:-right-1 after:text-[10px] after:animate-pulse"
-                            }}
-                            classNames={{
-                                day: cn(
-                                    "h-10 w-10 p-0 font-normal aria-selected:opacity-100 rounded-full transition-all duration-300 relative",
-                                    "hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:scale-110",
-                                ),
-                                day_selected: "bg-zinc-900 text-zinc-50 hover:bg-zinc-900 hover:text-zinc-50 focus:bg-zinc-900 focus:text-zinc-50 shadow-lg scale-105",
-                                day_today: "bg-zinc-100 text-zinc-900 font-bold ring-1 ring-zinc-300",
-                            }}
-                        />
+                    <div className="flex justify-center relative overflow-hidden min-h-[350px]">
+                        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+                            <motion.div
+                                key={viewDate.toISOString()}
+                                custom={direction}
+                                variants={variants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    x: { type: "spring", stiffness: 300, damping: 30 },
+                                    opacity: { duration: 0.2 }
+                                }}
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                dragElastic={0.2}
+                                onDragEnd={handleSwipe}
+                                className="absolute inset-0 flex justify-center items-start"
+                            >
+                                <Calendar
+                                    mode="single"
+                                    month={viewDate} // Controlled month
+                                    selected={date}
+                                    onSelect={setDate}
+                                    onMonthChange={onMonthChange}
+                                    className="p-0 bg-transparent border-none shadow-none"
+                                    components={{
+                                        // Removed Custom DayContent to fix type error; using modifiers instead
+                                    }}
+                                    modifiers={{
+                                        high: highDates,
+                                        medium: mediumDates,
+                                        low: lowDates,
+                                        projected: projectedDates,
+                                        streak: streakDates,
+                                        danger: dangerDates,
+                                        warning: warningDates
+                                    }}
+                                    modifiersClassNames={{
+                                        high: "before:content-[''] before:absolute before:inset-1 before:rounded-full before:bg-rose-500/20 before:z-[-1] after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-rose-500 after:rounded-full after:z-[-1]",
+                                        medium: "before:content-[''] before:absolute before:inset-1 before:rounded-full before:bg-amber-500/20 before:z-[-1] after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-amber-500 after:rounded-full after:z-[-1]",
+                                        low: "before:content-[''] before:absolute before:inset-1 before:rounded-full before:bg-emerald-500/20 before:z-[-1] after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-emerald-500 after:rounded-full after:z-[-1]",
+                                        projected: "border-2 border-dashed border-zinc-300 dark:border-zinc-700 opacity-80",
+                                        danger: "bg-red-500/20 text-red-600 font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] border border-red-500/30",
+                                        warning: "bg-amber-500/10 text-amber-600 font-bold border border-amber-500/30",
+                                        streak: ""
+                                    }}
+                                    classNames={{
+                                        day: cn(
+                                            "h-10 w-10 p-0 font-normal aria-selected:opacity-100 rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-10",
+                                            "hover:bg-cyan-500/10 dark:hover:bg-cyan-400/10 hover:scale-110",
+                                            "active:scale-75 active:transition-transform active:duration-100", // Jelly poke effect
+                                            "focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-0",
+                                            "data-[selected]:bg-cyan-500/20 data-[selected]:backdrop-blur-md data-[selected]:border data-[selected]:border-cyan-500/30"
+                                        ),
+                                        day_selected: "bg-cyan-500 text-white hover:bg-cyan-600 shadow-[0_0_20px_rgba(6,182,212,0.5)] scale-110 border-transparent font-bold z-20",
+                                        day_today: "bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 text-foreground font-semibold",
+                                        head_cell: "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem]",
+                                    }}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
 
                     {/* Legend */}

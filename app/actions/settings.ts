@@ -45,3 +45,42 @@ export async function generateAdminInvite() {
         return { error: "Failed to generate invite code. Please try again." }
     }
 }
+
+export async function updateUserPreferences(preferences: any) {
+    const session = await auth()
+
+    if (!session?.user?.email) {
+        return { error: "Unauthorized" }
+    }
+
+    try {
+        // Fetch current preferences first to merge
+        const currentUser = await prisma.user.findUnique({
+            where: { email: session.user.email },
+            select: { preferences: true }
+        })
+
+        let currentPrefs = {}
+        if (currentUser?.preferences) {
+            try {
+                currentPrefs = JSON.parse(currentUser.preferences)
+            } catch (e) {
+                // Ignore parse error, start fresh
+            }
+        }
+
+        const newPrefs = { ...currentPrefs, ...preferences }
+
+        await prisma.user.update({
+            where: { email: session.user.email },
+            data: {
+                preferences: JSON.stringify(newPrefs)
+            }
+        })
+
+        return { success: true }
+    } catch (e) {
+        console.error("Failed to update preferences:", e)
+        return { error: "Failed to update settings" }
+    }
+}
