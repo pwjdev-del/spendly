@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 
 const prismaClientSingleton = () => {
+    console.log("Initializing Prisma Client...")
     return new PrismaClient().$extends({
         query: {
             expense: {
