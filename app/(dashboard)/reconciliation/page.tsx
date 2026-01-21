@@ -18,5 +18,12 @@ export default async function ReconciliationPage() {
 
     if (!user || (!hasRoleAccess && !hasDirectAccess)) redirect("/")
 
-    return <ReconciliationPageClient />
+    // Feature Flags from Preferences
+    let enableSubscriptionManager = false
+    try {
+        const prefs = JSON.parse(user.preferences || "{}")
+        enableSubscriptionManager = prefs.enableSubscriptionManager || false
+    } catch (e) { }
+
+    return <ReconciliationPageClient initialSubscriptionEnabled={enableSubscriptionManager} />
 }

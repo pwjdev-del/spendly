@@ -12,7 +12,11 @@ import { reconcileStatements, confirmReconciliation, getReconciliationHistory, d
 import { ExpenseLinkDialog } from "./ExpenseLinkDialog"
 import { SubscriptionManager } from "@/components/reconciliation/SubscriptionManager"
 
-export default function ReconciliationPageClient() {
+interface ReconciliationPageClientProps {
+    initialSubscriptionEnabled: boolean
+}
+
+export default function ReconciliationPageClient({ initialSubscriptionEnabled }: ReconciliationPageClientProps) {
     const [isDragging, setIsDragging] = useState(false)
     const [file, setFile] = useState<File | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
@@ -30,7 +34,7 @@ export default function ReconciliationPageClient() {
 
     // NEW State for Subscription Manager Toggle
     const [showSubscriptionManager, setShowSubscriptionManager] = useState(false)
-    const [isSubscriptionFeatureEnabled, setIsSubscriptionFeatureEnabled] = useState(false)
+    const [isSubscriptionFeatureEnabled, setIsSubscriptionFeatureEnabled] = useState(initialSubscriptionEnabled)
 
     // Fetch History on Load
     useEffect(() => {

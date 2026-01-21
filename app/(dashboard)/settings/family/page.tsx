@@ -13,12 +13,17 @@ import { OrganizationSettings } from "@/components/settings/OrganizationSettings
 
 import { redirect } from "next/navigation"
 
+import { PendingMembersList } from "./pending-members-list"
+
 export default async function FamilySettingsPage() {
-    const { organizationName, inviteCode, members, currentUserRole, isCurrentUserOwner, currentUserId } = await getFamilyDetails()
+    const { organizationName, inviteCode, inviteCodeExpiresAt, members, currentUserRole, isCurrentUserOwner, currentUserId } = await getFamilyDetails()
 
     if (currentUserRole !== 'ADMIN') {
         redirect("/settings")
     }
+
+    const activeMembers = members.filter(m => m.status === 'ACTIVE' || !m.status) // Handle legacy null status as active
+    const pendingMembers = members.filter(m => m.status === 'PENDING')
 
     return (
         <div className="space-y-6">
@@ -44,10 +49,12 @@ export default async function FamilySettingsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <InviteCodeDisplay initialCode={inviteCode} />
+                        <InviteCodeDisplay initialCode={inviteCode} expiresAt={inviteCodeExpiresAt} />
                     </CardContent>
                 </Card>
             )}
+
+            <PendingMembersList members={pendingMembers} />
 
             {currentUserRole === 'ADMIN' && (
                 <Card className="border-yellow-500/20 bg-yellow-500/5 dark:bg-yellow-500/10 dark:border-yellow-500/10">
@@ -88,7 +95,7 @@ export default async function FamilySettingsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {members.map((member) => (
+                            {activeMembers.map((member) => (
                                 <TableRow key={member.id}>
                                     <TableCell className="font-medium">{member.name}</TableCell>
                                     <TableCell>{member.email}</TableCell>
