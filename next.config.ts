@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: 'standalone',
   allowedDevOrigins: ['http://10.133.20.233:3001'],
   devIndicators: {
     // @ts-expect-error - appIsrStatus is valid in newer Next.js versions but missing from types

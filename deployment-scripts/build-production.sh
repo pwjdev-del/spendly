@@ -1,93 +1,33 @@
 #!/bin/bash
-#
-# Build Production Deployment Package for Windows Server
-# Run this script on your Mac before deploying to Windows
-#
 
-set -e  # Exit on error
+echo "🚀 Starting production build for AWS Elastic Beanstalk..."
 
-echo "=========================================="
-echo "Spendly - Windows Production Build Script"
-echo "=========================================="
-echo ""
+# 1. Clean previous build
+echo "🧹 Cleaning previous build..."
+rm -rf .next
+rm -rf standalone
+rm -f spendly-deploy.zip
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
-
-# Project directory
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR="${PROJECT_DIR}/build-production"
-TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-OUTPUT_FILE="spendly-production-${TIMESTAMP}.tar.gz"
-
-echo "Project Directory: ${PROJECT_DIR}"
-echo "Build Directory: ${BUILD_DIR}"
-echo ""
-
-# Step 1: Clean previous builds
-echo -e "${YELLOW}[1/6]${NC} Cleaning previous builds..."
-rm -rf "${BUILD_DIR}"
-mkdir -p "${BUILD_DIR}"
-
-# Step 2: Install dependencies
-echo -e "${YELLOW}[2/6]${NC} Installing production dependencies..."
-cd "${PROJECT_DIR}"
-npm install --production=false
-
-# Step 3: Build Next.js application
-echo -e "${YELLOW}[3/6]${NC} Building Next.js application..."
+# 2. Build the app
+echo "🏗️  Building Next.js app..."
+npm install
 npm run build
 
-if [ ! -d ".next" ]; then
-    echo -e "${RED}ERROR:${NC} Build failed - .next directory not found"
-    exit 1
-fi
+# 3. Prepare standalone directory
+echo "📦 Preparing deployment package..."
+# 'standalone' folder is created by Next.js in .next/standalone
+# We need to copy public/ and static/ assets to it for it to work correctly
 
-echo -e "${GREEN}✓${NC} Build successful"
+mkdir -p .next/standalone/public
+mkdir -p .next/standalone/.next/static
 
-# Step 4: Copy necessary files to build directory
-echo -e "${YELLOW}[4/6]${NC} Copying files to build directory..."
-cp -r .next "${BUILD_DIR}/"
-cp -r public "${BUILD_DIR}/"
-cp -r prisma "${BUILD_DIR}/"
-cp package.json "${BUILD_DIR}/"
-cp package-lock.json "${BUILD_DIR}/"
-cp next.config.ts "${BUILD_DIR}/"
-cp web.config "${BUILD_DIR}/"
-cp ecosystem.config.js "${BUILD_DIR}/"
-cp .env.production.template "${BUILD_DIR}/.env.production"
-cp DEPLOYMENT_WINDOWS.md "${BUILD_DIR}/"
+cp -r public/* .next/standalone/public/
+cp -r .next/static/* .next/standalone/.next/static/
 
-# Copy node_modules (production only)
-echo -e "${YELLOW}[5/6]${NC} Installing production-only node_modules..."
-cd "${BUILD_DIR}"
-npm install --production --legacy-peer-deps
+# 4. Create zip file
+echo "🤐 Zipping payload..."
+cd .next/standalone
+zip -r ../../spendly-deploy.zip .
 
-# Step 5: Create deployment archive
-echo -e "${YELLOW}[6/6]${NC} Creating deployment archive..."
-cd "${PROJECT_DIR}"
-tar -czf "${OUTPUT_FILE}" -C "${BUILD_DIR}" .
-
-FILE_SIZE=$(du -h "${OUTPUT_FILE}" | cut -f1)
-echo""
-echo -e "${GREEN}=========================================="
-echo -e "✓ Production Build Complete!"
-echo -e "==========================================${NC}"
-echo ""
-echo "Deployment Package: ${OUTPUT_FILE}"
-echo "Package Size: ${FILE_SIZE}"
-echo ""
-echo "Next Steps:"
-echo "1. Transfer ${OUTPUT_FILE} to Windows Server"
-echo "2. Extract to C:\\inetpub\\wwwroot\\spendly"
-echo "3. Follow instructions in DEPLOYMENT_WINDOWS.md"
-echo ""
-
-# Cleanup
-echo "Cleaning up build directory..."
-rm -rf "${BUILD_DIR}"
-
-echo -e "${GREEN}Done!${NC}"
+echo "✅ SUCCESS! Deployment package created: spendly-deploy.zip"
+echo "👉 Upload this file to AWS Elastic Beanstalk."

@@ -49,3 +49,4 @@ deployment-scripts/*.log
 .env.production
 /logs
 pm2-*.log
+spendly-deploy.zip
