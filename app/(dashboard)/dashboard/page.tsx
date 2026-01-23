@@ -65,9 +65,8 @@ export default async function DashboardPage() {
 
 
 
-  // WORKAROUND: Raw SQL to bypass "invalid characters" error on User table
-  const users: any[] = await prisma.$queryRaw`SELECT * FROM User WHERE email = ${session.user.email} LIMIT 1`;
-  const user = users[0];
+  // Reverted workaround: Standard Prisma query matches auth.ts behavior
+  const user = await prisma.user.findFirst({ where: { email: session.user.email } });
 
   if (!user) redirect("/login")
 
