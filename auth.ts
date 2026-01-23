@@ -66,18 +66,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     ],
     callbacks: {
         async jwt({ token, user, account }) {
-            // Fingerprinting
-            let currentHash = "unknown";
-            try {
-                const headersList = await headers();
-                const userAgent = headersList.get("user-agent") || "unknown";
-                const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
-                const { createHash } = await import("crypto");
-                currentHash = createHash("sha256").update(`${userAgent}|${ip.split(',')[0]}`).digest("hex");
-            } catch (e) {
-                console.warn("Could not fetch headers for fingerprinting:", e);
-            }
-
             if (user) {
                 // Initial Sign In
                 token.id = user.id;
@@ -89,17 +77,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 token.canReconcile = user.canReconcile;
                 // @ts-ignore
                 token.picture = user.avatarUrl || user.image;
-                token.deviceHash = currentHash; // Bind session to device
-            } else {
-                // Subsequent checks
-                if (token.deviceHash && token.deviceHash !== currentHash) {
-                    // Session Fixation / Hijack attempt detected
-                    console.warn(`[Security] Session hijacked. Token Hash: ${token.deviceHash}, Current Hash: ${currentHash}`);
-                    // Return null or throw to invalidate
-                    // In NextAuth v5, returning null in jwt callback might cause issues or just empty token.
-                    // We will invalidate by returning an empty object or null.
-                    return {};
-                }
             }
             return token;
         },
