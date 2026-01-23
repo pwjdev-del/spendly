@@ -21,6 +21,7 @@ async function getUser(email: string) {
 }
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
+    trustHost: true,
     debug: true,
     ...authConfig,
     adapter: PrismaAdapter(prisma),
