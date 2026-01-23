@@ -155,7 +155,7 @@ Password Length: ${password?.length}
             fs.appendFileSync(logPath, logData);
         } catch (e) { }
 
-        return "An error occurred during registration"
+        return `Registration Error: ${error.message}`
     }
 }
 
