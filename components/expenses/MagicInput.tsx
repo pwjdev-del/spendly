@@ -97,9 +97,9 @@ export function MagicInput() {
 
             const result = await createExpense(null, formData)
 
-            if (result?.error) {
-                toast.error(result.error)
-            } else if (result?.status === "DUPLICATE") {
+            if ((result as any)?.error) {
+                toast.error((result as any).error)
+            } else if ((result as any)?.status === "DUPLICATE") {
                 toast.warning("Duplicate detected. Please use the full form to resolve.")
                 // Ideally we'd show a dialog here, but for MVP we might just clear or redirect
             } else {

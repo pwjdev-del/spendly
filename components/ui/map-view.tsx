@@ -5,16 +5,24 @@ import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { MapPin } from "lucide-react"
 
-// Custom marker matching Stitch "Cyan/Teal" theme
-const createCustomIcon = () => L.divIcon({
-    className: "bg-transparent border-none",
-    html: `<div class="w-5 h-5 bg-[#2DD4BF] rounded-full border-2 border-white shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-            <div class="w-1.5 h-1.5 bg-[#0A1628] rounded-full"></div>
-           </div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10], // Center it
-    popupAnchor: [0, -12]
-})
+// Custom marker with dynamic color
+const createCustomIcon = (status: string = "PENDING") => {
+    let color = "#F59E0B"; // Default Pending (Orange)
+
+    if (status === "APPROVED") color = "#2DD4BF"; // Teal
+    else if (status === "REJECTED") color = "#EF4444"; // Red
+    else if (status === "RECONCILED") color = "#3B82F6"; // Blue
+
+    return L.divIcon({
+        className: "bg-transparent border-none",
+        html: `<div class="w-5 h-5 rounded-full border-2 border-white shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center" style="background-color: ${color};">
+                <div class="w-1.5 h-1.5 bg-[#0A1628] rounded-full"></div>
+               </div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10], // Center it
+        popupAnchor: [0, -12]
+    })
+}
 
 interface MapViewProps {
     expenses: Array<{
@@ -25,6 +33,7 @@ interface MapViewProps {
         latitude?: number | null
         longitude?: number | null
         category?: string
+        status?: string
     }>
 }
 
@@ -54,9 +63,9 @@ export default function MapView({ expenses }: MapViewProps) {
         })
         mapInstanceRef.current = map
 
-        // 3. Add Tile Layer (Esri World Imagery - Satellite)
-        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-            attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+        // 3. Add Tile Layer (CartoDB Voyager - Clean, Premium look)
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 19
         }).addTo(map)
 
@@ -66,13 +75,21 @@ export default function MapView({ expenses }: MapViewProps) {
 
             validExpenses.forEach(expense => {
                 if (expense.latitude && expense.longitude) {
-                    const marker = L.marker([expense.latitude, expense.longitude], { icon: createCustomIcon() })
+                    const marker = L.marker([expense.latitude, expense.longitude], {
+                        icon: createCustomIcon(expense.status)
+                    })
                         .addTo(map)
                         .bindPopup(`
-                            <div class="p-1 font-sans">
-                                <div class="font-bold text-sm">${expense.merchant}</div>
-                                <div className="text-lg font-bold text-primary">$${(expense.amount / 100).toFixed(2)}</div>
-                                <div class="text-xs text-muted-foreground">${expense.category || ''}</div>
+                            <div class="p-1 font-sans min-w-[150px]">
+                                <div class="font-bold text-sm mb-1">${expense.merchant}</div>
+                                <div class="flex items-center justify-between gap-2">
+                                     <span class="text-xs font-medium px-1.5 py-0.5 rounded-full ${expense.status === 'APPROVED' ? 'bg-teal-100 text-teal-700' :
+                                expense.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                    'bg-amber-100 text-amber-700'
+                            }">${expense.status || 'PENDING'}</span>
+                                     <span class="text-sm font-bold">$${(expense.amount / 100).toFixed(2)}</span>
+                                </div>
+                                <div class="text-xs text-muted-foreground mt-1">${expense.category || ''}</div>
                                 ${expense.date ? `<div class="text-xs text-muted-foreground border-t mt-1 pt-1">${new Date(expense.date).toLocaleDateString()}</div>` : ''}
                             </div>
                         `)

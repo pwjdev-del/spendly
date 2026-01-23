@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -36,6 +36,11 @@ model Organization {
   savedSearches   SavedSearch[]
   discussions     Discussion[]
   todoItems       TodoItem[]
+  
+  // Innovation Features
+  subscriptionMonitoring Boolean @default(true)
+  smartLimits     SmartLimit[]
+  subscriptions   Subscription[]
 }
 
 model User {
@@ -66,7 +71,7 @@ model User {
   recurringExpenses RecurringExpense[]
 
   payoutDay      Int?          @default(15) // Default to 15th
-  monthlyLimit   Float?        @default(5000.0)
+  monthlyLimit   Int?        @default(500000) // Stored in Cents (Default $5000.00)
 
   // Profile Fields
   bio            String?
@@ -95,6 +100,11 @@ model User {
   tasks         Task[]
   taskLists     TaskList[]
   tags          Tag[]
+  
+  // Innovation Features
+  rewardsBalance  Int           @default(0) // Points/Cents
+  gamificationEnabled Boolean   @default(true)
+  subscriptions   Subscription[]
 }
 
 model Account {
@@ -118,7 +128,7 @@ model Account {
 
 model Income {
   id        String   @id @default(cuid())
-  amount    Float
+  amount    Int // Stored in Cents
   source    String   @default("Manual")
   date      DateTime @default(now())
   userId    String
@@ -160,6 +170,16 @@ model Expense {
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  
+  // Innovation Features
+  isPerDiem      Boolean  @default(false)
+  autoApproved   Boolean  @default(false)
+  
+  // Audit Trail
+  approvedBy     String?  
+  approvedAt     DateTime?
+  rejectedBy     String?  
+  rejectedAt     DateTime?
 
   // Filtering indexes for power search
   @@index([status])
@@ -174,8 +194,8 @@ model Card {
   id             String @id @default(cuid())
   nickname       String? // e.g. "AWS Subscription"
   last4          String
-  limit          Float
-  spent          Float @default(0.0)
+  limit          Int // Stored in Cents
+  spent          Int @default(0) // Stored in Cents
   
   userId         String
   user           User @relation(fields: [userId], references: [id])
@@ -194,7 +214,7 @@ model Trip {
   description     String?
   startDate       DateTime
   endDate         DateTime?
-  budget          Float?
+  budget          Int? // Stored in Cents
   status          String    @default("PLANNING") // PLANNING, ACTIVE, COMPLETED
   
   expenses        Expense[]
@@ -220,7 +240,7 @@ model Trip {
 model Transaction {
   id          String   @id @default(cuid())
   date        DateTime
-  amount      Float    // Positive for deposit, Negative for charge/withdrawal
+  amount      Int    // Stored in Cents. Positive for deposit, Negative for charge/withdrawal
   description String
   source      String   // BANK, CREDIT_CARD, CASH_ADVANCE
   status      String   @default("PENDING") // PENDING, RECONCILED
@@ -293,7 +313,7 @@ model TripDocument {
 model RecurringExpense {
   id             String   @id @default(cuid())
   merchant       String
-  amount         Float
+  amount         Int // Stored in Cents
   currency       String   @default("USD")
   category       String
   frequency      String   @default("MONTHLY") // WEEKLY, MONTHLY, YEARLY
@@ -593,7 +613,58 @@ model Task {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  @@index([ownerId])
+
   @@index([listId])
   @@index([dueDate])
+}
+
+// ============================================================
+// INNOVATION FEATURES (Blue Ocean)
+// ============================================================
+
+model SmartLimit {
+  id             String   @id @default(cuid())
+  name           String   // e.g., "London Per Diem"
+  amount         Int      // Daily limit in cents
+  currency       String   @default("USD")
+  
+  category       String?  // If null, applies to all
+  location       String?  // e.g., "London, UK"
+  
+  isEnabled      Boolean  @default(true)
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([organizationId])
+}
+
+model Subscription {
+  id             String   @id @default(cuid())
+  name           String   // Service name (e.g. "Figma")
+  amount         Int      // Recurring amount in cents
+  currency       String   @default("USD")
+  frequency      String   // MONTHLY, YEARLY
+  
+  status         String   @default("ACTIVE") // ACTIVE, CANCELLED, FLAGGED
+  
+  lastPaymentDate DateTime?
+  nextPaymentDate DateTime?
+  
+  detectedBy     String   @default("MANUAL") // MANUAL, AI_AUDITOR
+  
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([organizationId])
+  @@index([userId])
 }

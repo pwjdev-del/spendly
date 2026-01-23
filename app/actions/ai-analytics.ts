@@ -175,7 +175,9 @@ User Query: "${query}"
 3. BUDGET TRACKING - Compare current spending to monthly budget limit
 4. PREDICTIVE SPENDING - Estimate future spending based on historical patterns
 5. EXPENSE CREATION - Help users add new expenses via natural language
-6. TASK CREATION - Help users add to-do items/tasks
+7. EXPENSE CREATION - Help users add new expenses via natural language
+8. TASK CREATION - Help users add to-do items/tasks
+9. SUBSCRIPTION MANAGEMENT - Cancel subscriptions upon request
 
 === CONTEXT DATA ===
 
@@ -210,6 +212,10 @@ Average Monthly Spending: $${avgMonthlySpending.toFixed(2)}
 8. If asked to CREATE a task/todo, respond with ONLY this format:
     [ACTION:CREATE_TASK]{"title":"TITLE","priority":X}
     Where title is the task description. Priority is optional (1=Critical, 2=High, 3=Normal, 4=None). Default to 4.
+
+9. If asked to CANCEL a subscription, respond with ONLY this format:
+    [ACTION:CANCEL_SUBSCRIPTION]{"subscriptionName":"NAME"}
+    Where subscriptionName is the name of the service (e.g. Netflix, Figma).
 
 Answer:
 `
@@ -301,5 +307,38 @@ export async function createTaskFromSia(params: {
     } catch (error: any) {
         console.error("CreateTaskFromSia Error:", error)
         return { error: "Failed to create task" }
+    }
+}
+
+// Action to cancel subscription from Sia chat
+export async function cancelSubscriptionFromSia(params: {
+    subscriptionName: string
+}) {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+
+    try {
+        // Find subscription by fuzzy name match
+        const subscription = await prisma.subscription.findFirst({
+            where: {
+                userId: session.user.id,
+                name: { contains: params.subscriptionName }
+            }
+        })
+
+        if (!subscription) {
+            return { error: `Subscription '${params.subscriptionName}' not found.` }
+        }
+
+        await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: { status: "CANCELLED" }
+        })
+
+        revalidatePath("/")
+        return { success: true, message: `Cancelled subscription: ${subscription.name}` }
+    } catch (error: any) {
+        console.error("CancelSubscriptionFromSia Error:", error)
+        return { error: "Failed to cancel subscription" }
     }
 }

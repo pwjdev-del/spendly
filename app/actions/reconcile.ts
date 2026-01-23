@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { parseCSV, findExactAmountMatches, applyMerchantMapping, type ParsedTransaction } from "@/lib/reconciliation/csv-parser"
 import { weightedMatching } from "@/lib/reconciliation/matching"
+import { sanitizeCSVValue } from "@/lib/csv-sanitizer"
 
 // Types for the Reconciliation Report
 export interface Transaction {
@@ -213,10 +214,10 @@ export async function reconcileStatements(formData: FormData): Promise<Reconcili
             for (const m of matched) {
                 const tx: Transaction = {
                     date: m.bank.date,
-                    merchant: m.bank.description,
+                    merchant: sanitizeCSVValue(m.bank.description),
                     amount: m.bank.amount,
                     status: m.confidence >= HIGH_CONFIDENCE_THRESHOLD ? 'MATCHED' : 'NEEDS_REVIEW',
-                    notes: `Matched to ${m.expense.merchant} (${Math.round(m.confidence * 100)}% confidence)`,
+                    notes: `Matched to ${sanitizeCSVValue(m.expense.merchant)} (${Math.round(m.confidence * 100)}% confidence)`,
                     confidence: m.confidence,
                     expenseId: m.expense.id,
                     rawBankName: m.bank.rawDescription

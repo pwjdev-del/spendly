@@ -118,7 +118,7 @@ export function HeroSection() {
             {/* Main Hero Content */}
             <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 pt-24 pb-20">
                 <motion.div
-                    variants={staggerContainer}
+                    variants={staggerContainer as any}
                     initial="initial"
                     animate="animate"
                     className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center"
@@ -126,14 +126,14 @@ export function HeroSection() {
                     {/* Left: Text Content */}
                     <div className="text-center lg:text-left">
                         {/* Badge */}
-                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-[#2DD4BF]/10 border border-[#2DD4BF]/20 rounded-full px-4 py-2 mb-6">
+                        <motion.div variants={fadeInUp as any} className="inline-flex items-center gap-2 bg-[#2DD4BF]/10 border border-[#2DD4BF]/20 rounded-full px-4 py-2 mb-6">
                             <Sparkles size={14} className="text-[#2DD4BF]" />
                             <span className="text-[#2DD4BF] text-sm font-medium">AI-Powered Expense Management</span>
                         </motion.div>
 
                         {/* Headline */}
                         <motion.h1
-                            variants={fadeInUp}
+                            variants={fadeInUp as any}
                             className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
                         >
                             The{" "}
@@ -145,7 +145,7 @@ export function HeroSection() {
 
                         {/* Subheadline */}
                         <motion.p
-                            variants={fadeInUp}
+                            variants={fadeInUp as any}
                             className="text-lg md:text-xl text-white/60 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
                         >
                             From receipt scanning with AI to automated approvals and real-time insights —
@@ -153,7 +153,7 @@ export function HeroSection() {
                         </motion.p>
 
                         {/* CTA Buttons */}
-                        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+                        <motion.div variants={fadeInUp as any} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
                             <Link
                                 href="/register"
                                 className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#2DD4BF] to-[#14B8A6] text-[#0A1628] px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-2xl hover:shadow-[#2DD4BF]/40 transition-all duration-300 transform hover:scale-[1.02]"
@@ -170,7 +170,7 @@ export function HeroSection() {
                         </motion.div>
 
                         {/* Trust Indicators */}
-                        <motion.div variants={fadeInUp} className="flex flex-wrap items-center gap-6 justify-center lg:justify-start">
+                        <motion.div variants={fadeInUp as any} className="flex flex-wrap items-center gap-6 justify-center lg:justify-start">
                             <div className="flex items-center gap-2 text-white/50">
                                 <Shield size={18} className="text-[#2DD4BF]" />
                                 <span className="text-sm">Bank-grade security</span>
@@ -188,11 +188,11 @@ export function HeroSection() {
 
                     {/* Right: Floating Dashboard Preview */}
                     <motion.div
-                        variants={scaleIn}
+                        variants={scaleIn as any}
                         className="relative hidden lg:block"
                     >
                         <motion.div
-                            variants={floatAnimation}
+                            variants={floatAnimation as any}
                             initial="initial"
                             animate="animate"
                             className="relative"

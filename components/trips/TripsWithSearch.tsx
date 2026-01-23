@@ -134,16 +134,17 @@ export function TripsWithSearch({ initialTrips, savedSearches: initialSavedSearc
                     <p className="text-muted-foreground mt-1">Track and manage your business trips</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <SearchBar
-                        value={query}
-                        onChange={setQuery}
-                        onSearch={handleSearch}
-                        onSave={handleSaveSearch}
-                        placeholder="Search trips..."
-                        savedSearches={savedSearches}
-                        onSelectSaved={handleSavedSearchSelect}
-                        className="w-[300px]"
-                    />
+                    <div className="w-[300px]">
+                        <SearchBar
+                            value={query}
+                            onChange={setQuery}
+                            onSearch={handleSearch}
+                            onSave={handleSaveSearch}
+                            placeholder="Search trips..."
+                            savedSearches={savedSearches}
+                            onSelectSaved={handleSavedSearchSelect}
+                        />
+                    </div>
                     <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg border-0 h-10 px-6 rounded-xl font-semibold transition-all hover:scale-105" asChild>
                         <Link href="/trips/new">
                             <Plus className="mr-2 h-4 w-4" /> Create New Trip

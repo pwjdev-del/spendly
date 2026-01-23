@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button"
 import { AnimatedCurrency, AnimatedCounter } from "@/components/ui/AnimatedCounter"
 import { CreateTaskDialog } from "@/components/todo/CreateTaskDialog"
 import { SpendingPulse } from "@/components/dashboard/SpendingPulse"
+import { RewardsWidget } from "@/components/gamification/RewardsDashboard"
+import { SubscriptionAlertWidget } from "@/components/dashboard/SubscriptionAlert"
 
 export type WidgetId =
     | "balance"
@@ -29,7 +31,9 @@ export type WidgetId =
     | "ask-kharcho"
     | "quick-actions"
     | "spending-map"
-    | "spending-pulse";
+    | "spending-pulse"
+    | "rewards"
+    | "subscription-alerts";
 
 export interface DashboardData {
     balance: number
@@ -43,6 +47,9 @@ export interface DashboardData {
     trips: any[]
     role: "ADMIN" | "MEMBER"
     taskLists: any[]
+    // Innovation Features
+    rewardsBalance?: number
+    subscriptionAnomalies?: any[]
 }
 
 // 1. Metrics Widget (Balance, Income, Spend)
@@ -391,7 +398,9 @@ export const WIDGET_REGISTRY: Record<WidgetId, { component: React.FC<{ data: Das
     "ask-kharcho": { component: AskSiaWidget, title: "Ask Sia", defaultSize: "col-span-1 md:col-span-2 lg:col-span-3" },
     "quick-actions": { component: QuickActionsWidget, title: "Quick Actions", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4", mobileVisible: true }, // Essentials
     "spending-map": { component: SpendingMapWidget, title: "Spending Map", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4" },
-    "spending-pulse": { component: SpendingPulseWidget, title: "Spending Pulse", defaultSize: "col-span-1 md:col-span-2", mobileVisible: true }
+    "spending-pulse": { component: SpendingPulseWidget, title: "Spending Pulse", defaultSize: "col-span-1 md:col-span-2", mobileVisible: true },
+    "rewards": { component: RewardsWidget, title: "Rewards & Savings", defaultSize: "col-span-1 md:col-span-2" },
+    "subscription-alerts": { component: SubscriptionAlertWidget, title: "Subscription Alerts", defaultSize: "col-span-1 md:col-span-2" }
 }
 
 export const WIDGET_SIZES = [
@@ -406,6 +415,8 @@ export const WIDGET_SIZES = [
 export const DEFAULT_LAYOUT = [
     { id: "quick-actions", type: "quick-actions" },
     { id: "spend", type: "spend" },
+    { id: "rewards", type: "rewards" },         // [NEW]
+    { id: "subscription-alerts", type: "subscription-alerts" }, // [NEW]
     { id: "approvals", type: "approvals" },
     { id: "spending-chart", type: "spending-chart" },
     { id: "recent-expenses", type: "recent-expenses" },

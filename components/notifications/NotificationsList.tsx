@@ -155,13 +155,13 @@ export function NotificationsList({ initialNotifications }: NotificationsListPro
 
                                 <div className="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {!notification.readAt && (
-                                        <Button variant="ghost" size="xs" className="h-6 text-xs" onClick={() => handleMarkAsRead(notification.id)}>
+                                        <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => handleMarkAsRead(notification.id)}>
                                             <Check className="mr-1 h-3 w-3" /> Mark read
                                         </Button>
                                     )}
                                     <Button
                                         variant="ghost"
-                                        size="xs"
+                                        size="sm"
                                         className="h-6 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                                         onClick={(e) => handleDelete(notification.id, e)}
                                     >

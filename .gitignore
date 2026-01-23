@@ -19,6 +19,7 @@
 
 # production
 /build
+/build-production
 
 # misc
 .DS_Store
@@ -41,3 +42,10 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# Windows deployment artifacts
+spendly-production-*.tar.gz
+deployment-scripts/*.log
+.env.production
+/logs
+pm2-*.log

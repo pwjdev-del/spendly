@@ -100,8 +100,8 @@ export default async function FamilySettingsPage() {
                                     <TableCell className="font-medium">{member.name}</TableCell>
                                     <TableCell>{member.email}</TableCell>
                                     <TableCell>
-                                        {/* Only Admin can edit roles of others, but not themselves here (handled by logic) */}
-                                        {isCurrentUserOwner && member.id !== currentUserId ? (
+                                        {/* Allow any Admin to edit roles of others (except themselves) */}
+                                        {currentUserRole === 'ADMIN' && member.id !== currentUserId ? (
                                             <UserRoleSelector
                                                 userId={member.id}
                                                 currentRole={member.role}

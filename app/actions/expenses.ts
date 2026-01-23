@@ -8,6 +8,8 @@ import { canApprove, canCreateExpenseForOthers, canManageSystem } from "@/lib/pe
 import { canAddExpense } from "@/lib/trip-workflow"
 import { CreateExpenseSchema } from "@/lib/schemas"
 import { z } from "zod"
+import { ActionResult } from "@/lib/api-types"
+import { SafeMath } from "@/lib/math"
 
 async function getUser() {
     const session = await auth()
@@ -20,9 +22,7 @@ async function getUser() {
     return user
 }
 
-import { SafeMath } from "@/lib/math"
-
-export async function createExpense(prevState: any, formData: FormData) {
+export async function createExpense(prevState: any, formData: FormData): Promise<ActionResult<any>> {
     const rawAmount = formData.get("amount");
     // Handle both "10.50" (string) and potential raw inputs
     const amountInCents = rawAmount ? SafeMath.toCents(rawAmount.toString()) : 0;
@@ -43,9 +43,37 @@ export async function createExpense(prevState: any, formData: FormData) {
     // 1. Strict Server-Side Validation
     const validated = CreateExpenseSchema.safeParse(rawData)
     if (!validated.success) {
-        return { error: validated.error.issues[0].message }
+        return { success: false, error: validated.error.issues[0].message }
     }
     const data = validated.data
+
+    // ---------------------------------------------------------
+    // GEOCODING ENHANCEMENT (Server-Side)
+    // ---------------------------------------------------------
+    if (!data.latitude || !data.longitude) {
+        // Try to find location from locationName first, then merchant
+        const query = data.locationName || data.merchant;
+        if (query) {
+            try {
+                // Dynamic import to avoid circular dep issues if any
+                const { geocodeWithNominatim } = await import("@/lib/geocoding");
+                const geoResult = await geocodeWithNominatim(query);
+
+                if (geoResult) {
+                    data.latitude = geoResult.latitude;
+                    data.longitude = geoResult.longitude;
+                    // Optional: update location name if it was just merchant
+                    if (!data.locationName) {
+                        data.locationName = geoResult.displayName;
+                    }
+                }
+            } catch (e) {
+                // Ignore geocoding errors, proceed without location
+                console.error("Geocoding failed gracefully:", e);
+            }
+        }
+    }
+    // ---------------------------------------------------------
 
     const user = await getUser()
 
@@ -55,9 +83,7 @@ export async function createExpense(prevState: any, formData: FormData) {
             where: { key: data.idempotencyKey }
         })
         if (existingKey) {
-            // Key exists, meaning we already processed this. 
-            // Ideally we'd return the original result, but for now we block the duplicate.
-            return { error: "Duplicate request detected (Idempotency Key violation)" }
+            return { success: false, error: "Duplicate request detected (Idempotency Key violation)" }
         }
     }
 
@@ -87,9 +113,8 @@ export async function createExpense(prevState: any, formData: FormData) {
 
         if (existing) {
             return {
-                status: "DUPLICATE",
-                message: "A similar expense already exists.",
-                existingId: existing.id
+                success: false,
+                error: "A similar expense already exists."
             }
         }
     }
@@ -104,7 +129,7 @@ export async function createExpense(prevState: any, formData: FormData) {
             receiptUrl = await storage.upload(file, "receipts");
         } catch (error) {
             console.error("Receipt upload failed:", error);
-            return { error: "Failed to upload receipt file." };
+            return { success: false, error: "Failed to upload receipt file." }
         }
     }
 
@@ -116,7 +141,7 @@ export async function createExpense(prevState: any, formData: FormData) {
         })
 
         if (trip && !canAddExpense(trip.status)) {
-            return { error: `Cannot add expenses to trip in '${trip.status}' status` }
+            return { success: false, error: `Cannot add expenses to trip in '${trip.status}' status` }
         }
     }
 
@@ -134,17 +159,17 @@ export async function createExpense(prevState: any, formData: FormData) {
                 select: { status: true }
             })
             if (existingTrip && !canAddExpense(existingTrip.status)) {
-                return { error: `Cannot edit expense from a locked trip (${existingTrip.status})` }
+                return { success: false, error: `Cannot edit expense from a locked trip (${existingTrip.status})` }
             }
         }
 
         // RBAC: Edit Check
         if (existingToReplace?.userId !== user.id && !canManageSystem(user.role)) {
-            return { error: "Unauthorized to edit this expense" }
+            return { success: false, error: "Unauthorized to edit this expense" }
         }
 
         if (existingToReplace?.status === "APPROVED") {
-            return { error: "Cannot edit a verified (approved) expense." }
+            return { success: false, error: "Cannot edit a verified (approved) expense." }
         }
 
         await prisma.expense.update({
@@ -207,6 +232,8 @@ export async function createExpense(prevState: any, formData: FormData) {
     } else {
         redirect("/expenses")
     }
+
+    return { success: true, data: null }
 }
 
 export async function approveExpense(id: string) {
@@ -215,10 +242,35 @@ export async function approveExpense(id: string) {
         throw new Error("Unauthorized: Insufficient permissions to approve expenses")
     }
 
+    // ✅ SECURITY: Verify expense belongs to same organization
+    const expense = await prisma.expense.findUnique({
+        where: { id },
+        select: { organizationId: true, status: true, merchant: true, amount: true }
+    })
+
+    if (!expense) {
+        throw new Error("Expense not found")
+    }
+
+    if (expense.organizationId !== user.organizationId) {
+        throw new Error("Unauthorized: Cross-organization access denied")
+    }
+
+    if (expense.status === "APPROVED") {
+        throw new Error("Expense already approved")
+    }
+
     await prisma.expense.update({
         where: { id },
-        data: { status: "APPROVED" },
+        data: {
+            status: "APPROVED",
+            approvedBy: user.id,
+            approvedAt: new Date()
+        },
     })
+
+    console.log(`[AUDIT] Expense ${id} (${expense.merchant} $${expense.amount / 100}) approved by ${user.email}`)
+
     revalidatePath("/approvals")
     revalidatePath("/")
 }
@@ -229,10 +281,35 @@ export async function rejectExpense(id: string) {
         throw new Error("Unauthorized: Insufficient permissions to reject expenses")
     }
 
+    // ✅ SECURITY: Verify expense belongs to same organization  
+    const expense = await prisma.expense.findUnique({
+        where: { id },
+        select: { organizationId: true, status: true, merchant: true, amount: true }
+    })
+
+    if (!expense) {
+        throw new Error("Expense not found")
+    }
+
+    if (expense.organizationId !== user.organizationId) {
+        throw new Error("Unauthorized: Cross-organization access denied")
+    }
+
+    if (expense.status === "REJECTED") {
+        throw new Error("Expense already rejected")
+    }
+
     await prisma.expense.update({
         where: { id },
-        data: { status: "REJECTED" },
+        data: {
+            status: "REJECTED",
+            rejectedBy: user.id,
+            rejectedAt: new Date()
+        },
     })
+
+    console.log(`[AUDIT] Expense ${id} (${expense.merchant} $${expense.amount / 100}) rejected by ${user.email}`)
+
     revalidatePath("/approvals")
     revalidatePath("/")
 }

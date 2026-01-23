@@ -8,6 +8,7 @@ import { redirect } from "next/navigation"
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid"
 import { DEFAULT_LAYOUT, WidgetId } from "@/components/dashboard/WidgetRegistry"
 import { MagicInput } from "@/components/expenses/MagicInput"
+import { checkForSubscriptionAnomalies } from "@/lib/subscriptions/monitor"
 
 async function getGraphData(userId: string) {
   const expenses = await prisma.expense.findMany({
@@ -176,6 +177,12 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "asc" }
   }) : [];
 
+  const rewardsBalance = user.rewardsBalance || 0
+
+  // Fetch Subscription Anomalies
+  // @ts-ignore
+  const subscriptionAnomalies = prisma.subscription ? await checkForSubscriptionAnomalies(user.id) : [];
+
   /* Dashboard Data Construction for Widget Grid */
   const dashboardData = {
     balance: balance,
@@ -188,7 +195,9 @@ export default async function DashboardPage() {
     recentExpenses: expenses,
     trips: activeTrips,
     role: user.role as "ADMIN" | "MEMBER",
-    taskLists: taskLists
+    taskLists: taskLists,
+    rewardsBalance: rewardsBalance,
+    subscriptionAnomalies: subscriptionAnomalies
   }
 
   // Parse layout from user preferences or use default

@@ -173,7 +173,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
     const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
     const formRef = useRef<HTMLFormElement>(null)
 
-    const [state, formAction, isPending] = useActionState<FormState, FormData>(createExpense, initialState)
+    const [state, formAction, isPending] = useActionState<FormState, FormData>(createExpense as any, initialState)
     const { isOnline, saveExpenseOffline } = useOffline()
 
     // UI State

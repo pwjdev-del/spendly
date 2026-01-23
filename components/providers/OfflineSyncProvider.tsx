@@ -105,8 +105,8 @@ export function OfflineSyncProvider({ children }: { children: ReactNode }) {
 
                     const result = await createExpense(null, formData)
 
-                    if (result?.error) {
-                        throw new Error(result.error)
+                    if ((result as any)?.error) {
+                        throw new Error((result as any).error)
                     }
 
                     await removeSyncedExpense(item.id!)

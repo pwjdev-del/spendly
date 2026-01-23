@@ -35,6 +35,14 @@ export default async function DashboardLayout({
         if (dbUser?.canReconcile) {
             canReconcile = dbUser.canReconcile
         }
+
+        // 🔍 DEBUG: Identify which account is logged in
+        console.log('[LAYOUT DEBUG] ============================================')
+        console.log('[LAYOUT DEBUG] session.user.email:', session?.user?.email)
+        console.log('[LAYOUT DEBUG] session.user.id:', session?.user.id)
+        console.log('[LAYOUT DEBUG] dbUser.role:', dbUser?.role)
+        console.log('[LAYOUT DEBUG] Expected: patelkathan134@gmail.com with ADMIN role')
+        console.log('[LAYOUT DEBUG] ============================================')
     }
 
     // Construct a composite user object with latest DB data

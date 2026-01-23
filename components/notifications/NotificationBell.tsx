@@ -37,7 +37,7 @@ export function NotificationBell() {
                     getNotifications({ limit: 10 }),
                     getUnreadCount(),
                 ]);
-                setNotifications(notifs as Notification[]);
+                setNotifications(notifs as unknown as Notification[]);
                 setUnreadCount(count);
             } catch (error) {
                 console.error("Failed to load notifications:", error);
@@ -53,7 +53,7 @@ export function NotificationBell() {
         setIsOpen(open);
         if (open) {
             const notifs = await getNotifications({ limit: 10 });
-            setNotifications(notifs as Notification[]);
+            setNotifications(notifs as unknown as Notification[]);
         }
     };
 

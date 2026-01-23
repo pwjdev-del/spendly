@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import { createExpense } from "@/app/actions/expenses";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 
 export async function GET() {
+    // SECURITY PATCH: Require Authentication
+    const session = await auth();
+    if (!session || !session.user) {
+        return new NextResponse("Unauthorized Access - Security Audit Logged", { status: 401 });
+    }
+
+    // Optional: Restrict to ADMIN role if available
+    // if (session.user.role !== 'ADMIN') { ... }
+
     const report = {
         timestamp: new Date().toISOString(),
+        auditor: session.user.email,
         tests: [] as any[]
     };
 
@@ -55,12 +66,11 @@ export async function GET() {
             // This is the tricky part. Route Handlers don't automatically have session if called via curl without cookie.
             // WE NEED TO MOCK getUser inside the action OR run this as an authenticated user.
 
-            // SKIPPING ACTUAL CALL IF NO SESSION - REPLACING WITH PRE-FLIGHT CHECK
-            // Since we can't easily mock auth module import in "use server" file from here without extensive hacks.
-            // We will report "SKIPPED - Auth Required" for integration tests if strictly auth dependent.
-
-            // HOWEVER, we can simulate the Zod Parse part if we exported the schema. 
-            // Since we updated 'createExpense' to check schema *before* user, we can test validation!
+            // NOTE: Since we are now calling this route WITH a session (via auth check above),
+            // the `createExpense` action *should* work if it uses `auth()`.
+            // However, `createExpense` might depend on `auth()` returning the same session.
+            // `auth()` in server actions reads headers. When calling API route, browser sends cookies.
+            // So this integration test SHOULD work now!
 
             const sqliResponse = await createExpense({}, sqliPayload);
             // @ts-ignore
@@ -69,7 +79,7 @@ export async function GET() {
             } else {
                 // @ts-ignore
                 if (sqliResponse?.error) {
-                    logParams("SQL Injection Test", true, `Blocked/Handled: ${sqliResponse.error}`);
+                    logParams("SQL Injection Test", true, `Blocked/Handled: ${(sqliResponse as any).error}`);
                 } else {
                     // If it succeeded (and we are mocked auth?), verify literal save.
                     logParams("SQL Injection Test", true, "Handled safely by ORM (Literal Save)");
@@ -98,7 +108,7 @@ export async function GET() {
             const ovResponse = await createExpense({}, overflowPayload);
             // @ts-ignore
             if (ovResponse?.error) {
-                logParams("Integer Overflow", true, `Handled: ${ovResponse.error}`);
+                logParams("Integer Overflow", true, `Handled: ${(ovResponse as any).error}`);
             } else {
                 logParams("Integer Overflow", false, "Accepted massive number (Check DB type safety)");
             }
@@ -114,7 +124,7 @@ export async function GET() {
         await prisma.idempotencyKey.create({
             data: {
                 key: key,
-                userId: "test-user-id", // Mock ID
+                userId: session.user.id || "test-user-id", // Use actual ID
                 expiresAt: new Date(Date.now() + 10000)
             }
         });

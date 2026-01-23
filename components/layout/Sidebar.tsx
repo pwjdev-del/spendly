@@ -76,8 +76,12 @@ function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBE
     // Filter nav items based on user role
     const normalizedRole = userRole === 'MEMBER' ? 'SUBMITTER' : userRole
 
+    console.log('[SIDEBAR DEBUG] userRole:', userRole, 'normalizedRole:', normalizedRole)
+
     const filteredNavItems = sidebarNavItems.filter(item => {
-        return item.roles.includes(normalizedRole) || item.roles.includes(userRole)
+        const isIncluded = item.roles.includes(normalizedRole) || item.roles.includes(userRole)
+        console.log(`[SIDEBAR DEBUG] Item: ${item.title}, Roles: ${item.roles}, Included: ${isIncluded}`)
+        return isIncluded
     })
 
     return (

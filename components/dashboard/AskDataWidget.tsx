@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { askData } from "@/app/actions/ai-analytics"
+import { askData, createExpenseFromSia, createTaskFromSia, cancelSubscriptionFromSia } from "@/app/actions/ai-analytics"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -41,13 +41,49 @@ export function AskSiaWidget() {
                 toast.error(result.error)
                 setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error analyzing your data." }])
             } else {
-                setMessages(prev => [...prev, { role: 'assistant', content: result.answer || "I couldn't find an answer." }])
+                const processedAnswer = await handleAction(result.answer || "")
+                setMessages(prev => [...prev, { role: 'assistant', content: processedAnswer }])
             }
         } catch (error) {
             toast.error("Failed to connect to AI")
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const handleAction = async (response: string) => {
+        // Check for Action Tags
+        if (response.startsWith('[ACTION:')) {
+            const actionEnd = response.indexOf(']')
+            const actionType = response.substring(8, actionEnd)
+            const jsonStr = response.substring(actionEnd + 1)
+
+            try {
+                const params = JSON.parse(jsonStr)
+                let result;
+
+                if (actionType === 'CREATE_EXPENSE') {
+                    result = await createExpenseFromSia(params)
+                } else if (actionType === 'CREATE_TASK') {
+                    result = await createTaskFromSia(params)
+                } else if (actionType === 'CANCEL_SUBSCRIPTION') {
+                    result = await cancelSubscriptionFromSia(params)
+                }
+
+                if (result?.error) {
+                    return `Error executing action: ${result.error}`
+                } else if (result?.success) {
+                    if (actionType === 'CREATE_EXPENSE') return `Created expense for ${params.merchant} ($${params.amount})`
+                    if (actionType === 'CREATE_TASK') return `Added task: ${params.title}`
+                    if (actionType === 'CANCEL_SUBSCRIPTION') return (result as any).message || `Cancelled subscription: ${params.subscriptionName}`
+                    return "Action executed successfully."
+                }
+            } catch (e) {
+                console.error("Action Parse Error", e)
+                return "I tried to perform an action but failed to parse the parameters."
+            }
+        }
+        return response
     }
 
     return (

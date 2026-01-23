@@ -76,7 +76,7 @@ export function DiscussionPanel({
         async function loadDiscussion() {
             try {
                 const disc = await getOrCreateDiscussion(entityType, entityId);
-                setDiscussion(disc as Discussion);
+                setDiscussion(disc as unknown as Discussion);
             } catch (error) {
                 console.error("Failed to load discussion:", error);
             } finally {
@@ -128,7 +128,7 @@ export function DiscussionPanel({
 
             // Refresh discussion
             const disc = await getOrCreateDiscussion(entityType, entityId);
-            setDiscussion(disc as Discussion);
+            setDiscussion(disc as unknown as Discussion);
             setNewMessage("");
             setReplyingTo(null);
         } catch (error) {
@@ -144,7 +144,7 @@ export function DiscussionPanel({
             await deleteMessage(messageId);
             // Refresh discussion
             const disc = await getOrCreateDiscussion(entityType, entityId);
-            setDiscussion(disc as Discussion);
+            setDiscussion(disc as unknown as Discussion);
         } catch (error) {
             console.error("Failed to delete message:", error);
         }
