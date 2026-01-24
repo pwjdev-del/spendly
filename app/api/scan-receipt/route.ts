@@ -25,6 +25,7 @@ export async function POST(req: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const originalBuffer = Buffer.from(arrayBuffer);
 
+        let finalBuffer: Buffer;
         let mimeType = "image/jpeg";
 
         // 1. PROCESS IMAGE (Clean and Resize to JPEG)
