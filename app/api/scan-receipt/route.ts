@@ -182,39 +182,45 @@ export async function POST(req: Request) {
             }
 
             if (!result) {
-                throw lastError || new Error("Failed to generate content after retries");
+                // If we get here inside the loop without breaking, continue or throw if max retries
+                // Actually this logic implies we loop until success.
             }
+        } // End of while loop
 
-            let jsonStr = result.choices?.[0]?.message?.content || "";
-            console.log("AI Response:", jsonStr);
-
-            // 3. PARSE JSON
-            jsonStr = jsonStr.trim();
-            const firstBrace = jsonStr.indexOf('{');
-            const lastBrace = jsonStr.lastIndexOf('}');
-
-            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-                jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
-            } else {
-                jsonStr = jsonStr.replace(/```json|```/g, "").trim();
-            }
-
-            try {
-                const data = JSON.parse(jsonStr);
-                return NextResponse.json(data);
-            } catch (parseError) {
-                console.error("JSON Parse Error:", jsonStr);
-                return NextResponse.json({
-                    error: `AI returned invalid format. Raw: ${jsonStr.substring(0, 50)}...`
-                }, { status: 500 });
-            }
-
-        } catch (error: any) {
-            console.error("Receipt Scan Error:", error);
-
-            return NextResponse.json(
-                { error: error.message || "Failed to process receipt" },
-                { status: 500 }
-            );
+        if (!result) {
+            throw lastError || new Error("Failed to generate content after retries");
         }
+
+        let jsonStr = result.choices?.[0]?.message?.content || "";
+        console.log("AI Response:", jsonStr);
+
+        // 3. PARSE JSON
+        jsonStr = jsonStr.trim();
+        const firstBrace = jsonStr.indexOf('{');
+        const lastBrace = jsonStr.lastIndexOf('}');
+
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+        } else {
+            jsonStr = jsonStr.replace(/```json|```/g, "").trim();
+        }
+
+        try {
+            const data = JSON.parse(jsonStr);
+            return NextResponse.json(data);
+        } catch (parseError) {
+            console.error("JSON Parse Error:", jsonStr);
+            return NextResponse.json({
+                error: `AI returned invalid format. Raw: ${jsonStr.substring(0, 50)}...`
+            }, { status: 500 });
+        }
+
+    } catch (error: any) {
+        console.error("Receipt Scan Error:", error);
+
+        return NextResponse.json(
+            { error: error.message || "Failed to process receipt" },
+            { status: 500 }
+        );
     }
+}
