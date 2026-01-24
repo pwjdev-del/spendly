@@ -438,11 +438,8 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                             <CommandItem
                                                 key={c.value}
                                                 value={c.value}
-                                                onSelect={(currentValue) => {
-                                                    const matched = CURRENCIES.find(item => item.value.toLowerCase() === currentValue.toLowerCase())
-                                                    if (matched) {
-                                                        setCurrency(matched.value)
-                                                    }
+                                                onSelect={() => {
+                                                    setCurrency(c.value)
                                                     setOpenCurrency(false)
                                                 }}
                                                 className="aria-selected:bg-secondary"
@@ -558,11 +555,8 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                             <CommandItem
                                                 key={c.value}
                                                 value={c.value}
-                                                onSelect={(currentValue) => {
-                                                    const matched = CURRENCIES.find(item => item.value.toLowerCase() === currentValue.toLowerCase())
-                                                    if (matched) {
-                                                        setCurrency(matched.value)
-                                                    }
+                                                onSelect={() => {
+                                                    setCurrency(c.value)
                                                     setOpenCurrency(false)
                                                 }}
                                                 className="aria-selected:bg-secondary"

@@ -17,6 +17,9 @@ export const SafeMath = {
         const cleanString = stringAmount.replace(/[$,]/g, '');
         // Multiply by 100 but do it safely via string manipulation or strict math
         // Best way: Math.round(float * 100) handles the .00000004 IEEE ghost
+        // NOTE: For zero-decimal currencies like JPY, this results in the value * 100.
+        // E.g. 500 JPY -> 50000 stored. This is intended "Atomic Unit" storage (cents/pennies equivalent).
+        // Display logic must use Intl.NumberFormat to correctly strip the extra zeros.
         return Math.round(parseFloat(cleanString) * 100);
     },
 
