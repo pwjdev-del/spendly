@@ -7,6 +7,11 @@ frontend:
         - env | grep -e DATABASE_URL -e AUTH_SECRET -e NEXTAUTH_URL -e GOOGLE_CLIENT_ID -e GOOGLE_CLIENT_SECRET >> .env.production
         - echo "Checking Database URL..." && if [ -z "$DATABASE_URL" ]; then echo "DATABASE_URL is MISSING"; else echo "DATABASE_URL is SET"; fi
         - echo "Checking Auth Secret..." && if [ -z "$AUTH_SECRET" ]; then echo "AUTH_SECRET is MISSING"; else echo "AUTH_SECRET is SET"; fi
+        - echo "Checking AI Keys..." && if [ -z "$NVIDIA_API_KEY" ]; then echo "WARNING: NVIDIA_API_KEY is missing"; else echo "NVIDIA_API_KEY is SET"; fi
+        - echo "NVIDIA_API_KEY=$NVIDIA_API_KEY" >> .env.production
+        - echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env.production
+        - echo "Checking Resend Key..." && if [ -z "$RESEND_API_KEY" ]; then echo "WARNING: RESEND_API_KEY is missing"; else echo "RESEND_API_KEY is SET"; fi
+        - echo "RESEND_API_KEY=$RESEND_API_KEY" >> .env.production
         - npx prisma generate
     build:
       commands:

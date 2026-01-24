@@ -7,9 +7,8 @@ export default async function CalendarPage() {
     const session = await auth()
     if (!session?.user?.email) redirect("/login")
 
-    // WORKAROUND: Raw SQL to bypass "invalid characters" error on User table
-    const users: any[] = await prisma.$queryRaw`SELECT *, preferences FROM User WHERE email = ${session.user.email} LIMIT 1`;
-    const user = users[0];
+    // Reverted workaround: Standard Prisma query matches auth.ts behavior
+    const user = await prisma.user.findFirst({ where: { email: session.user.email } });
     if (!user) redirect("/login")
 
     // Allow personal items OR organization items
