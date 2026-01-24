@@ -244,11 +244,14 @@ export function CalendarClient({ expenses, recurringExpenses, balance = 0, enabl
         checkDate.setDate(checkDate.getDate() - 1);
     }
 
-    while (true) {
+    const MAX_STREAK_CHECK = 365 * 2; // Check up to 2 years back
+    let streakChecks = 0;
+    while (streakChecks < MAX_STREAK_CHECK) {
         const total = dailyTotals[checkDate.toDateString()] || 0;
         if (total === 0) {
             currentStreak++;
             checkDate.setDate(checkDate.getDate() - 1);
+            streakChecks++;
         } else {
             break;
         }

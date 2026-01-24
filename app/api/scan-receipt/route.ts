@@ -54,15 +54,27 @@ export async function POST(req: Request) {
             // Fallback: Use original buffer
             finalBuffer = originalBuffer;
 
-            // CRITICAL: Ensure mimeType matches the actual file if Sharp didn't convert it
-            // Do NOT default to image/jpeg if we are using the original buffer, unless we are sure.
-            if (file.type && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/webp')) {
-                console.log(`Using fallback mime type from file: ${file.type}`);
-                mimeType = file.type;
+            // Helper to check magic bytes
+            const isJpeg = finalBuffer[0] === 0xFF && finalBuffer[1] === 0xD8 && finalBuffer[2] === 0xFF;
+            const isPng = finalBuffer[0] === 0x89 && finalBuffer[1] === 0x50 && finalBuffer[2] === 0x4E && finalBuffer[3] === 0x47;
+            const isWebp = finalBuffer[0] === 0x52 && finalBuffer[1] === 0x49 && finalBuffer[2] === 0x46 && finalBuffer[3] === 0x44 &&
+                finalBuffer[8] === 0x57 && finalBuffer[9] === 0x45 && finalBuffer[10] === 0x42 && finalBuffer[11] === 0x50;
+
+            if (isJpeg) {
+                mimeType = "image/jpeg";
+                console.log("Fallback: Verified JPEG magic bytes.");
+            } else if (isPng) {
+                mimeType = "image/png";
+                console.log("Fallback: Verified PNG magic bytes.");
+            } else if (isWebp) {
+                mimeType = "image/webp";
+                console.log("Fallback: Verified WebP magic bytes.");
             } else {
-                console.warn(`Could not determine reliable mime type for fallback. Defaulting to ${mimeType}, but this may fail.`);
-                // If it's something weird, we might want to return an error, but let's try.
-                if (file.type) mimeType = file.type;
+                console.error("Critical: Could not identify image format from bytes. Aborting to avoid API error.");
+                return NextResponse.json(
+                    { error: "Unsupported image format or corrupted file. Please upload a standard JPEG or PNG image." },
+                    { status: 400 }
+                );
             }
         }
 
