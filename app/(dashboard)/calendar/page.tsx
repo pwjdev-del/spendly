@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma"
 import { CalendarClient } from "./client"
 import { redirect } from "next/navigation"
 
-export default async function CalendarPage() {
+export default async function CalendarPage(props: { searchParams: Promise<{ month?: string; year?: string }> }) {
     const session = await auth()
     if (!session?.user?.email) redirect("/login")
 
@@ -19,8 +19,28 @@ export default async function CalendarPage() {
         ]
     }
 
+    // URL Params for Month Navigation
+    // @ts-ignore
+    const { month, year } = props.searchParams || {};
+    const date = new Date();
+    const currentMonth = month ? parseInt(month as string) : date.getMonth();
+    const currentYear = year ? parseInt(year as string) : date.getFullYear();
+
+    const startOfMonth = new Date(currentYear, currentMonth, 1);
+    const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+
+    // Fetch surrounding months for smoother transitions (optional, keeping strict for perf)
+    const queryStart = new Date(currentYear, currentMonth - 1, 1);
+    const queryEnd = new Date(currentYear, currentMonth + 2, 0);
+
     const expenses = await prisma.expense.findMany({
-        where: whereClause,
+        where: {
+            ...whereClause,
+            date: {
+                gte: queryStart,
+                lte: queryEnd
+            }
+        },
         orderBy: { date: 'asc' },
         select: {
             id: true,

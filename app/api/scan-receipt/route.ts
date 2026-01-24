@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         const arrayBuffer = await file.arrayBuffer();
         const originalBuffer = Buffer.from(arrayBuffer);
 
-        let finalBuffer: Buffer;
+        let mimeType = "image/jpeg";
 
         // 1. PROCESS IMAGE (Clean and Resize to JPEG)
         try {
@@ -35,19 +35,26 @@ export async function POST(req: Request) {
 
             // Resize to ensure it fits within token limits and is optimized
             finalBuffer = await image
-                .rotate()
+                .rotate() // Auto-rotate based on EXIF
                 .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
                 .jpeg({ quality: 80 })
                 .toBuffer();
 
+            mimeType = "image/jpeg"; // Sharp output is always JPEG here
+
         } catch (error: any) {
-            console.warn("Sharp processing failed, using original buffer:", error.message);
+            console.warn("Sharp processing failed (likely missing binaries), using original buffer:", error.message);
             finalBuffer = originalBuffer;
+            // Try to guess mime type from file, default to jpeg but warn
+            // Since we can't easily detect mime without libraries, we'll try to rely on the file extension if available, or just send it.
+            // But for Nvidia, if we say jpeg and it's png, it fails.
+            // Let's rely on the file object if possible, but File is from FormData.
+            if (file.type) mimeType = file.type;
         }
 
         // 2. CALL NVIDIA API (Llama 3.2 Vision)
         const base64Image = finalBuffer.toString("base64");
-        const dataUrl = `data:image/jpeg;base64,${base64Image}`;
+        const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
         console.log("Using Nvidia Llama 3.2 Vision API...");
 
