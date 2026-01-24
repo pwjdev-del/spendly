@@ -29,7 +29,9 @@ export async function POST(req: Request) {
         let mimeType = "image/jpeg";
 
         // 1. PROCESS IMAGE (Clean and Resize to JPEG)
+        // 1. PROCESS IMAGE (Clean and Resize to JPEG)
         try {
+            console.log("Attempting to process image with Sharp...");
             const image = sharp(originalBuffer);
             const metadata = await image.metadata();
             console.log(`Input Image: ${metadata.format} ${metadata.width}x${metadata.height}`);
@@ -41,16 +43,27 @@ export async function POST(req: Request) {
                 .jpeg({ quality: 80 })
                 .toBuffer();
 
-            mimeType = "image/jpeg"; // Sharp output is always JPEG here
+            // Sharp successfully converted to JPEG
+            mimeType = "image/jpeg";
+            console.log("Image successfully processed and converted to JPEG.");
 
         } catch (error: any) {
-            console.warn("Sharp processing failed (likely missing binaries), using original buffer:", error.message);
+            console.warn("Sharp processing failed (likely missing binaries or unsupported format).");
+            console.warn("Error details:", error.message);
+
+            // Fallback: Use original buffer
             finalBuffer = originalBuffer;
-            // Try to guess mime type from file, default to jpeg but warn
-            // Since we can't easily detect mime without libraries, we'll try to rely on the file extension if available, or just send it.
-            // But for Nvidia, if we say jpeg and it's png, it fails.
-            // Let's rely on the file object if possible, but File is from FormData.
-            if (file.type) mimeType = file.type;
+
+            // CRITICAL: Ensure mimeType matches the actual file if Sharp didn't convert it
+            // Do NOT default to image/jpeg if we are using the original buffer, unless we are sure.
+            if (file.type && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/webp')) {
+                console.log(`Using fallback mime type from file: ${file.type}`);
+                mimeType = file.type;
+            } else {
+                console.warn(`Could not determine reliable mime type for fallback. Defaulting to ${mimeType}, but this may fail.`);
+                // If it's something weird, we might want to return an error, but let's try.
+                if (file.type) mimeType = file.type;
+            }
         }
 
         // 2. CALL NVIDIA API (Llama 3.2 Vision)
