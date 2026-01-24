@@ -5,6 +5,7 @@ frontend:
       commands:
         - node -v
         - npm -v
+        - rm -rf node_modules package-lock.json
         - npm install --legacy-peer-deps
         - echo "DATABASE_URL=$DATABASE_URL" >> .env.production
         - echo "AUTH_SECRET=$AUTH_SECRET" >> .env.production
