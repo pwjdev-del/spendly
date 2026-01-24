@@ -54,6 +54,9 @@ export async function POST(req: Request) {
             // Fallback: Use original buffer
             finalBuffer = originalBuffer;
 
+            // DEBUG: Log first 20 bytes to debug magic number mismatch
+            console.log("DEBUG: Magic Bytes (Hex):", finalBuffer.subarray(0, 20).toString('hex').toUpperCase());
+
             // Helper to check magic bytes
             const isJpeg = finalBuffer[0] === 0xFF && finalBuffer[1] === 0xD8 && finalBuffer[2] === 0xFF;
             const isPng = finalBuffer[0] === 0x89 && finalBuffer[1] === 0x50 && finalBuffer[2] === 0x4E && finalBuffer[3] === 0x47;
@@ -70,11 +73,19 @@ export async function POST(req: Request) {
                 mimeType = "image/webp";
                 console.log("Fallback: Verified WebP magic bytes.");
             } else {
-                console.error("Critical: Could not identify image format from bytes. Aborting to avoid API error.");
-                return NextResponse.json(
-                    { error: "Unsupported image format or corrupted file. Please upload a standard JPEG or PNG image." },
-                    { status: 400 }
-                );
+                console.warn("Formatting Warning: Could not verify magic bytes. Bytes:", finalBuffer.subarray(0, 10).toString('hex'));
+
+                // RELAXED FALLBACK: Trust the user/browser if they say it's an image, but warn.
+                if (file.type && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+                    console.log(`Fallback: Magic bytes failed, but trusting file.type: ${file.type}`);
+                    mimeType = file.type;
+                } else {
+                    console.error("Critical: Could not identify image format. Aborting.");
+                    return NextResponse.json(
+                        { error: "Unsupported image format. Please upload a standard JPEG or PNG image." },
+                        { status: 400 }
+                    );
+                }
             }
         }
 
