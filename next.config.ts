@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
+  // Fix workspace root detection for Amplify/Monorepos
+  outputFileTracingRoot: require('path').join(__dirname, '../../../../..'),
   allowedDevOrigins: ['http://10.133.20.233:3001'],
   devIndicators: {
     // @ts-expect-error - appIsrStatus is valid in newer Next.js versions but missing from types
