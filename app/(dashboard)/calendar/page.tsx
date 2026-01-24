@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma"
 import { CalendarClient } from "./client"
 import { redirect } from "next/navigation"
 
-export default async function CalendarPage(props: { searchParams: Promise<{ month?: string; year?: string }> }) {
+export default async function CalendarPage(props: any) {
     const session = await auth()
     if (!session?.user?.email) redirect("/login")
 
