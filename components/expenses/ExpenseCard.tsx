@@ -18,6 +18,9 @@ interface Expense {
     status: string
     reconciliationStatus: string
     receiptUrl?: string | null
+    originalAmount?: number | null
+    originalCurrency?: string | null
+    exchangeRate?: number | null
     user: {
         name: string | null
         email: string | null
@@ -30,7 +33,8 @@ interface Expense {
         originalAmount?: number | null
         originalCurrency?: string | null
         exchangeRate?: number | null
-    }
+    } | null
+}
 
 interface ExpenseCardProps {
     expense: Expense
