@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 
 export async function GET() {
     const nvidiaKey = process.env.NVIDIA_API_KEY;
@@ -13,6 +14,22 @@ export async function GET() {
     const expectedPrefix = "nvapi-QMxa";
     const isExpectedKey = nvidiaKey && nvidiaKey.startsWith(expectedPrefix);
 
+    // Test Sharp
+    let sharpStatus = "Unknown";
+    try {
+        await sharp({
+            create: {
+                width: 1,
+                height: 1,
+                channels: 3,
+                background: { r: 255, g: 0, b: 0 }
+            }
+        }).png().toBuffer();
+        sharpStatus = "Functional (Created 1x1 PNG)";
+    } catch (e: any) {
+        sharpStatus = `FAILED: ${e.message}`;
+    }
+
     return NextResponse.json({
         environment: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
@@ -25,6 +42,10 @@ export async function GET() {
             DATABASE_URL: {
                 status: dbUrl ? "Present" : "MISSING",
                 isNeon: dbUrl ? dbUrl.includes("neon.tech") : false
+            },
+            SHARP_VERSION: {
+                status: sharpStatus,
+                version: sharp.versions?.sharp || "unknown"
             }
         }
     });

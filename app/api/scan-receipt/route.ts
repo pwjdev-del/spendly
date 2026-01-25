@@ -232,14 +232,21 @@ export async function POST(req: Request) {
     } catch (error: any) {
         console.error("Receipt Scan Error:", error);
 
+        const sharpUsed = (originalBuffer && finalBuffer) ? !originalBuffer.equals(finalBuffer) : false;
+        const magicBytesPrefix = finalBuffer ? finalBuffer.subarray(0, 10).toString('hex') : "N/A";
+        const payloadPrefix = dataUrl ? dataUrl.substring(0, 30) + "..." : "N/A";
+
+        // Embed debug info into the MESSAGE so the user sees it in the console log they paste
+        const debugString = ` [DebugInfo: SharpSucc=${sharpUsed}, MagicBytes=${magicBytesPrefix}, Mime=${mimeType}]`;
+
         return NextResponse.json(
             {
-                error: error.message || "Failed to process receipt",
+                error: (error.message || "Failed to process receipt") + debugString,
                 debug: {
-                    sharpUsed: (originalBuffer && finalBuffer) ? !originalBuffer.equals(finalBuffer) : false,
-                    magicBytesPrefix: finalBuffer ? finalBuffer.subarray(0, 10).toString('hex') : "N/A",
+                    sharpUsed,
+                    magicBytesPrefix,
                     mimeTypeUsed: mimeType,
-                    payloadPrefix: dataUrl ? dataUrl.substring(0, 30) + "..." : "N/A"
+                    payloadPrefix
                 }
             },
             { status: 500 }
