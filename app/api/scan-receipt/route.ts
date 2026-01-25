@@ -75,14 +75,15 @@ export async function POST(req: Request) {
             } else {
                 console.warn("Formatting Warning: Could not verify magic bytes. Bytes:", finalBuffer.subarray(0, 10).toString('hex'));
 
-                // RELAXED FALLBACK: Trust the user/browser if they say it's an image, but warn.
-                if (file.type && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+                // STRICT FALLBACK: If we can't identify it, and it's not a standard web type, we should fail early 
+                // rather than sending garbage to the AI which causes the "cannot identify image file" 400 error.
+                if (file.type && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp')) {
                     console.log(`Fallback: Magic bytes failed, but trusting file.type: ${file.type}`);
                     mimeType = file.type;
                 } else {
                     console.error("Critical: Could not identify image format. Aborting.");
                     return NextResponse.json(
-                        { error: "Unsupported image format. Please upload a standard JPEG or PNG image." },
+                        { error: "Unsupported image format. Please upload a standard JPEG or PNG image. (HEIC is not supported directly, please convert first)" },
                         { status: 400 }
                     );
                 }

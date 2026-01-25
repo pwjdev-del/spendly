@@ -25,6 +25,9 @@ const LocationPicker = dynamic(() => import("@/components/ui/location-picker"), 
     loading: () => <div className="h-[400px] w-full flex items-center justify-center bg-muted animate-pulse rounded-md">Loading Map...</div>
 })
 
+// Client-side import for HEIC conversion
+import heic2any from "heic2any"
+
 function SubmitButton() {
     const { pending } = useFormStatus()
     return (
@@ -216,6 +219,35 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
         }
 
         setIsScanning(true)
+        let fileToProcess = file
+
+        // HEIC Conversion Logic
+        if (file.type === "image/heic" || file.name.toLowerCase().endsWith(".heic")) {
+            try {
+                toast.loading("Converting HEIC image...", { id: "heic-convert" })
+                console.log("Converting HEIC to JPEG...")
+                const converted = await heic2any({
+                    blob: file,
+                    toType: "image/jpeg",
+                    quality: 0.8
+                })
+
+                const blob = Array.isArray(converted) ? converted[0] : converted
+                fileToProcess = new File([blob], file.name.replace(/\.heic$/i, ".jpg"), {
+                    type: "image/jpeg"
+                })
+                toast.dismiss("heic-convert")
+                console.log("Conversion successful:", fileToProcess.name)
+            } catch (err) {
+                console.error("HEIC Conversion failed:", err)
+                toast.dismiss("heic-convert")
+                toast.error("Could not convert HEIC image. Please try a JPEG/PNG.")
+                setIsScanning(false)
+                return
+            }
+        }
+
+        setIsScanning(true) // Re-assert in case logic flowed weirdly
 
         // function to perform upload
         const performScan = async (fileToUpload: File | Blob) => {
@@ -258,8 +290,8 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
         try {
             toast.loading("Scanning receipt with AI...", { id: "scan-progress" });
 
-            // Upload directly - server handles image processing
-            const data = await performScan(file);
+            // Upload directly - server handles image processing (or we passed converted file)
+            const data = await performScan(fileToProcess);
             toast.dismiss("scan-progress");
             toast.success("Receipt scanned!");
 
