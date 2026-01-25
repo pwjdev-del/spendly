@@ -72,11 +72,20 @@ export async function POST(req: Request) {
                 mimeType = "image/webp";
                 console.log("Fallback: Verified WebP.");
             } else {
-                console.error("CRITICAL: Fallback failed. Unknown magic bytes:", finalBuffer.subarray(0, 10).toString('hex'));
-                return NextResponse.json(
-                    { error: "Image processing failed. Use a standard JPEG or PNG." },
-                    { status: 400 }
-                );
+                console.warn(`Formatting Warning: Could not verify magic bytes. Bytes: ${finalBuffer.subarray(0, 10).toString('hex')}`);
+
+                // RELAXED FALLBACK: Trust the user/browser if they say it's an image, but warn.
+                // This fixes the issue where valid JPEGs/PNGs might be rejected if Sharp fails AND magic bytes aren't perfect.
+                if (file.type && (file.type.startsWith('image/'))) {
+                    console.log(`Fallback: Magic bytes failed, but trusting file.type: ${file.type}`);
+                    mimeType = file.type;
+                } else {
+                    console.error("Critical: Could not identify image format. Aborting.");
+                    return NextResponse.json(
+                        { error: "Unsupported image format. Please upload a standard JPEG or PNG image. (HEIC is not supported directly, please convert first)" },
+                        { status: 400 }
+                    );
+                }
             }
         }
 
