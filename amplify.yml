@@ -5,15 +5,15 @@ frontend:
     preBuild:
       commands:
         - npm ci
-        - echo "DATABASE_URL=$DATABASE_URL" >> .env.production
-        - echo "AUTH_SECRET=$AUTH_SECRET" >> .env.production
-        - echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production
-        - echo "AUTH_TRUST_HOST=true" >> .env.production
-        - echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env.production
-        - echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env.production
-        - echo "NVIDIA_API_KEY=$NVIDIA_API_KEY" >> .env.production
-        - echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env.production
-        - echo "RESEND_API_KEY=$RESEND_API_KEY" >> .env.production
+        - echo "DATABASE_URL=$DATABASE_URL" >> .env
+        - echo "AUTH_SECRET=$AUTH_SECRET" >> .env
+        - echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env
+        - echo "AUTH_TRUST_HOST=true" >> .env
+        - echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
+        - echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
+        - echo "NVIDIA_API_KEY=$NVIDIA_API_KEY" >> .env
+        - echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env
+        - echo "RESEND_API_KEY=$RESEND_API_KEY" >> .env
         - npx prisma migrate deploy
         - npx prisma generate
     build:
