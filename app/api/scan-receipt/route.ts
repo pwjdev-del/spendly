@@ -13,7 +13,8 @@ export async function POST(req: Request) {
             console.error("Scan Receipt: No file uploaded");
             return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
         }
-        console.log("Scan Receipt: File received", file.name, file.size);
+
+        console.log(`Scan Receipt: File received. Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`);
 
         const apiKey = process.env.NVIDIA_API_KEY;
 
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
             console.log(`Input Image: ${metadata.format} ${metadata.width}x${metadata.height}`);
 
             // Resize to ensure it fits within token limits and is optimized
+            console.log("Sharp: Starting processing...");
             finalBuffer = await image
                 .rotate() // Auto-rotate based on EXIF
                 .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
@@ -45,48 +47,36 @@ export async function POST(req: Request) {
 
             // Sharp successfully converted to JPEG
             mimeType = "image/jpeg";
-            console.log("Image successfully processed and converted to JPEG.");
+            console.log(`Sharp: Success. Output Buffer Size: ${finalBuffer.length} bytes.`);
 
         } catch (error: any) {
-            console.warn("Sharp processing failed (likely missing binaries or unsupported format).");
-            console.warn("Error details:", error.message);
+            console.error("Sharp processing failed:", error);
 
-            // Fallback: Use original buffer
+            // STRICT FALLBACK - Only allow known types if Sharp fails
+            // If sharp failed, the file might be corrupt or an unknown format.
+            // We verify magic bytes of the ORIGINAL buffer.
             finalBuffer = originalBuffer;
 
-            // DEBUG: Log first 20 bytes to debug magic number mismatch
-            console.log("DEBUG: Magic Bytes (Hex):", finalBuffer.subarray(0, 20).toString('hex').toUpperCase());
-
-            // Helper to check magic bytes
+            console.log(`Fallback: Checking magic bytes of original buffer (${finalBuffer.length} bytes)...`);
             const isJpeg = finalBuffer[0] === 0xFF && finalBuffer[1] === 0xD8 && finalBuffer[2] === 0xFF;
             const isPng = finalBuffer[0] === 0x89 && finalBuffer[1] === 0x50 && finalBuffer[2] === 0x4E && finalBuffer[3] === 0x47;
-            const isWebp = finalBuffer[0] === 0x52 && finalBuffer[1] === 0x49 && finalBuffer[2] === 0x46 && finalBuffer[3] === 0x44 &&
-                finalBuffer[8] === 0x57 && finalBuffer[9] === 0x45 && finalBuffer[10] === 0x42 && finalBuffer[11] === 0x50;
+            const isWebp = finalBuffer[0] === 0x52 && finalBuffer[1] === 0x49 && finalBuffer[2] === 0x46 && finalBuffer[3] === 0x44;
 
             if (isJpeg) {
                 mimeType = "image/jpeg";
-                console.log("Fallback: Verified JPEG magic bytes.");
+                console.log("Fallback: Verified JPEG.");
             } else if (isPng) {
                 mimeType = "image/png";
-                console.log("Fallback: Verified PNG magic bytes.");
+                console.log("Fallback: Verified PNG.");
             } else if (isWebp) {
                 mimeType = "image/webp";
-                console.log("Fallback: Verified WebP magic bytes.");
+                console.log("Fallback: Verified WebP.");
             } else {
-                console.warn("Formatting Warning: Could not verify magic bytes. Bytes:", finalBuffer.subarray(0, 10).toString('hex'));
-
-                // STRICT FALLBACK: If we can't identify it, and it's not a standard web type, we should fail early 
-                // rather than sending garbage to the AI which causes the "cannot identify image file" 400 error.
-                if (file.type && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp')) {
-                    console.log(`Fallback: Magic bytes failed, but trusting file.type: ${file.type}`);
-                    mimeType = file.type;
-                } else {
-                    console.error("Critical: Could not identify image format. Aborting.");
-                    return NextResponse.json(
-                        { error: "Unsupported image format. Please upload a standard JPEG or PNG image. (HEIC is not supported directly, please convert first)" },
-                        { status: 400 }
-                    );
-                }
+                console.error("CRITICAL: Fallback failed. Unknown magic bytes:", finalBuffer.subarray(0, 10).toString('hex'));
+                return NextResponse.json(
+                    { error: "Image processing failed. Use a standard JPEG or PNG." },
+                    { status: 400 }
+                );
             }
         }
 
@@ -94,6 +84,7 @@ export async function POST(req: Request) {
         const base64Image = finalBuffer.toString("base64");
         const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
+        console.log(`Prepared payload. Data URL prefix: ${dataUrl.substring(0, 50)}...`);
         console.log("Using Nvidia Llama 3.2 Vision API...");
 
         const prompt = `
