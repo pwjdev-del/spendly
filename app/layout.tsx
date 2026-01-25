@@ -39,6 +39,18 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Spendly",
   },
+  openGraph: {
+    title: "Spendly",
+    description: "Expense Management for your business",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Spendly - Intelligent Expense Management",
+      },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
