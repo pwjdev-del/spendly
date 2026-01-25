@@ -135,7 +135,14 @@ export async function getUnifiedTasks() {
             { createdAt: "desc" }
         ],
         include: {
-            list: true
+            list: true,
+            trip: {
+                select: {
+                    id: true,
+                    name: true,
+                    tripNumber: true
+                }
+            }
         }
     });
 

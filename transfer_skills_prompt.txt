@@ -1,0 +1,843 @@
+I want you to set up a comprehensive suite of "skills" for this project.
+Please create the following directories and files inside the `.agent/skills/` directory.
+
+---
+
+### 1. Skill: allin1
+**Path:** `.agent/skills/allin1/SKILL.md`
+```markdown
+---
+name: allin1
+description: Orchestrates the comprehensive full-stack development lifecycle. Connects Frontend, API, Backend, Database, and External Services into a cohesive workflow. Use for end-to-end feature implementation.
+---
+
+# All-in-One Full Stack Development
+
+## When to use this skill
+- When implementing a complete feature that touches every layer of the stack.
+- When you need to understand the data flow from User to Database.
+- To ensure tight integration between Frontend components and Backend logic.
+- For architectural guidance on connecting External Services (Payments, Email).
+
+## Workflow
+
+### 1. The Full Stack Loop
+Follow the data flow:
+1.  **User (Frontend)**: Capture intent using `frontend` skill components.
+2.  **API (Communication)**: Validate payload using shared types.
+3.  **Backend (Logic)**: Process rules using `backend` skill architecture.
+4.  **Database (Storage)**: Persist safely.
+5.  **External Services**: Handle side-effects (Async/Queues).
+
+### 2. Integration Checkpoints
+[ ] **Contract First**: Define the API types/Interface before coding.
+[ ] **Database Schema**: Ensure efficient models (check Indexes).
+[ ] **Error Handling**: Ensure Backend errors map to Frontend toast notifications.
+[ ] **Loading States**: Handle network latency gracefully in the UI.
+
+## Resources
+- 👉 **[End-to-End Workflow](resources/end-to-end-workflow.md)** (The detailed flow map)
+- 👉 **[Integration Patterns](resources/integration-patterns.md)** (Type sharing, Facades, Queues)
+- 👉 **[Frontend Skill](../frontend/SKILL.md)** (For UI/UX)
+- 👉 **[Backend Skill](../backend/SKILL.md)** (For Architecture/Security)
+- 👉 **[Debug Skill](../debug/SKILL.md)** (When integrations break)
+```
+
+---
+
+### 2. Skill: api-troubleshooting
+**Path:** `.agent/skills/api-troubleshooting/SKILL.md`
+```markdown
+---
+name: api-troubleshooting
+description: |
+  Expert diagnostics and resolution for API, AI integration, and server-side dependency errors. 
+  Follows a rigorous "isolate-inspect-resolve" methodology to fix 400/500 errors.
+---
+
+# API Troubleshooting Skill
+
+Use this skill when the user encounters:
+- **Status 400 (Bad Request)**: "Invalid format", "Cannot identify image", "Missing parameter".
+- **Status 500 (Internal Server Error)**: Crashes, timeouts, "Something went wrong".
+- **AI API Issues**: OpenAI/Anthropic/Nvidia errors, rate limits, hallucinated formats.
+- **Dependency Failures**: "Sharp missing", "Module not found", "Glbc version mismatch" (Common in AWS/Vercel).
+
+## Workflow
+
+### Phase 1: Isolation & Classification
+1.  **Identify the Source**:
+    - **Client-Side (400)**: The request is malformed (bad JSON, wrong Headers, invalid file type).
+    - **Server-Side (500)**: The code crashed (Null pointer, Dependency missing, Database timeout).
+    - **Upstream (502/504)**: The 3rd party API (AI provider) is down or rejecting the request.
+
+2.  **Verify Environment**:
+    - **Run the Diagnostic Script**: `npx tsx .agent/skills/api-troubleshooting/scripts/diagnose-env.ts`
+        - Checks for critical binaries (`sharp`, `python`, `ffmpeg`).
+        - Validates environment variables (API Keys present?).
+        - Checks node version matches deployment target.
+
+### Phase 2: "Deep Logging" Instrumentation
+If the error is vague (e.g., "Image processing failed"), you MUST instrument the code to see the raw data.
+
+1.  **Log Incoming Payloads**:
+    ```typescript
+    console.log('[Debug] Payload Size:', req.body.length);
+    console.log('[Debug] Headers:', JSON.stringify(req.headers));
+    ```
+2.  **Log Binary/Buffer Details**:
+    - **NEVER** log the full buffer.
+    - **ALWAYS** log the magic bytes (first 10 hex characters).
+    ```typescript
+    if (buffer) {
+       console.log('[Debug] Buffer Magic Bytes:', buffer.subarray(0, 10).toString('hex'));
+    }
+    ```
+3.  **Log Upstream Requests**:
+    - Log exactly what you are sending to the AI API (truncated to safe length).
+
+### Phase 3: Common Fix Patterns
+
+#### Pattern A: "Sharp/Image Processing Failed" (The AWS/Linux Issue)
+**Symptoms**: Works locally (Mac/Windows), fails on AWS/Vercel (Linux). Error: "Cannot find module...", "Something went wrong".
+**Root Cause**: `sharp` needs platform-specific binaries (`linux-x64`) which aren't installed on your Mac.
+**Fix**:
+1.  **Relax Validation**: Don't just trust `sharp`. If it fails, fallback to checking `file.type` (MIME type) or simple magic bytes.
+    ```typescript
+    // RELAXED FALLBACK
+    try {
+       await sharp(buffer).metadata();
+    } catch (e) {
+       if (file.type.startsWith('image/')) {
+          console.warn("Sharp failed, but trusting MIME type");
+       } else {
+          throw e;
+       }
+    }
+    ```
+2.  **Install Platform Binaries**:
+    - Run: `npm install --platform=linux --arch=x64 sharp`
+    - Or use `npm ci` in Docker.
+
+#### Pattern B: "AI Returns Invalid JSON"
+**Symptoms**: `JSON.parse` fails.
+**Fix**:
+1.  **Sanitize Output**:
+    ```typescript
+    const cleanJson = response.replace(/```json|```/g, '').trim();
+    ```
+2.  **Use "Strict Mode" / Structured Outputs** (if available in API).
+
+#### Pattern C: "Timeouts" (504)
+**Symptoms**: Request takes > 30s.
+**Fix**:
+1.  Increase Vercel/AWS Function timeout.
+2.  Verify `await` logic (don't `await` inside a `map` unless intentional, use `Promise.all`).
+
+## User Notification
+If you identify an Environment Issue (missing binary, wrong env var), you MUST notify the user clearly:
+> "I have detected a missing dependency in your production environment. AWS requires Linux binaries for [Library Name], but you only have macOS binaries. I will run a fix command."
+```
+**Path:** `.agent/skills/api-troubleshooting/scripts/diagnose-env.ts`
+```typescript
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+
+const COLORS = {
+    green: '\x1b[32m',
+    red: '\x1b[31m',
+    yellow: '\x1b[33m',
+    reset: '\x1b[0m',
+    bold: '\x1b[1m'
+};
+
+function log(color: string, message: string) {
+    console.log(`${color}${message}${COLORS.reset}`);
+}
+
+async function checkDependencies() {
+    log(COLORS.bold, "🔍 Starting API Environment Diagnostic...");
+
+    // 1. Check Node Environment
+    log(COLORS.reset, `\n[1/3] Checking Node.js Environment...`);
+    log(COLORS.reset, `Current Platform: ${process.platform}`);
+    log(COLORS.reset, `Current Arch: ${process.arch}`);
+    log(COLORS.green, `✔ Node Version: ${process.version}`);
+
+    // 2. Check Critical Binaries (Sharp)
+    log(COLORS.reset, `\n[2/3] Checking Specific Dependencies...`);
+
+    // Check sharp
+    try {
+        const sharp = require('sharp');
+        log(COLORS.green, `✔ 'sharp' is loadable.`);
+
+        // Check if linux binaries are present (heuristic)
+        const nodeModulesPath = path.join(process.cwd(), 'node_modules', '@img');
+        if (fs.existsSync(nodeModulesPath)) {
+            log(COLORS.green, `✔ Native bindings appear to be installed.`);
+        } else {
+            if (process.platform === 'darwin') {
+                log(COLORS.yellow, `⚠ Running on macOS. Ensure 'sharp' linux binaries are installed for AWS deployment.`);
+                log(COLORS.yellow, `  Recommendation: run 'npm install --platform=linux --arch=x64 sharp' before deploy.`);
+            }
+        }
+
+    } catch (e: any) {
+        log(COLORS.red, `✖ 'sharp' failed to load: ${e.message}`);
+        log(COLORS.red, `  This is a critical error for image processing.`);
+    }
+
+    // 3. Check API Keys (Env Vars)
+    log(COLORS.reset, `\n[3/3] Scanning Environment Variables...`);
+    const criticalKeys = [
+        'NVIDIA_API_KEY',
+        'OPENAI_API_KEY',
+        'DATABASE_URL',
+        'AWS_ACCESS_KEY_ID',
+        'AWS_SECRET_ACCESS_KEY'
+    ];
+
+    let missingKeys = 0;
+    criticalKeys.forEach(key => {
+        if (process.env[key]) {
+            log(COLORS.green, `✔ ${key}`);
+        } else {
+            // Only warn, don't error, as not all might be required
+            log(COLORS.yellow, `⚠ ${key} is NOT SET (Is this expected?)`);
+            missingKeys++;
+        }
+    });
+
+    console.log("\n" + "=".repeat(30));
+    if (missingKeys > 0) {
+        log(COLORS.yellow, "diagnostic completed with warnings.");
+    } else {
+        log(COLORS.green, "Diagnostic completed successfully. Environment looks healthy.");
+    }
+}
+
+checkDependencies().catch(console.error);
+```
+
+---
+
+### 3. Skill: aws-troubleshooting
+**Path:** `.agent/skills/aws-troubleshooting/SKILL.md`
+```markdown
+---
+name: aws-troubleshooting
+description: Performs expert pre-deployment checks and troubleshooting for AWS deployments, specifically focusing on database connectivity and health. Use this when the user intends to "deploy", "upload", or fix AWS issues.
+---
+
+# AWS Deployment Troubleshooter
+
+## When to use this skill
+- User says "deploy", "upload to AWS", or "going live".
+- User encounters "deployment failed" or "database connection error" on AWS.
+- User asks to "check the database" before deploying.
+
+## Workflow
+1.  **Detect Intent**: User wants to deploy or is having deployment issues.
+2.  **Pre-Flight Check**: Run the `pre-deploy-check.ts` script to verify local/environment readiness.
+    - Check for `DATABASE_URL`.
+    - Validate Prisma schema.
+    - Verify actual database connectivity.
+3.  **Analyze Results**:
+    - **Pass**: Proceed with the user's requested deployment command (e.g., `git push`, `eb deploy`, `zip upload`).
+    - **Fail**: Stop! Do not deploy. Analyze the error output and propose fixes (e.g., correct env vars, run migrations).
+
+## Instructions
+
+### 1. Run Pre-Deployment Check
+Before ANY deployment command, run this script to ensure the database is accessible and the schema is valid.
+
+```bash
+npx tsx .agent/skills/aws-troubleshooting/scripts/pre-deploy-check.ts
+```
+
+### 2. Common Fixes
+
+**Issue: `PrismaClientInitializationError` / Connection refused**
+- Check if the allowed IP address for the database includes the deployment environment (or current machine).
+- Verify `DATABASE_URL` format.
+
+**Issue: Schema Validation Error**
+- Run `npx prisma generate` to refresh the client.
+- Fix syntax errors in `schema.prisma`.
+
+**Issue: Pending Migrations**
+- If the check warns about migrations, ASK the user before running `npx prisma migrate deploy`.
+
+## Resources
+- [pre-deploy-check.ts](scripts/pre-deploy-check.ts)
+```
+**Path:** `.agent/skills/aws-troubleshooting/scripts/pre-deploy-check.ts`
+```typescript
+import { PrismaClient } from '@prisma/client'
+import { execSync } from 'child_process'
+
+const prisma = new PrismaClient()
+
+async function main() {
+    console.log('\x1b[36m%s\x1b[0m', '🚀 Starting AWS Pre-Deployment Checks...')
+
+    // 1. Check Environment Variables
+    if (!process.env.DATABASE_URL) {
+        console.error('\x1b[31m%s\x1b[0m', '❌ CRITICAL: DATABASE_URL is not set in the environment.')
+        process.exit(1)
+    }
+    console.log('\x1b[32m%s\x1b[0m', '✅ DATABASE_URL is present.')
+
+    // 2. Validate Prisma Schema
+    try {
+        console.log('Validating Prisma schema...')
+        execSync('npx prisma validate', { stdio: 'inherit' })
+        console.log('\x1b[32m%s\x1b[0m', '✅ Prisma schema is valid.')
+    } catch (error) {
+        console.error('\x1b[31m%s\x1b[0m', '❌ Prisma validation failed.')
+        process.exit(1)
+    }
+
+    // 3. Verify Database Connection & Query
+    console.log('Verifying Database Connection...')
+    try {
+        // Simple query to check connectivity
+        await prisma.$connect()
+
+        // Try a read operation to ensure we have read permissions and the tables exist
+        // We'll try to count users or find the first organization, similar to verify-prisma.ts
+        const orgCount = await prisma.organization.count()
+        console.log(`✅ Successfully connected! Found ${orgCount} organizations.`)
+
+        // Optional: Check for pending migrations (this is a heuristic)
+        // We can't easily check for pending migrations without potentially altering state or complex logic,
+        // so we'll rely on the connection + simple query as a proxy for "db is alive and schema likely matches".
+
+    } catch (e) {
+        console.error('\x1b[31m%s\x1b[0m', '❌ Database Connection Failed!')
+        console.error(e)
+        // Suggest potential fixes based on error
+        if (e instanceof Error) {
+            if (e.message.includes('P1001')) {
+                console.log('\x1b[33m%s\x1b[0m', '💡 Hint: Can\'t reach database server. Check firewall rules / public access?')
+            } else if (e.message.includes('P1017')) {
+                console.log('\x1b[33m%s\x1b[0m', '💡 Hint: Server closed the connection. Check connection limits or timeouts.')
+            }
+        }
+        process.exit(1)
+    } finally {
+        await prisma.$disconnect()
+    }
+
+    console.log('\x1b[32m%s\x1b[0m', '🎉 All Pre-Deployment Checks Passed! Ready to deploy.')
+}
+
+main()
+```
+
+---
+
+### 4. Skill: backend
+**Path:** `.agent/skills/backend/SKILL.md`
+```markdown
+---
+name: backend
+description: Research best practices for modern backend technologies, architectural patterns, performance optimization, and market competitive analysis. Use this to design scalable systems and identify feature opportunities.
+---
+
+# Research & Backend Optimization
+
+## When to use this skill
+- When designing a new backend system or microservice.
+- When optimizing an existing API for performance or security.
+- When you need to understand the current "State of the Art" (2026 standards).
+- When analyzing competitors and identifying market gaps for a product.
+
+## Workflow
+[ ] **Step 1: Architecture Check** - Consult [Architecture Trends](resources/architecture-trends.md) to choose the right pattern (Monolith vs. Serverless vs. Agentic).
+[ ] **Step 2: Optimize** - Apply [Performance & Security](resources/performance-security.md) best practices.
+[ ] **Step 3: Analyze Market** - Use [Market Analysis](resources/market-analysis.md) to validate features and find gaps.
+[ ] **Step 4: Implementation** - (Hand off to `planning` or `frontend` skills for execution).
+
+## Resources
+- 👉 **[Architecture & Trends (2026)](resources/architecture-trends.md)** (Microservices, Edge, Vector DBs)
+- 👉 **[Performance & Security](resources/performance-security.md)** (Caching, OWASP for AI, Zero Trust)
+- 👉 **[Market Analysis](resources/market-analysis.md)** (Gap Analysis, JTBD, SWOT)
+
+## Quick Tips
+- **Performance**: Always fix the N+1 query problem first.
+- **Security**: Never trust LLM output. Sanitize everything.
+- **Architecture**: Start with a Modular Monolith; don't over-engineer microservices early.
+```
+
+---
+
+### 5. Skill: brainstorming
+**Path:** `.agent/skills/brainstorming/SKILL.md`
+```markdown
+---
+name: brainstorming
+description: Use before any creative work to explore user intent, requirements, and design before implementation. Helps turn ideas into fully formed designs through collaborative dialogue.
+---
+
+# Brainstorming Ideas Into Designs
+
+## When to use this skill
+- When starting a new feature or component
+- When the user has a vague idea that needs refinement
+- Before writing any code or implementation plans
+
+## Workflow
+[ ] Understand the idea (Check context, ask clarifying questions)
+[ ] Explore approaches (Propose 2-3 options with trade-offs)
+[ ] Present the design (Break into small sections, validate each)
+[ ] Documentation (Write validated design to docs)
+
+## Instructions
+
+### 1. Understanding the Idea
+- **Check Context First**: Look at current files, docs, and recent work.
+- **Ask ONE Question at a time**: Don't overwhelm.
+- **Prefer Multiple Choice**: "Should we use A or B?" is better than "How should we do this?"
+- **Focus**: Understand purpose, constraints, and success criteria.
+
+### 2. Exploring Approaches
+- Always propose **2-3 different approaches**.
+- Explain trade-offs for each.
+- State your recommendation clearly but be open to feedback.
+
+### 3. Presenting the Design
+- **Incremental Validation**: Present the design in chunks of 200-300 words.
+- **Check-in**: "Does this look right so far?" after each chunk.
+- **Cover**: Architecture, components, data flow, error handling, testing.
+- **Be Flexible**: If the user disagrees, pause and clarify.
+
+### 4. Post-Design Actions
+- **Document**: Save the valid design to a markdown file (e.g., `docs/designs/YYYY-MM-DD-topic.md`).
+- **Transition**: Ask "Ready to set up for implementation?" and suggested moving to the `planning` skill.
+
+## Resources
+- [See `planning` skill for next steps](../planning/SKILL.md)
+```
+
+---
+
+### 6. Skill: brand-identity
+**Path:** `.agent/skills/brand-identity/SKILL.md`
+```markdown
+---
+name: brand-identity
+description: Provides the single source of truth for brand guidelines, design tokens, technology choices, and voice/tone. Use this skill whenever generating UI components, styling applications, writing copy, or creating user-facing assets to ensure brand consistency.
+---
+
+# Brand Identity & Guidelines
+
+**Brand Name:** Spendly
+
+This skill defines the core constraints for visual design and technical implementation for the brand. You must adhere to these guidelines strictly to maintain consistency.
+
+## Reference Documentation
+
+Depending on the task you are performing, consult the specific resource files below. Do not guess brand elements; always read the corresponding file.
+
+### For Visual Design & UI Styling
+If you need exact colors, fonts, border radii, or spacing values, read:
+👉 **[`resources/design-tokens.json`](resources/design-tokens.json)**
+
+### For Coding & Component Implementation
+If you are generating code, choosing libraries, or structuring UI components, read the technical constraints here:
+👉 **[`resources/tech-stack.md`](resources/tech-stack.md)**
+
+### For Copywriting & Content Generation
+If you are writing marketing copy, error messages, documentation, or user-facing text, read the persona guidelines here:
+👉 **[`resources/voice-tone.md`](resources/voice-tone.md)**
+```
+
+---
+
+### 7. Skill: compare
+**Path:** `.agent/skills/compare/SKILL.md`
+```markdown
+---
+name: comparing-products
+description: Conducts comprehensive competitive analysis, identifies feature/market gaps, and creates strategic innovation roadmaps to differentiate your product.
+---
+
+# Competitive Analysis & Strategy
+
+## When to use this skill
+- When you want to know how your app stacks up against Top 10 competitors.
+- When you feel "stuck" and need innovative feature ideas.
+- To identify "Blue Ocean" market gaps.
+- To create a 90-day strategic product roadmap.
+
+## Workflow
+[ ] **Step 1: Audit** - Use [Competitor Analysis](resources/competitor-analysis.md) to dissect the market.
+[ ] **Step 2: Innovate** - Apply [Innovation Strategy](resources/innovation-strategy.md) to find your UVP.
+[ ] **Step 3: Plan** - Build a [Strategic Roadmap](resources/strategic-roadmap.md) (Quick Wins vs. Big Bets).
+
+## Resources
+- 👉 **[Competitor Framework](resources/competitor-analysis.md)** (Dossiers & Gap Matrix)
+- 👉 **[Strategic Roadmap](resources/strategic-roadmap.md)** (90-Day Action Plan)
+- 👉 **[Innovation Strategy](resources/innovation-strategy.md)** (UVP & Outside-the-Box)
+
+## Deliverables Checklist
+1.  **Executive Summary**
+2.  **Gap Analysis Report** (ranked)
+3.  **Improvement Roadmap**
+4.  **Creative Innovation Ideas**
+5.  **Go-to-Market Strategy**
+```
+
+---
+
+### 8. Skill: cyber-security
+**Path:** `.agent/skills/cyber-security/SKILL.md`
+```markdown
+---
+name: cyber-security
+description: Acts as an expert cybersecurity analyst to assess, test, and fix application security risks. Uses ethical hacking methodology to identify vulnerabilities (OWASP Top 10) and provides concrete mitigation steps.
+---
+
+# Cybersecurity Vulnerability Analyst
+
+## When to use this skill
+- When the user asks for a "security audit" or "vulnerability assessment" of their code.
+- To detect and fix specific security flaws (SQLi, XSS, CSRF, IDOR).
+- When simulating an ethical hacking scenario or penetration test.
+- To ensure compliance with security standards (GDPR, PCI-DSS).
+
+## Role & Objectives
+You are an expert cybersecurity analyst (attacker/defender mindset). Your goals:
+1.  **Enumerate**: Find vulnerabilities in frontend, backend, and network layers.
+2.  **Explain**: Detail root causes (e.g., "insecure direct object reference").
+3.  **Simulate**: Describe potential exploit paths (ethical participation only).
+4.  **Mitigate**: Provide code-level fixes and architectural improvements.
+5.  **Report**: Deliver clear findings for developers and stakeholders.
+
+## Workflow
+[ ] **Step 1: Reconnaissance & Analysis**  
+   - Review code for hardcoded secrets, insecure deps (`package.json`), and logic flaws.
+   - Analyze API endpoints for IDOR, Broken Access Control, and Injection risks.
+[ ] **Step 2: Simulation (Ethical Hacking)**  
+   - *Think like an attacker*: How could authentication be bypassed? Input validation skipped?
+   - Describe the "Exploit Scenario" (Hypothetical walk-through).
+[ ] **Step 3: Risk Assessment**  
+   - Classify findings by severity (Critical/High/Medium/Low).
+   - Evaluate impact on data confidentiality, integrity, and availability (CIA triad).
+[ ] **Step 4: Remediation Plan**  
+   - Provide **exact code fixes** (e.g., "Use parameterized queries to stop SQLi").
+   - Recommend security headers, rate limiting, and input sanitization.
+
+## Analytical Behavior (The "Style")
+- **Technical & Structured**: Use headings, bullet points, and authoritative tone.
+- **Ethical Boundaries**: Describe vulnerabilities clearly but NEVER generate malicious payloads for live execution.
+- **Tools Awareness**: Reference tools like Burp Suite, OWASP ZAP, or Nmap where relevant to explain *how* a vulnerability would be found.
+
+## Example Output Format
+
+### 🚨 Vulnerability Found: [Name] (Severity: High)
+**Description:**  
+Explanation of the flaw...
+
+**Exploit Scenario:**  
+1. Attacker sends...
+2. Server responds with...
+
+**Remediation:**  
+```javascript
+// OLD (Vulnerable)
+db.query("SELECT * FROM users WHERE id = " + req.query.id);
+
+// NEW (Fixed)
+db.query("SELECT * FROM users WHERE id = ?", [req.query.id]);
+```
+```
+
+---
+
+### 9. Skill: debug
+**Path:** `.agent/skills/debug/SKILL.md`
+```markdown
+---
+name: debug
+description: Debugging & Problem-Solving Master. Provides a systematic framework for debugging React, Node.js, and Database issues. Includes methodology, patterns, tools, and real-world examples.
+---
+
+# Debugging & Problem-Solving Master
+
+## When to use this skill
+- When you are stuck on a difficult bug in a web stack (React/Node/DB).
+- When you need a structured approach ("I don't know where to start").
+- When identifying common patterns like memory leaks, re-renders, or slow queries.
+
+## Workflow
+[ ] **Step 1: Consult Framework** - Use the [Methodology](resources/methodology.md) to structure your approach.
+[ ] **Step 2: Check Patterns** - Look for [Common Patterns](resources/common-patterns.md) matching your symptoms.
+[ ] **Step 3: Tooling** - Select the right [Tool](resources/tools-techniques.md) (Inspector, DevTools, Logging).
+[ ] **Step 4: Check Examples** - See [Real Fixes](examples/fix-examples.md) for inspiration.
+
+## Resources
+- 👉 **[Systematic Methodology](resources/methodology.md)** (Reproduce -> Diagnose -> Fix)
+- 👉 **[Common Bug Patterns](resources/common-patterns.md)** (React loops, Node leaks, DB bottlenecks)
+- 👉 **[Tools & Techniques](resources/tools-techniques.md)** (DevTools, breakpoints, logging)
+- 👉 **[Real Code Examples](examples/fix-examples.md)** (Before/After scenarios)
+
+## Quick Tips
+- **React**: Is it a stale closure? Check your dependency arrays.
+- **Node**: Is the process crashing? Check unhandled promise rejections.
+- **Database**: Is it slow? Check for N+1 queries.
+```
+
+---
+
+### 10. Skill: frontend
+**Path:** `.agent/skills/frontend/SKILL.md`
+```markdown
+---
+name: frontend
+description: Generates COMPLETELY ORIGINAL & UNIQUELY BEAUTIFUL frontend designs. Research unconventional trends (Neo-Brutalism, Dark Neon, Glassmorphism 2.0) and creates custom design systems, color palettes, and animation strategies.
+---
+
+# Uniquely Beautiful Frontend Design
+
+## When to use this skill
+- When you want a design that is **NOT** generic (no standard Bootstrap/Material).
+- When you need a "WOW" factor for a landing page or app interface.
+- To generate original component designs (React + Tailwind).
+- To create a comprehensive design system (Colors, Typography, Motion).
+
+## Workflow
+[ ] **Step 1: Choose Philosophy** - Consult [Design Philosophy](resources/design-philosophy.md) to pick a direction (e.g., Neo-Brutalism vs. Organic Minimal).
+[ ] **Step 2: Define System** - Customize the [Design System](resources/custom-design-system.md) (Colors, Fonts, Spacing).
+[ ] **Step 3: Build Components** - Use [Component Examples](examples/components.md) as a base for construction.
+[ ] **Step 4: Animate** - Apply [Motion Principles](resources/animation-library.md) to bring it to life.
+
+## Resources
+- 👉 **[Design Philosophy](resources/design-philosophy.md)** (Beyond "Clean & Modern")
+- 👉 **[Custom Design System](resources/custom-design-system.md)** ("Electric Noir" & "Fluid" Spacing)
+- 👉 **[Original Components](examples/components.md)** (React + Tailwind Code Snippets)
+- 👉 **[Animation Library](resources/animation-library.md)** (Framer Motion strategies)
+- 👉 **[Inspiration Sources](resources/inspiration-sources.md)** (Where to find the new-new)
+
+## Quick Tips
+- **Glows**: Use `shadow-[color]` with `rgba` to create neon glows.
+- **Glass**: Layer `backdrop-blur` with subtle white borders.
+- **Typography**: Go BIG with headings. Mix a wild display font with a clean sans.
+- **Micro-interactions**: Use `whileHover` and `whileTap` on *everything*.
+```
+
+---
+
+### 11. Skill: planning
+**Path:** `.agent/skills/planning/SKILL.md`
+```markdown
+---
+name: planning
+description: Generates comprehensive implementation plans for multi-step tasks. Use this when you have requirements/specs but haven't started coding yet. Ensures detailed, bite-sized tasks for execution.
+---
+
+# Planning Implementation
+
+## When to use this skill
+- After a design has been agreed upon (e.g., via `brainstorming` skill)
+- When you have a clear spec or requirements
+- Before writing any code or implementation plans
+
+## Workflow
+[ ] Create Implementation Plan file (e.g., `docs/plans/YYYY-MM-DD-feature.md`)
+[ ] Add standard header with verify instructions
+[ ] Break down work into bite-sized tasks (2-5 mins each)
+[ ] Review plan with user
+
+## Instructions
+
+### 1. Core Philosophy
+- **Assume Zero Context**: Write for a skilled dev who doesn't know the codebase.
+- **Bite-Sized Tasks**: Each step should be one atomic action (e.g., "Write failing test", "Make it pass").
+- **TDD & YAGNI**: Enforce Test-Driven Development and "You Ain't Gonna Need It".
+
+### 2. Plan Document Structure
+
+**Header:**
+```markdown
+# [Feature Name] Implementation Plan
+
+**Goal:** [One sentence describing what this builds]
+**Architecture:** [2-3 sentences about approach]
+**Tech Stack:** [Key technologies/libraries]
+```
+
+**Task Format:**
+Each task should follow this strict structure:
+```markdown
+### Task N: [Component Name]
+
+**Files:**
+- Create: `exact/path/to/file.py`
+- Modify: `exact/path/to/existing.py:123-145`
+
+**Step 1: Write the failing test**
+[Code snippet]
+
+**Step 2: Verify failure**
+[Command to run]
+
+**Step 3: Minimal Implementation**
+[Code snippet]
+
+**Step 4: Verify pass**
+[Command to run]
+
+**Step 5: Commit**
+[Git command]
+```
+
+### 3. Execution Options
+After generating the plan, ask the user how they want to proceed:
+1.  **Execute Immediately**: You proceed to implement the plan step-by-step.
+2.  **Parallel Execution**: Open a new session to execute the plan while this session remains for oversight.
+
+## Resources
+- [See `brainstorming` skill for prior steps](../brainstorming/SKILL.md)
+```
+
+---
+
+### 12. Skill: skillgod
+**Path:** `.agent/skills/skillgod/SKILL.md`
+```markdown
+---
+name: creating-skills
+description: Generates high-quality, predictable, and efficient .agent/skills/ directories based on user requirements. This is the 'skillgod' skill to reference for creating other skills.
+---
+
+# Antigravity Skill Creator System Instructions
+
+You are an expert developer specializing in creating "Skills" for the Antigravity agent environment. Your goal is to generate high-quality, predictable, and efficient `.agent/skills/` directories based on user requirements.
+
+## 1. Core Structural Requirements
+Every skill you generate must follow this folder hierarchy:
+- `<skill-name>/`
+    - `SKILL.md` (Required: Main logic and instructions)
+    - `scripts/` (Optional: Helper scripts)
+    - `examples/` (Optional: Reference implementations)
+    - `resources/` (Optional: Templates or assets)
+
+## 2. YAML Frontmatter Standards
+The `SKILL.md` must start with YAML frontmatter following these strict rules:
+- **name**: Gerund form (e.g., `testing-code`, `managing-databases`). Max 64 chars. Lowercase, numbers, and hyphens only. No "claude" or "anthropic" in the name.
+- **description**: Written in **third person**. Must include specific triggers/keywords. Max 1024 chars. (e.g., "Extracts text from PDFs. Use when the user mentions document processing or PDF files.")
+
+## 3. Writing Principles (The "Claude Way")
+When writing the body of `SKILL.md`, adhere to these best practices:
+
+* **Conciseness**: Assume the agent is smart. Do not explain what a PDF or a Git repo is. Focus only on the unique logic of the skill.
+* **Progressive Disclosure**: Keep `SKILL.md` under 500 lines. If more detail is needed, link to secondary files (e.g., `[See ADVANCED.md](ADVANCED.md)`) only one level deep.
+* **Forward Slashes**: Always use `/` for paths, never `\`.
+* **Degrees of Freedom**: 
+    - Use **Bullet Points** for high-freedom tasks (heuristics).
+    - Use **Code Blocks** for medium-freedom (templates).
+    - Use **Specific Bash Commands** for low-freedom (fragile operations).
+
+## 4. Workflow & Feedback Loops
+For complex tasks, include:
+1.  **Checklists**: A markdown checklist the agent can copy and update to track state.
+2.  **Validation Loops**: A "Plan-Validate-Execute" pattern. (e.g., Run a script to check a config file BEFORE applying changes).
+3.  **Error Handling**: Instructions for scripts should be "black boxes"—tell the agent to run `--help` if they are unsure.
+
+## 5. Output Template
+When asked to create a skill, output the result in this format:
+
+### [Folder Name]
+**Path:** `.agent/skills/[skill-name]/`
+
+### [SKILL.md]
+```markdown
+---
+name: [gerund-name]
+description: [3rd-person description]
+---
+
+# [Skill Title]
+
+## When to use this skill
+- [Trigger 1]
+- [Trigger 2]
+
+## Workflow
+[Insert checklist or step-by-step guide here]
+
+## Instructions
+[Specific logic, code snippets, or rules]
+
+## Resources
+- [Link to scripts/ or resources/]
+[Supporting Files]
+(If applicable, provide the content for scripts/ or examples/)
+```
+
+---
+
+## Instructions for use
+
+1.  **Copy the content above** into a new file named `antigravity-skill-creator.md`.
+2.  **Upload this file** to your AI agent or paste it into the system prompt area.
+3.  **Trigger a skill creation** by saying: *"Based on my skill creator instructions, build me a skill for [Task, e.g., 'automating React component testing with Vitest']."**
+
+### Suggested Next Step
+Would you like me to use this new logic to **generate a specific example skill** for you right now (such as a "Deployment Guard" or "Code Reviewer" skill)?
+```
+
+---
+
+### 13. Skill: troubleshooting
+**Path:** `.agent/skills/troubleshooting/SKILL.md`
+```markdown
+---
+name: troubleshooting
+description: Systematically debugs and resolves application issues using a rigorous 6-step process (Error Assessment, Prediction, Investigation, Root Cause, Fix). Use when the user reports a bug, error, or unexpected behavior.
+---
+
+# Troubleshooting & Debugging
+
+## When to use this skill
+- When the user reports a bug, crash, or error message
+- When an application is behaving unexpectedly
+- When resolving build or compilation errors
+- To harden code using robust error handling patterns
+
+## Workflow
+[ ] **Step 1: Error Assessment** (Restate error, summarize task, check for red flags)
+[ ] **Step 2: Prediction Generation** (Generate 3-7 plausible root causes)
+[ ] **Step 3: Code Investigation** (Scan code for evidence confirming/denying predictions)
+[ ] **Step 4: Prediction Narrowing** (Converge on 1-2 most likely causes)
+[ ] **Step 5: Root Cause Identification** (Pinpoint problematic code and explain why)
+[ ] **Step 6: Debugging & Fixing** (Apply fix, verify, and improve error handling)
+
+## Instructions
+
+### 1. Error Assessment
+- **Restate the ERROR** in your own words.
+- **Summarize** what the user was trying to do.
+- **Identify Red Flags** in the provided code immediately.
+
+### 2. Prediction Generation
+- Brainstorm **3-7 potential causes**.
+- Base these on the stack trace, error message, and common failure modes (e.g., null pointers, network issues, race conditions).
+
+### 3. Investigation & Narrowing
+- **Systematically test** each prediction against the code.
+- **Rule out** causes with evidence (e.g., "Can't be network because the error is a ReferenceError").
+- **Converge** on the single most likely root cause.
+
+### 4. Fixing the Issue
+- **Apply the Fix**: Provide exact code changes.
+- **Verify**: precise steps to confirm the fix works.
+- **Harden**: Consult the **Error Handling Patterns** resource to prevent recurrence.
+
+## Resources
+- [Error Handling Patterns](resources/error-handling-patterns.md) - Best practices for writing resilient code and better error messages.
+```

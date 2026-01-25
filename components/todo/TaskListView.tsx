@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format, isToday, isPast, isTomorrow, isSameYear } from "date-fns";
-import { Check, Circle, AlertCircle, Calendar, Flag, MoreHorizontal, Trash, CalendarClock } from "lucide-react";
+import { Check, Circle, AlertCircle, Calendar, Flag, MoreHorizontal, Trash, CalendarClock, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ interface Task {
     priority: number;
     dueDate: Date | null;
     list?: { name: string; color: string | null } | null;
+    trip?: { id: string; name: string; tripNumber: string } | null;
     isSystem?: boolean;
     original?: any;
     systemType?: string;
@@ -154,6 +155,13 @@ function TaskItem({ task }: { task: Task }) {
                                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: task.list.color }} />
                             )}
                             <span className="max-w-[100px] truncate">{task.list.name}</span>
+                        </div>
+                    )}
+
+                    {task.trip && (
+                        <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-300">
+                            <Plane className="w-3 h-3" />
+                            <span className="max-w-[100px] truncate">{task.trip.name}</span>
                         </div>
                     )}
                 </div>
