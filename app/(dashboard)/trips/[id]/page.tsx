@@ -21,6 +21,7 @@ import prisma from "@/lib/prisma"
 import { getStatusConfig, canAddExpense, getBadgeColor } from "@/lib/trip-workflow"
 import { TripReportButton } from "./TripReportButton"
 import { DiscussionPanel } from "@/components/discussions/DiscussionPanel"
+import { TripTasks } from "@/components/trips/TripTasks"
 
 export default async function TripDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -76,6 +77,15 @@ export default async function TripDetailPage({ params }: { params: Promise<{ id:
                     </div>
                 </div>
                 <div className="flex gap-3 items-center">
+                    {userRole === "ADMIN" && (
+                        <Button variant="outline" asChild className="rounded-xl font-semibold border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                            <Link href={`/trips/${trip.id}/edit`}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Trip
+                            </Link>
+                        </Button>
+                    )}
+
                     <TripReportButton trip={trip} />
 
                     {/* Only show Add Expense if trip allows adding expenses (Planning/Active) */}
@@ -312,6 +322,13 @@ export default async function TripDetailPage({ params }: { params: Promise<{ id:
                             className="border-0 shadow-none rounded-none"
                             scrollAreaClassName="h-[400px]"
                         />
+                    </CardContent>
+                </Card>
+
+                {/* Trip Tasks */}
+                <Card className="lg:col-span-2 border-zinc-200 dark:border-zinc-800 shadow-sm">
+                    <CardContent className="pt-6">
+                        <TripTasks tripId={trip.id} tasks={(trip as any).tasks || []} />
                     </CardContent>
                 </Card>
             </div>

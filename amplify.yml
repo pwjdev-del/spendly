@@ -14,6 +14,7 @@ frontend:
         - echo "NVIDIA_API_KEY=$NVIDIA_API_KEY" >> .env.production
         - echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env.production
         - echo "RESEND_API_KEY=$RESEND_API_KEY" >> .env.production
+        - npx prisma migrate deploy
         - npx prisma generate
     build:
       commands:

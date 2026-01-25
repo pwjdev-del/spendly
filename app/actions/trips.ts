@@ -51,7 +51,7 @@ export async function createTrip(prevState: string | undefined, formData: FormDa
                 description,
                 startDate: new Date(startDate),
                 endDate: endDate ? new Date(endDate) : null,
-                budget: budget ? parseFloat(budget) : null,
+                budget: budget ? Math.round(parseFloat(budget) * 100) : null,
                 status,
                 userId: user.id,
                 organizationId: user.organizationId
@@ -84,6 +84,15 @@ export async function updateTrip(id: string, prevState: string | undefined, form
 
         if (!canEdit) return "Not authorized"
 
+        // Enforce Admin Only if requested? 
+        // User asked "make ti so that the admain is the only one able to edit".
+        // So I should restrict strict editing here to ADMIN only?
+        // The previous code allowed owner. 
+        // I will restrict it to ADMIN only as requested.
+        if (user.role !== 'ADMIN') {
+            return "Only Admins can edit trips"
+        }
+
         const name = (formData.get("name") as string)?.trim()
         const description = (formData.get("description") as string)?.trim() || null
         const startDate = formData.get("startDate") as string
@@ -102,7 +111,7 @@ export async function updateTrip(id: string, prevState: string | undefined, form
                 description,
                 startDate: new Date(startDate),
                 endDate: endDate ? new Date(endDate) : null,
-                budget: budget ? parseFloat(budget) : null,
+                budget: budget ? Math.round(parseFloat(budget) * 100) : null,
                 status
             }
         })

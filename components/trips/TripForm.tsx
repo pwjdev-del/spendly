@@ -37,13 +37,13 @@ export function TripForm({ initialData, isEditing = false }: TripFormProps) {
             try {
                 if (isEditing && initialData) {
                     // Update existing trip
-                    const result = await updateTrip(initialData.id, formData)
-                    if (result?.error) {
-                        toast.error(result.error)
-                    } else {
+                    const result = await updateTrip(initialData.id, undefined, formData)
+                    if (result === "success") {
                         toast.success("Trip updated successfully")
                         router.push(`/trips/${initialData.id}`)
                         router.refresh()
+                    } else {
+                        toast.error(typeof result === 'string' ? result : "Failed to update trip")
                     }
                 } else {
                     // Create new trip
@@ -51,8 +51,8 @@ export function TripForm({ initialData, isEditing = false }: TripFormProps) {
                     if (result === "success") {
                         toast.success("Trip created successfully")
                         router.push("/trips")
-                    } else if (typeof result === "string") {
-                        toast.error(result)
+                    } else {
+                        toast.error(typeof result === 'string' ? result : "Failed to create trip")
                     }
                 }
             } catch (error) {
