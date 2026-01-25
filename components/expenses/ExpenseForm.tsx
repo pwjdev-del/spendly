@@ -250,7 +250,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
         setIsScanning(true) // Re-assert in case logic flowed weirdly
 
         // function to perform upload
-        const performScan = async (fileToUpload: File | Blob) => {
+        const performScan = async (fileToUpload: File | Blob): Promise<any> => {
             const formData = new FormData()
             formData.append("file", fileToUpload)
 
@@ -260,27 +260,21 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             })
 
             if (!response.ok) {
-                if (response.status === 422) {
-                    throw new Error("HEIC_DETECTED");
-                }
                 const text = await response.text();
+
+                // HEIC DETECTION TRAP
+                // If server says it's HEIC (regardless of extension), throw specific error to trigger client-side conversion
+                if (response.status === 400 && (text.includes("HEIC") || text.includes("ftyp"))) {
+                    throw new Error("HIDDEN_HEIC_DETECTED");
+                }
+
                 let errorMessage = `Server Error (${response.status})`;
                 try {
                     const errorData = JSON.parse(text);
-                    // Ensure we extract a meaningful error message
-                    if (errorData?.error) {
-                        errorMessage = errorData.error;
-                    } else if (errorData?.message) {
-                        errorMessage = errorData.message;
-                    } else if (errorData?.detail) {
-                        errorMessage = errorData.detail;
-                    } else if (text && text !== '{}') {
-                        errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}`;
-                    }
+                    if (errorData?.error) errorMessage = errorData.error;
+                    else if (errorData?.message) errorMessage = errorData.message;
                 } catch {
-                    if (text) {
-                        errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}`;
-                    }
+                    if (text) errorMessage = `${errorMessage}: ${text.slice(0, 100)}`;
                 }
                 throw new Error(errorMessage);
             }
@@ -291,7 +285,36 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             toast.loading("Scanning receipt with AI...", { id: "scan-progress" });
 
             // Upload directly - server handles image processing (or we passed converted file)
-            const data = await performScan(fileToProcess);
+            let data;
+            try {
+                data = await performScan(fileToProcess);
+            } catch (err: any) {
+                // AUTO-FIX: If server rejected it as HEIC (even if named .png), try to convert it client-side and retry!
+                if (err.message === "HIDDEN_HEIC_DETECTED") {
+                    console.log("Server identified hidden HEIC! Attempting client-side conversion...");
+                    toast.loading("Detected iPhone format. Converting...", { id: "scan-progress" });
+
+                    try {
+                        const converted = await heic2any({
+                            blob: file, // Use original file
+                            toType: "image/jpeg",
+                            quality: 0.8
+                        });
+                        const blob = Array.isArray(converted) ? converted[0] : converted;
+                        const fixedFile = new File([blob], "fixed_receipt.jpg", { type: "image/jpeg" });
+
+                        // Retry upload with fixed file
+                        data = await performScan(fixedFile);
+                        console.log("Retry successful with converted JPEG!");
+                    } catch (convErr) {
+                        console.error("Client-side conversion failed:", convErr);
+                        throw new Error("Could not convert this image. Please screenshot it and upload not as File.");
+                    }
+                } else {
+                    throw err; // Re-throw other errors
+                }
+            }
+
             toast.dismiss("scan-progress");
             toast.success("Receipt scanned!");
 
