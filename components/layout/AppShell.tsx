@@ -50,7 +50,7 @@ export function AppShell({ children, userRole, canReconcile, trips, user, organi
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col h-full overflow-hidden relative">
                 {/* Header */}
-                <Header user={user} userRole={userRole} canReconcile={canReconcile} />
+                <Header user={user} userRole={userRole} canReconcile={canReconcile} organizationName={organizationName} />
 
                 {/* Main View Container (Flex Row for Desktop Panel) */}
                 <div className="flex-1 flex overflow-hidden relative">

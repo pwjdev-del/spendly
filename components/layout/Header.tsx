@@ -28,11 +28,12 @@ interface HeaderProps {
     }
     userRole?: string
     canReconcile?: boolean
+    organizationName?: string
 }
 
 import { useState, useEffect } from "react"
 
-export function Header({ user, userRole = "MEMBER", canReconcile = false }: HeaderProps) {
+export function Header({ user, userRole = "MEMBER", canReconcile = false, organizationName }: HeaderProps) {
     const [isMounted, setIsMounted] = useState(false)
     const pathname = usePathname()
 
@@ -63,7 +64,7 @@ export function Header({ user, userRole = "MEMBER", canReconcile = false }: Head
     return (
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-[env(safe-area-inset-top)] transition-all">
             <div className="flex h-16 md:h-14 items-center px-6 gap-4">
-                <MobileSidebar userRole={userRole} canReconcile={canReconcile} />
+                <MobileSidebar userRole={userRole} canReconcile={canReconcile} organizationName={organizationName} />
                 <div className="flex items-center gap-2 md:hidden">
                     <Image
                         src="/sia-mascot.png"
