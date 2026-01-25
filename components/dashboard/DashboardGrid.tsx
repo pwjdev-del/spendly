@@ -22,6 +22,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { Button } from "@/components/ui/button"
 import { LayoutGrid, Save, Plus, X, Move, RotateCcw, Maximize2, Minimize2 } from "lucide-react"
 import { WIDGET_REGISTRY, DashboardData, WidgetId, DEFAULT_LAYOUT, WIDGET_SIZES } from "./WidgetRegistry"
+import { WidgetErrorBoundary } from "./WidgetErrorBoundary"
 import { saveDashboardLayout } from "@/app/actions/user"
 import {
     Dialog,
@@ -110,7 +111,9 @@ function SortableItem(props: {
             {/* Widget content - no motion during drag */}
             <div className={`h-full rounded-xl overflow-hidden ${props.isEditing ? 'border-2 border-dashed border-primary/30 bg-accent/5' : ''}`}>
                 <div className={props.isEditing ? "pointer-events-none h-full" : "h-full"}>
-                    <WidgetComponent data={props.data} />
+                    <WidgetErrorBoundary title={WidgetConfig.title}>
+                        <WidgetComponent data={props.data} />
+                    </WidgetErrorBoundary>
                 </div>
             </div>
 

@@ -74,13 +74,15 @@ function SidebarContent({ className, onNavigate, onAddExpense, userRole = "MEMBE
     const pathname = usePathname()
 
     // Filter nav items based on user role
-    const normalizedRole = userRole === 'MEMBER' ? 'SUBMITTER' : userRole
+    // Normalize input role to uppercase to match constant arrays
+    const upperUserRole = userRole?.toUpperCase() || "MEMBER"
+    const normalizedRole = upperUserRole === 'MEMBER' ? 'SUBMITTER' : upperUserRole
 
     console.log('[SIDEBAR DEBUG] userRole:', userRole, 'normalizedRole:', normalizedRole)
 
     const filteredNavItems = sidebarNavItems.filter(item => {
-        const isIncluded = item.roles.includes(normalizedRole) || item.roles.includes(userRole)
-        console.log(`[SIDEBAR DEBUG] Item: ${item.title}, Roles: ${item.roles}, Included: ${isIncluded}`)
+        const isIncluded = item.roles.includes(normalizedRole) || item.roles.includes(upperUserRole)
+        // console.log(`[SIDEBAR DEBUG] Item: ${item.title}, Roles: ${item.roles}, Included: ${isIncluded}`)
         return isIncluded
     })
 
