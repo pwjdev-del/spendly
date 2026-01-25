@@ -5,15 +5,17 @@ import { Building2, Check, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { updateOrganizationName } from "@/app/actions/organization"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 interface OrganizationSettingsProps {
     initialName: string
+    initialCurrency: string
 }
 
-export function OrganizationSettings({ initialName }: OrganizationSettingsProps) {
+export function OrganizationSettings({ initialName, initialCurrency }: OrganizationSettingsProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [name, setName] = useState(initialName)
     const router = useRouter()
@@ -60,6 +62,26 @@ export function OrganizationSettings({ initialName }: OrganizationSettingsProps)
                         />
                     </div>
                     <p className="text-xs text-muted-foreground">This name will be displayed in the sidebar for all members.</p>
+                </div>
+
+                <div className="grid gap-2 max-w-xl">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Default Currency</Label>
+                    <p className="text-xs text-muted-foreground mb-2">Used for all new expenses and reporting.</p>
+
+                    <Select name="currency" defaultValue={initialCurrency}>
+                        <SelectTrigger className="w-full h-12 bg-background border-input">
+                            <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="USD">USD ($) - United States Dollar</SelectItem>
+                            <SelectItem value="EUR">EUR (€) - Euro</SelectItem>
+                            <SelectItem value="GBP">GBP (£) - British Pound</SelectItem>
+                            <SelectItem value="INR">INR (₹) - Indian Rupee</SelectItem>
+                            <SelectItem value="CAD">CAD ($) - Canadian Dollar</SelectItem>
+                            <SelectItem value="AUD">AUD ($) - Australian Dollar</SelectItem>
+                            <SelectItem value="JPY">JPY (¥) - Japanese Yen</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="flex justify-end pt-4 border-t border-border">

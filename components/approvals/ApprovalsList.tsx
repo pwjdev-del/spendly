@@ -69,10 +69,10 @@ function SwipeableCard({ expense, onApprove, onReject }: { expense: Expense, onA
             {/* Foreground Card */}
             <motion.div
                 drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
+                dragConstraints={{ left: -100, right: 100 }}
                 onDragEnd={handleDragEnd}
                 style={{ x, background }}
-                className="relative z-10 bg-card p-4 shadow-sm"
+                className="relative z-10 bg-card p-4 shadow-sm touch-pan-y"
                 whileTap={{ cursor: "grabbing" }}
             >
                 <div className="flex justify-between items-start mb-2">

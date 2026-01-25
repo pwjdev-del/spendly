@@ -81,7 +81,8 @@ export async function getFamilyDetails() {
         currentUserRole: user.role,
         currentUserId: user.id,
         ownerId: ownerId,
-        isCurrentUserOwner
+        isCurrentUserOwner,
+        currency: organization.currency
     }
 }
 

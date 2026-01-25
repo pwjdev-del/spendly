@@ -17,6 +17,7 @@ model Organization {
   inviteCode   String? @unique
   logoUrl      String?
   primaryColor String? @default("#09090b") // Default black
+  currency     String  @default("USD")
   requireApproval Boolean @default(true) // Default to secure
 
   users        User[]
@@ -219,6 +220,7 @@ model Trip {
   
   expenses        Expense[]
   documents       TripDocument[]
+  tasks           Task[]
   
   userId          String
   user            User      @relation(fields: [userId], references: [id])
@@ -600,7 +602,10 @@ model Task {
   
   listId      String?
   list        TaskList? @relation(fields: [listId], references: [id])
-  
+
+  tripId      String?
+  trip        Trip?     @relation(fields: [tripId], references: [id])
+    
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id])
   

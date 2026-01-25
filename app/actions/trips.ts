@@ -78,8 +78,9 @@ export async function updateTrip(id: string, prevState: string | undefined, form
 
         if (!trip) return "Trip not found"
 
+        const normalizedRole = user.role === 'MEMBER' ? 'SUBMITTER' : user.role
         const canEdit = trip.userId === user.id ||
-            (user.role === 'ADMIN' && trip.organizationId === user.organizationId)
+            (['ADMIN', 'APPROVER', 'AUDITOR'].includes(normalizedRole) && trip.organizationId === user.organizationId)
 
         if (!canEdit) return "Not authorized"
 

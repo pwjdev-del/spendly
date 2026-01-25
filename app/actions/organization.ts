@@ -39,7 +39,10 @@ export async function updateOrganizationName(formData: FormData) {
 
         await prisma.organization.update({
             where: { id: user.organizationId },
-            data: { name: parsed.data.name }
+            data: {
+                name: parsed.data.name,
+                currency: formData.get("currency") as string || undefined
+            }
         })
 
         revalidatePath("/")

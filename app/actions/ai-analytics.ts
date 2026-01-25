@@ -68,10 +68,9 @@ async function getHistoricalSpending(userId: string) {
 }
 
 export async function askData(query: string) {
-    const session = await auth()
-    if (!session?.user?.id) return { error: "Unauthorized" }
-
     try {
+        const session = await auth()
+        if (!session?.user?.id) return { error: "Unauthorized" }
         const userId = session.user.id
         const { startOfMonth, endOfMonth } = getMonthBounds()
 
@@ -241,7 +240,7 @@ export async function createExpenseFromSia(params: {
     try {
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
-            select: { organizationId: true }
+            select: { organizationId: true, organization: { select: { currency: true } } }
         })
 
         if (!user?.organizationId) {
@@ -256,7 +255,7 @@ export async function createExpenseFromSia(params: {
                 amount: amountInCents,
                 merchant: params.merchant,
                 category: params.category || "General",
-                currency: "USD",
+                currency: user.organization?.currency || "USD",
                 date: new Date(),
                 status: "PENDING",
                 userId: session.user.id,

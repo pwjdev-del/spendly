@@ -492,7 +492,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                         {CURRENCIES.map((c) => (
                                             <CommandItem
                                                 key={c.value}
-                                                value={c.value}
+                                                value={c.label}
                                                 onSelect={() => {
                                                     setCurrency(c.value)
                                                     setOpenCurrency(false)
@@ -609,7 +609,7 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                                         {CURRENCIES.map((c) => (
                                             <CommandItem
                                                 key={c.value}
-                                                value={c.value}
+                                                value={c.label}
                                                 onSelect={() => {
                                                     setCurrency(c.value)
                                                     setOpenCurrency(false)

@@ -182,7 +182,7 @@ export async function createExpense(prevState: any, formData: FormData): Promise
                 date: transactionDate,
                 ...(receiptUrl ? { receiptUrl } : {}),
                 organizationId: user.organizationId!,
-                tripId: data.tripId,
+                tripId: data.tripId === "none" ? null : (data.tripId || existingToReplace?.tripId),
                 status: "PENDING",
                 latitude: data.latitude,
                 longitude: data.longitude,

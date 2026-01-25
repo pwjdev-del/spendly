@@ -160,14 +160,22 @@ export default async function ExpensePage({ params }: { params: Promise<{ id: st
                         </CardHeader>
                         <CardContent>
                             {expense.receiptUrl ? (
-                                <div className="relative rounded-lg overflow-hidden border bg-muted/30">
-                                    <a href={expense.receiptUrl} target="_blank" rel="noopener noreferrer">
-                                        <img
-                                            src={expense.receiptUrl}
-                                            alt="Receipt"
-                                            className="w-full h-auto max-h-[500px] object-contain"
+                                <div className="relative rounded-lg overflow-hidden border bg-muted/30 min-h-[300px] flex items-center justify-center">
+                                    {expense.receiptUrl.toLowerCase().endsWith('.pdf') ? (
+                                        <iframe
+                                            src={`${expense.receiptUrl}#view=FitH`}
+                                            className="w-full h-[500px]"
+                                            title="Receipt PDF"
                                         />
-                                    </a>
+                                    ) : (
+                                        <a href={expense.receiptUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
+                                            <img
+                                                src={expense.receiptUrl}
+                                                alt="Receipt"
+                                                className="w-full h-auto max-h-[500px] object-contain"
+                                            />
+                                        </a>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-48 border border-dashed rounded-lg bg-muted/30 text-muted-foreground">

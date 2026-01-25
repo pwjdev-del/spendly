@@ -16,7 +16,7 @@ import { redirect } from "next/navigation"
 import { PendingMembersList } from "./pending-members-list"
 
 export default async function FamilySettingsPage() {
-    const { organizationName, inviteCode, inviteCodeExpiresAt, members, currentUserRole, isCurrentUserOwner, currentUserId } = await getFamilyDetails()
+    const { organizationName, inviteCode, inviteCodeExpiresAt, members, currentUserRole, isCurrentUserOwner, currentUserId, currency } = await getFamilyDetails()
 
     if (currentUserRole !== 'ADMIN') {
         redirect("/settings")
@@ -35,7 +35,7 @@ export default async function FamilySettingsPage() {
             </div>
 
             {/* Organization Name Settings */}
-            <OrganizationSettings initialName={organizationName || "Your Space"} />
+            <OrganizationSettings initialName={organizationName || "Your Space"} initialCurrency={currency || "USD"} />
 
             {currentUserRole === 'ADMIN' && (
                 <Card>

@@ -302,68 +302,68 @@ export function ExpensesTable({ expenses: initialExpenses, userRole = "MEMBER" }
                     <div className="overflow-x-auto scrollbar-hide">
                         <Table className="min-w-[1000px] text-sm table-fixed">
                             <TableHeader>
-                                <TableRow className="bg-white/5 hover:bg-white/5 border-b border-white/10">
-                                    <TableHead className="w-[50px] p-2 pl-4"><Checkbox checked={selectedIds.size === initialExpenses.length && initialExpenses.length > 0} onCheckedChange={toggleSelectAll} className="rounded-[4px] border-white/20 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500" /></TableHead>
-                                    <TableHead className="w-[120px] h-12 text-xs font-bold text-white uppercase tracking-wider cursor-pointer" onClick={() => handleSort('date')}>Date <ChevronsUpDown className="w-3 h-3 inline opacity-50" /></TableHead>
-                                    <TableHead className="w-[240px] h-12 text-xs font-bold text-white uppercase tracking-wider cursor-pointer" onClick={() => handleSort('merchant')}>Merchant <ChevronsUpDown className="w-3 h-3 inline opacity-50" /></TableHead>
-                                    <TableHead className="w-[150px] h-12 text-xs font-bold text-white uppercase tracking-wider">Category</TableHead>
-                                    <TableHead className="w-[150px] h-12 text-xs font-bold text-white uppercase tracking-wider">Trip</TableHead>
-                                    <TableHead className="w-[120px] h-12 text-xs font-bold text-white uppercase tracking-wider">Status</TableHead>
-                                    <TableHead className="w-[140px] h-12 text-xs font-bold text-white uppercase tracking-wider">Submitted By</TableHead>
-                                    <TableHead className="w-[120px] h-12 text-right text-xs font-bold text-white uppercase tracking-wider cursor-pointer" onClick={() => handleSort('amount')}>Amount <ChevronsUpDown className="w-3 h-3 inline opacity-50" /></TableHead>
+                                <TableRow className="bg-muted/50 hover:bg-muted/60 border-b border-border">
+                                    <TableHead className="w-[50px] p-2 pl-4"><Checkbox checked={selectedIds.size === initialExpenses.length && initialExpenses.length > 0} onCheckedChange={toggleSelectAll} className="rounded-[4px] border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary" /></TableHead>
+                                    <TableHead className="w-[120px] h-12 text-xs font-bold text-muted-foreground uppercase tracking-wider cursor-pointer" onClick={() => handleSort('date')}>Date <ChevronsUpDown className="w-3 h-3 inline opacity-50" /></TableHead>
+                                    <TableHead className="w-[240px] h-12 text-xs font-bold text-muted-foreground uppercase tracking-wider cursor-pointer" onClick={() => handleSort('merchant')}>Merchant <ChevronsUpDown className="w-3 h-3 inline opacity-50" /></TableHead>
+                                    <TableHead className="w-[150px] h-12 text-xs font-bold text-muted-foreground uppercase tracking-wider">Category</TableHead>
+                                    <TableHead className="w-[150px] h-12 text-xs font-bold text-muted-foreground uppercase tracking-wider">Trip</TableHead>
+                                    <TableHead className="w-[120px] h-12 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</TableHead>
+                                    <TableHead className="w-[140px] h-12 text-xs font-bold text-muted-foreground uppercase tracking-wider">Submitted By</TableHead>
+                                    <TableHead className="w-[120px] h-12 text-right text-xs font-bold text-muted-foreground uppercase tracking-wider cursor-pointer" onClick={() => handleSort('amount')}>Amount <ChevronsUpDown className="w-3 h-3 inline opacity-50" /></TableHead>
                                     <TableHead className="w-[60px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {sortedExpenses.map((expense) => (
-                                    <TableRow key={expense.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
-                                        <TableCell className="p-2 pl-4"><Checkbox checked={selectedIds.has(expense.id)} onCheckedChange={() => toggleSelect(expense.id)} className="rounded-[4px] border-white/20 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500" /></TableCell>
-                                        <TableCell className="text-sm text-slate-300 font-mono py-3 truncate">
-                                            <Link href={`/expenses/${expense.id}`} className="block hover:text-white transition-colors">
+                                    <TableRow key={expense.id} className="border-b border-border hover:bg-muted/50 transition-colors group">
+                                        <TableCell className="p-2 pl-4"><Checkbox checked={selectedIds.has(expense.id)} onCheckedChange={() => toggleSelect(expense.id)} className="rounded-[4px] border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary" /></TableCell>
+                                        <TableCell className="text-sm text-foreground font-mono py-3 truncate">
+                                            <Link href={`/expenses/${expense.id}`} className="block hover:text-primary transition-colors">
                                                 {new Date(expense.date).toLocaleDateString()}
                                             </Link>
                                         </TableCell>
                                         <TableCell className="py-3">
-                                            <Link href={`/expenses/${expense.id}`} className="block group-hover:text-white transition-colors">
+                                            <Link href={`/expenses/${expense.id}`} className="block group-hover:text-primary transition-colors">
                                                 <div className="flex items-center gap-3">
-                                                    <MerchantLogo merchant={expense.merchant} category={expense.category} className="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity border border-white/10 rounded-full" />
+                                                    <MerchantLogo merchant={expense.merchant} category={expense.category} className="w-8 h-8 opacity-80 group-hover:opacity-100 transition-opacity border border-border rounded-full" />
                                                     <div className="flex flex-col">
-                                                        <span className="font-semibold text-slate-200 truncate pr-2 max-w-[160px]">{expense.merchant}</span>
+                                                        <span className="font-semibold text-foreground truncate pr-2 max-w-[160px]">{expense.merchant}</span>
                                                     </div>
                                                 </div>
                                             </Link>
                                         </TableCell>
-                                        <TableCell className="text-slate-400 py-3 text-sm truncate">
+                                        <TableCell className="text-muted-foreground py-3 text-sm truncate">
                                             <div className="flex items-center gap-2">
-                                                <span className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-md text-[11px] font-medium tracking-wide">{expense.category}</span>
+                                                <span className="px-2.5 py-1 bg-muted border border-border rounded-md text-[11px] font-medium tracking-wide">{expense.category}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-3">
                                             {expense.trip ? (
-                                                <Link href={`/trips/${expense.trip.name ? expense.trip.name : ''}`} className="flex items-center gap-1.5 text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-full w-fit max-w-[140px] truncate hover:bg-indigo-500/20 transition-colors">
+                                                <Link href={`/trips/${expense.trip.name ? expense.trip.name : ''}`} className="flex items-center gap-1.5 text-xs text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full w-fit max-w-[140px] truncate hover:bg-primary/20 transition-colors">
                                                     <Plane className="h-3 w-3 flex-shrink-0" />
                                                     <span className="truncate">{expense.trip.name}</span>
                                                 </Link>
-                                            ) : <span className="text-slate-600 text-sm">-</span>}
+                                            ) : <span className="text-muted-foreground text-sm">-</span>}
                                         </TableCell>
                                         <TableCell className="py-3">
                                             <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border w-fit shadow-sm",
-                                                expense.status === 'APPROVED' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                                                    expense.status === 'REJECTED' ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                                                        "bg-white/5 text-slate-400 border-white/10"
+                                                expense.status === 'APPROVED' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" :
+                                                    expense.status === 'REJECTED' ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" :
+                                                        "bg-muted text-muted-foreground border-border"
                                             )}>
                                                 {expense.status}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-slate-400 py-3 text-sm truncate">
+                                        <TableCell className="text-muted-foreground py-3 text-sm truncate">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold text-slate-300">
+                                                <div className="w-6 h-6 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                                                     {(expense.user?.name || 'U').charAt(0)}
                                                 </div>
                                                 <span className="truncate max-w-[100px] text-xs">{expense.user?.name || expense.user?.email || 'Unknown'}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right font-medium text-emerald-400 py-3 tabular-nums font-mono text-base">
+                                        <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400 py-3 tabular-nums font-mono text-base">
                                             <Link href={`/expenses/${expense.id}`} className="block">
                                                 {SafeMath.format(expense.amount, expense.currency)}
                                             </Link>
