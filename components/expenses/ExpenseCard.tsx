@@ -24,8 +24,13 @@ interface Expense {
     }
     trip?: {
         name: string
-    } | null
-}
+        trip?: {
+            name: string
+        } | null
+        originalAmount?: number | null
+        originalCurrency?: string | null
+        exchangeRate?: number | null
+    }
 
 interface ExpenseCardProps {
     expense: Expense
@@ -104,6 +109,11 @@ export function ExpenseCard({ expense }: ExpenseCardProps) {
                         {/* Amount */}
                         <div className="font-mono text-2xl font-bold text-white tracking-tight tabular-nums group-hover:text-emerald-400 transition-colors">
                             {SafeMath.format(expense.amount, expense.currency)}
+                            {expense.originalAmount && expense.originalCurrency && expense.currency !== expense.originalCurrency && (
+                                <div className="text-[10px] text-slate-500 font-medium text-right mt-0.5">
+                                    {SafeMath.format(expense.originalAmount, expense.originalCurrency)}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

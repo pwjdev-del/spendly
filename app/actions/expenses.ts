@@ -37,7 +37,10 @@ export async function createExpense(prevState: any, formData: FormData): Promise
         longitude: formData.get("longitude") ? parseFloat(formData.get("longitude") as string) : null,
         locationName: formData.get("locationName"),
         tripId: (formData.get("tripId") && formData.get("tripId") !== "none") ? formData.get("tripId") : null,
-        idempotencyKey: formData.get("idempotencyKey")
+        idempotencyKey: formData.get("idempotencyKey"),
+        originalAmount: formData.get("originalAmount") ? parseInt(formData.get("originalAmount") as string) : null,
+        originalCurrency: formData.get("originalCurrency"),
+        exchangeRate: formData.get("exchangeRate") ? parseFloat(formData.get("exchangeRate") as string) : null
     }
 
     // 1. Strict Server-Side Validation
@@ -186,7 +189,10 @@ export async function createExpense(prevState: any, formData: FormData): Promise
                 status: "PENDING",
                 latitude: data.latitude,
                 longitude: data.longitude,
-                locationName: data.locationName
+                locationName: data.locationName,
+                originalAmount: data.originalAmount,
+                originalCurrency: data.originalCurrency,
+                exchangeRate: data.exchangeRate
             }
         })
     } else {
@@ -207,7 +213,10 @@ export async function createExpense(prevState: any, formData: FormData): Promise
                     tripId: data.tripId,
                     latitude: data.latitude,
                     longitude: data.longitude,
-                    locationName: data.locationName
+                    locationName: data.locationName,
+                    originalAmount: data.originalAmount,
+                    originalCurrency: data.originalCurrency,
+                    exchangeRate: data.exchangeRate
                 },
             })
 

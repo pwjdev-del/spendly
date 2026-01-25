@@ -7,6 +7,7 @@ import { z } from "zod"
 
 const updateOrganizationNameSchema = z.object({
     name: z.string().min(1, "Name is required").max(50, "Name is too long"),
+    currency: z.string().length(3).optional()
 })
 
 export async function updateOrganizationName(formData: FormData) {

@@ -14,7 +14,7 @@ frontend:
         - echo "NVIDIA_API_KEY=$NVIDIA_API_KEY" >> .env
         - echo "GEMINI_API_KEY=$GEMINI_API_KEY" >> .env
         - echo "RESEND_API_KEY=$RESEND_API_KEY" >> .env
-        - npx prisma migrate deploy
+        - npx prisma db push --accept-data-loss --skip-generate
         - npx prisma generate
     build:
       commands:

@@ -59,6 +59,9 @@ interface ExpenseFormProps {
         tripId?: string | null
         latitude?: number | null
         longitude?: number | null
+        originalAmount?: number | null
+        originalCurrency?: string | null
+        exchangeRate?: number | null
     } | null
     initialFile?: File | null
     onCancel?: () => void
@@ -102,10 +105,54 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             : new Date().toISOString().slice(0, 10)
     )
     const [currency, setCurrency] = useState(initialData?.currency || "USD")
+    const [originalAmount, setOriginalAmount] = useState<number | null>(initialData?.originalAmount || null)
+    const [originalCurrency, setOriginalCurrency] = useState<string | null>(initialData?.originalCurrency || null)
+    const [exchangeRate, setExchangeRate] = useState<number | null>(initialData?.exchangeRate || null)
+    const [estimatedAmount, setEstimatedAmount] = useState<string | null>(null)
+    const [isLoadingRate, setIsLoadingRate] = useState(false)
+
     const [category, setCategory] = useState<string>(initialData?.category || "")
     const [customCategory, setCustomCategory] = useState("")
     const [openCategory, setOpenCategory] = useState(false)
     const [openCurrency, setOpenCurrency] = useState(false)
+
+    // Currency Conversion Effect
+    useEffect(() => {
+        const fetchRate = async () => {
+            // If currency is NOT USD (assuming USD is base/default for now, or we should pass defaultCurrency prop)
+            // Ideally we compare against organization currency, but for now let's assume if currency != "USD" we convert TO USD.
+            if (currency !== "USD" && amount) {
+                setIsLoadingRate(true)
+                try {
+                    const res = await fetch(`https://open.er-api.com/v6/latest/${currency}`)
+                    const data = await res.json()
+                    const rate = data.rates["USD"]
+                    if (rate) {
+                        setExchangeRate(rate)
+                        setOriginalCurrency(currency)
+                        // If we are typing in the foreign currency (Start Mode), amount is foreign.
+                        // So we want to calculate the USD equivalent.
+                        const foreignAmount = parseFloat(amount)
+                        const usdAmount = foreignAmount * rate
+                        setEstimatedAmount(usdAmount.toFixed(2))
+                        setOriginalAmount(SafeMath.toCents(amount))
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch rate", e)
+                } finally {
+                    setIsLoadingRate(false)
+                }
+            } else {
+                setEstimatedAmount(null)
+                setOriginalAmount(null)
+                setOriginalCurrency(null)
+                setExchangeRate(null)
+            }
+        }
+
+        const timeoutId = setTimeout(fetchRate, 500)
+        return () => clearTimeout(timeoutId)
+    }, [currency, amount])
 
     // Refs for Focus Management
     const merchantInputRef = useRef<HTMLInputElement>(null)
@@ -472,6 +519,21 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
                         />
                     </div>
 
+                    {/* Currency Conversion Display */}
+                    {estimatedAmount && (
+                        <div className="flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div className="text-sm text-slate-400 font-medium tracking-wide items-center flex gap-2">
+                                <span>{currency} {amount}</span>
+                                <span>≈</span>
+                                <span className="text-[#2DD4BF] font-mono">USD ${estimatedAmount}</span>
+                                {isLoadingRate && <Loader2 className="w-3 h-3 animate-spin" />}
+                            </div>
+                            <div className="text-[10px] text-slate-600 uppercase tracking-wider mt-1">
+                                (E) Estimated • Rate: {exchangeRate?.toFixed(4)}
+                            </div>
+                        </div>
+                    )}
+
                     <Popover open={openCurrency} onOpenChange={setOpenCurrency}>
                         <PopoverTrigger asChild>
                             <Button
@@ -759,13 +821,26 @@ export function ExpenseForm({ trips, selectedTrip, initialData, initialFile, onC
             <form ref={formRef} action={handleSubmit} className="hidden">
                 <input type="hidden" name="force" value={force.toString()} />
                 <input type="hidden" name="replaceId" value={replaceId} />
-                <input type="hidden" name="amount" value={amount} />
+                {/* Store converted amount as main amount for reporting, fallback to input amount */}
+                <input type="hidden" name="amount" value={estimatedAmount || amount} />
                 <input type="hidden" name="merchant" value={merchant} />
                 <input type="hidden" name="categorySelect" value={category} />
                 <input type="hidden" name="date" value={date} />
-                <input type="hidden" name="currency" value={currency} />
+                {/* Store "USD" as main currency if converted, else selected currency */}
+                <input type="hidden" name="currency" value={estimatedAmount ? "USD" : currency} />
                 <input type="hidden" name="customCategory" value={customCategory} />
-                {location && (<><input type="hidden" name="latitude" value={location.lat} /><input type="hidden" name="longitude" value={location.lng} /></>)}
+                {location && (
+                    <>
+                        <input type="hidden" name="latitude" value={location.lat} />
+                        <input type="hidden" name="longitude" value={location.lng} />
+                    </>
+                )}
+
+                {/* Multi-Currency Hidden Fields */}
+                {originalAmount && <input type="hidden" name="originalAmount" value={originalAmount} />}
+                {originalCurrency && <input type="hidden" name="originalCurrency" value={originalCurrency} />}
+                {exchangeRate && <input type="hidden" name="exchangeRate" value={exchangeRate} />}
+
                 <input type="file" name="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
             </form>
 

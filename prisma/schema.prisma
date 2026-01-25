@@ -142,6 +142,9 @@ model Expense {
   id             String @id @default(cuid())
   amount         Int      // Stored in Cents
   currency       String   @default("USD") // USD, EUR, GBP, INR
+  originalAmount Int?     // Amount in original currency (Cents)
+  originalCurrency String? // ISO Code of original currency
+  exchangeRate   Float?   // Rate used: Amount = Original * Rate
   merchant       String
   category       String
   date           DateTime @default(now())
