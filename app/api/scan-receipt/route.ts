@@ -80,6 +80,25 @@ export async function POST(req: Request) {
             } else {
                 console.warn(`Formatting Warning: Could not verify magic bytes. Bytes: ${finalBuffer.subarray(0, 10).toString('hex')}`);
 
+                // HEIC DETECTION: Check for 'ftyp' signature (common in HEIC/AVIF)
+                // Offset 4-8 is 'ftyp' (Ascii: 66 74 79 70 Hex: 66 74 79 70)
+                const isFtyp = finalBuffer[4] === 0x66 && finalBuffer[5] === 0x74 && finalBuffer[6] === 0x79 && finalBuffer[7] === 0x70;
+
+                if (isFtyp) {
+                    console.error("Critical: Detected HEIC/HEIF container. This is not a PNG/JPEG.");
+                    return NextResponse.json(
+                        {
+                            error: "Unsupported File Format: You uploaded an HEIC (iPhone) image that was renamed or incorrect. Please convert it to a real JPEG or PNG.",
+                            debug: {
+                                magicBytes: finalBuffer.subarray(0, 10).toString('hex'),
+                                detectedType: "HEIC/FTYP Container",
+                                sharpFailed: true
+                            }
+                        },
+                        { status: 400 }
+                    );
+                }
+
                 // RELAXED FALLBACK: Trust the user/browser if they say it's an image, but warn.
                 // This fixes the issue where valid JPEGs/PNGs might be rejected if Sharp fails AND magic bytes aren't perfect.
                 if (file.type && (file.type.startsWith('image/'))) {
