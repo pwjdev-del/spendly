@@ -4,14 +4,20 @@ import sharp from "sharp";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+    let file: File | null = null;
+    let originalBuffer: Buffer | null = null;
+    let finalBuffer: Buffer | null = null;
+    let mimeType = "image/jpeg";
+    let dataUrl: string | null = null;
+
     try {
         console.log("Scan Receipt API called (NVIDIA Mode)");
         const formData = await req.formData();
-        const file = formData.get("file") as File;
+        file = formData.get("file") as File;
 
         if (!file) {
             console.error("Scan Receipt: No file uploaded");
-            return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+            return NextResponse.json({ error: "No file uploaded", debug: { receivedFile: false } }, { status: 400 });
         }
 
         console.log(`Scan Receipt: File received. Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`);
@@ -20,14 +26,14 @@ export async function POST(req: Request) {
 
         if (!apiKey) {
             console.error("API Error: NVIDIA_API_KEY is missing");
-            return NextResponse.json({ error: "Server misconfiguration: API Key missing" }, { status: 500 });
+            return NextResponse.json({ error: "Server misconfiguration: API Key missing", debug: { envVarMissing: "NVIDIA_API_KEY" } }, { status: 500 });
         }
 
         const arrayBuffer = await file.arrayBuffer();
-        const originalBuffer = Buffer.from(arrayBuffer);
+        originalBuffer = Buffer.from(arrayBuffer);
 
-        let finalBuffer: Buffer;
-        let mimeType = "image/jpeg";
+        // finalBuffer declared above
+        // mimeType declared above
 
         // 1. PROCESS IMAGE (Clean and Resize to JPEG)
         // 1. PROCESS IMAGE (Clean and Resize to JPEG)
@@ -82,7 +88,14 @@ export async function POST(req: Request) {
                 } else {
                     console.error("Critical: Could not identify image format. Aborting.");
                     return NextResponse.json(
-                        { error: "Unsupported image format. Please upload a standard JPEG or PNG image. (HEIC is not supported directly, please convert first)" },
+                        {
+                            error: "Unsupported image format. Please upload a standard JPEG or PNG image.",
+                            debug: {
+                                magicBytes: finalBuffer.subarray(0, 10).toString('hex'),
+                                sharpFailed: true,
+                                fileType: file.type
+                            }
+                        },
                         { status: 400 }
                     );
                 }
@@ -91,7 +104,7 @@ export async function POST(req: Request) {
 
         // 2. CALL NVIDIA API (Llama 3.2 Vision)
         const base64Image = finalBuffer.toString("base64");
-        const dataUrl = `data:${mimeType};base64,${base64Image}`;
+        dataUrl = `data:${mimeType};base64,${base64Image}`;
 
         console.log(`Prepared payload. Data URL prefix: ${dataUrl.substring(0, 50)}...`);
         console.log("Using Nvidia Llama 3.2 Vision API...");
@@ -220,7 +233,15 @@ export async function POST(req: Request) {
         console.error("Receipt Scan Error:", error);
 
         return NextResponse.json(
-            { error: error.message || "Failed to process receipt" },
+            {
+                error: error.message || "Failed to process receipt",
+                debug: {
+                    sharpUsed: (originalBuffer && finalBuffer) ? !originalBuffer.equals(finalBuffer) : false,
+                    magicBytesPrefix: finalBuffer ? finalBuffer.subarray(0, 10).toString('hex') : "N/A",
+                    mimeTypeUsed: mimeType,
+                    payloadPrefix: dataUrl ? dataUrl.substring(0, 30) + "..." : "N/A"
+                }
+            },
             { status: 500 }
         );
     }
