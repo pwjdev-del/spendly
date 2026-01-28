@@ -22,7 +22,7 @@ async function getUser(email: string) {
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     trustHost: true,
-    debug: true,
+    debug: process.env.NODE_ENV === 'development',
     ...authConfig,
     adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" }, // Force JWT to coexist with Credentials
@@ -30,17 +30,14 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true, // Allow linking by email
         }),
         Facebook({
             clientId: process.env.FACEBOOK_CLIENT_ID,
             clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
         }),
         Apple({
             clientId: process.env.APPLE_CLIENT_ID,
             clientSecret: process.env.APPLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
         }),
         Credentials({
             async authorize(credentials) {

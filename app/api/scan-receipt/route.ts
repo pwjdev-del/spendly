@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server";
 import sharp from "sharp";
+import { auth } from "@/auth";
+import { aiLimiter } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+    // SECURITY: Require authentication
+    const session = await auth();
+    if (!session?.user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Rate limiting: 10 requests per minute for AI endpoints
+    try {
+        await aiLimiter.check(10, session.user.id!);
+    } catch {
+        return NextResponse.json({ error: "Rate limit exceeded. Please try again in a minute." }, { status: 429 });
+    }
+
     let file: File | null = null;
     let originalBuffer: Buffer | null = null;
     let finalBuffer: Buffer | null = null;

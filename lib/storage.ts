@@ -11,6 +11,9 @@ const ALLOWED_MIME_TYPES = new Set([
     "application/pdf",
 ]);
 
+// Whitelist allowed file extensions
+const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".pdf"]);
+
 export interface StorageProvider {
     upload(file: File, folder?: string): Promise<string>;
     delete(key: string): Promise<void>;
@@ -33,8 +36,11 @@ class LocalStorageProvider implements StorageProvider {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Sanitize filename and ensure uniqueness
-        const ext = path.extname(file.name) || ".bin";
+        // Sanitize extension - only allow whitelisted extensions
+        let ext = path.extname(file.name).toLowerCase();
+        if (!ALLOWED_EXTENSIONS.has(ext)) {
+            ext = ".bin"; // Safe fallback for unknown extensions
+        }
         const uniqueName = `${uuidv4()}${ext}`;
 
         // Structure uploads by folder if desired, currently flattening to /uploads

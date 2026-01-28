@@ -33,3 +33,19 @@ export const rateLimit = (options?: Options) => {
             }),
     };
 };
+
+// Pre-configured limiters for common use cases
+export const apiLimiter = rateLimit({
+    uniqueTokenPerInterval: 500,
+    interval: 60000, // 1 minute
+});
+
+export const uploadLimiter = rateLimit({
+    uniqueTokenPerInterval: 100,
+    interval: 60000, // 1 minute
+});
+
+export const aiLimiter = rateLimit({
+    uniqueTokenPerInterval: 50,
+    interval: 60000, // 1 minute - stricter for AI endpoints
+});

@@ -192,6 +192,13 @@ model Expense {
   @@index([createdAt])
   @@index([organizationId])
   @@index([userId])
+  
+  // Composite indexes for common query patterns
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@index([userId, category, createdAt])
 }
 
 model Card {
