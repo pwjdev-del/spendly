@@ -77,7 +77,7 @@ export function HeroSection() {
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Image
-                            src="/sia-mascot.png"
+                            src="/logo-icon-spendly-fixed.png"
                             alt="Spendly"
                             width={40}
                             height={40}
@@ -276,7 +276,7 @@ export function HeroSection() {
                                 <div className="flex items-center gap-3">
                                     <Sparkles size={24} className="text-[#0A1628]" />
                                     <div>
-                                        <p className="text-[#0A1628] text-sm font-bold">Penny AI</p>
+                                        <p className="text-[#0A1628] text-sm font-bold">Sia</p>
                                         <p className="text-[#0A1628]/70 text-xs">Scanning receipt...</p>
                                     </div>
                                 </div>

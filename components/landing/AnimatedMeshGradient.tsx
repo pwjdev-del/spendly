@@ -30,7 +30,7 @@ export function AnimatedMeshGradient() {
         resize()
         window.addEventListener("resize", resize)
 
-        // Initialize orbs with Kharcho palette
+        // Initialize orbs with Spendly palette
         const colors = [
             "rgba(45, 212, 191, 0.4)",  // Teal/Cyan
             "rgba(13, 148, 136, 0.35)", // Deep Teal

@@ -60,7 +60,7 @@ export default function LoginPage() {
                             transition={{ delay: 0.2, duration: 0.4 }}
                         >
                             <Image
-                                src="/sia-mascot.png"
+                                src="/logo-icon-spendly-fixed.png"
                                 alt="Spendly"
                                 width={120}
                                 height={120}

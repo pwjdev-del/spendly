@@ -28,7 +28,7 @@ export type WidgetId =
     | "approvals"
     | "cards"
     | "trips"
-    | "ask-kharcho"
+    | "ask-spendly"
     | "quick-actions"
     | "spending-map"
     | "spending-pulse"
@@ -379,8 +379,8 @@ export function QuickActionsWidget({ data }: { data: DashboardData }) {
 }
 
 
-// 8. Ask Kharcho AI Widget
-export function AskKharchoWidget({ data }: { data: DashboardData }) {
+// 8. Ask Spendly AI Widget
+export function AskSpendlyWidget({ data }: { data: DashboardData }) {
     return <AskSiaWidget />
 }
 
@@ -395,7 +395,7 @@ export const WIDGET_REGISTRY: Record<WidgetId, { component: React.FC<{ data: Das
     "approvals": { component: ApprovalsWidget, title: "Approvals", defaultSize: "col-span-1 md:col-span-2", mobileVisible: true }, // Essentials
     "cards": { component: () => null, title: "My Cards (Hidden)", defaultSize: "hidden" },
     "trips": { component: ActiveTripsWidget, title: "Active Trips", defaultSize: "col-span-1 md:col-span-4" },
-    "ask-kharcho": { component: AskSiaWidget, title: "Ask Sia", defaultSize: "col-span-1 md:col-span-2 lg:col-span-3" },
+    "ask-spendly": { component: AskSpendlyWidget, title: "Ask Sia", defaultSize: "col-span-1 md:col-span-2 lg:col-span-3" },
     "quick-actions": { component: QuickActionsWidget, title: "Quick Actions", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4", mobileVisible: true }, // Essentials
     "spending-map": { component: SpendingMapWidget, title: "Spending Map", defaultSize: "col-span-1 md:col-span-4 lg:col-span-4" },
     "spending-pulse": { component: SpendingPulseWidget, title: "Spending Pulse", defaultSize: "col-span-1 md:col-span-2", mobileVisible: true },
@@ -423,5 +423,5 @@ export const DEFAULT_LAYOUT = [
     { id: "spending-pulse", type: "spending-pulse" },
     { id: "spending-map", type: "spending-map" },
     { id: "trips", type: "trips" },
-    { id: "ask-kharcho", type: "ask-kharcho" },
+    { id: "ask-spendly", type: "ask-spendly" },
 ];

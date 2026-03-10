@@ -101,7 +101,7 @@ export function FeatureSection() {
                         </span>
                     </h2>
                     <p className="text-xl text-white/60 max-w-3xl mx-auto">
-                        From AI-powered receipt scanning to real-time analytics, Kharcho gives you complete visibility
+                        From AI-powered receipt scanning to real-time analytics, Spendly gives you complete visibility
                         and control over your company's expenses.
                     </p>
                 </motion.div>

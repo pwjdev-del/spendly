@@ -32,7 +32,7 @@ export function FooterSection() {
                         ?
                     </h2>
                     <p className="text-xl text-white/60 mb-10 max-w-2xl mx-auto">
-                        Join thousands of companies already saving time and money with Kharcho.
+                        Join thousands of companies already saving time and money with Spendly.
                         Start your free trial today.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -60,13 +60,13 @@ export function FooterSection() {
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-3 mb-6">
                             <Image
-                                src="/logo-icon-light.png"
-                                alt="Kharcho"
+                                src="/logo-icon-spendly-fixed.png"
+                                alt="Spendly"
                                 width={36}
                                 height={36}
                                 className="object-contain"
                             />
-                            <span className="text-white font-bold text-xl">Kharcho</span>
+                            <span className="text-white font-bold text-xl">Spendly</span>
                         </div>
                         <p className="text-white/50 mb-6 max-w-xs leading-relaxed">
                             The smartest way to manage business expenses. AI-powered, team-friendly, and built for scale.
@@ -127,7 +127,7 @@ export function FooterSection() {
             <div className="border-t border-[#1E3A5F]/50 py-6 px-6">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-white/40 text-sm">
-                        © 2026 Kharcho. All rights reserved.
+                        © 2026 Spendly. All rights reserved.
                     </p>
                     <div className="flex gap-6">
                         <Link href="#" className="text-white/40 hover:text-white/60 text-sm transition-colors">

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Receipt, CheckSquare, CreditCard, Settings, Menu, PieChart, Calendar, MapPin, Scale, Plus, ListTodo, Wallet } from "lucide-react"
+import { LayoutDashboard, Receipt, CheckSquare, CreditCard, Settings, Menu, PieChart, Calendar, MapPin, Scale, Plus, ListTodo, Wallet, UserCircle, CalendarOff, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SignOutButton } from "@/components/auth/SignOutButton"
@@ -23,6 +23,27 @@ const sidebarNavItems = [
         href: "/todo",
         icon: ListTodo,
         iconClass: "icon-todo",
+        roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
+    },
+    {
+        title: "My Profile",
+        href: "/hr/profile",
+        icon: UserCircle,
+        iconClass: "icon-profile",
+        roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
+    },
+    {
+        title: "Leave Requests",
+        href: "/hr/leaves",
+        icon: CalendarOff,
+        iconClass: "icon-leaves",
+        roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
+    },
+    {
+        title: "Payslips",
+        href: "/hr/payslips",
+        icon: FileText,
+        iconClass: "icon-payslips",
         roles: ["ADMIN", "MEMBER", "SUBMITTER", "DELEGATE", "APPROVER", "AUDITOR"],
     },
     {

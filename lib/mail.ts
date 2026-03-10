@@ -5,7 +5,7 @@ const resend = process.env.RESEND_API_KEY
     ? new Resend(process.env.RESEND_API_KEY)
     : null;
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'Kharcho App <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.EMAIL_FROM || 'Spendly App <onboarding@resend.dev>';
 
 export async function sendReceiptRequestEmail(to: string, items: { date: Date, merchant: string, amount: number }[]) {
     if (!resend) {
@@ -29,7 +29,7 @@ export async function sendReceiptRequestEmail(to: string, items: { date: Date, m
             <ul>
                 ${itemsList}
             </ul>
-            <p>You can upload them directly in the Kharcho Dashboard.</p>
+            <p>You can upload them directly in the Spendly Dashboard.</p>
         `
         });
     } catch (error) {
@@ -85,8 +85,8 @@ export async function sendWelcomeEmail(email: string, name: string) {
         await resend.emails.send({
             from: FROM_EMAIL,
             to: email,
-            subject: "Welcome to Kharcho!",
-            html: `<p>Hi ${name}, welcome to Kharcho! We are excited to have you on board.</p>`
+            subject: "Welcome to Spendly!",
+            html: `<p>Hi ${name}, welcome to Spendly! We are excited to have you on board.</p>`
         });
     } catch (error) {
         console.error("Failed to send Welcome Email:", error);

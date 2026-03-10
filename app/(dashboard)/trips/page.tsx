@@ -10,7 +10,7 @@ export default async function TripsPage() {
     ])
 
     return (
-        <div className="h-full">
+        <div className="">
             <TripsWithSearch
                 initialTrips={trips}
                 savedSearches={savedSearches.map(s => ({

@@ -1,6 +1,6 @@
-# Kharcho - Enterprise Expense Management
+# Spendly - Enterprise Expense Management
 
-Kharcho is a modern, full-stack expense management platform built with Next.js 16, Prisma, and Tailwind CSS. It features powerful search capabilities, collaboration tools, and automated workflows.
+Spendly is a modern, full-stack expense management platform built with Next.js 16, Prisma, and Tailwind CSS. It features powerful search capabilities, collaboration tools, and automated workflows.
 
 ## 🚀 Key Features
 
@@ -42,8 +42,8 @@ Kharcho is a modern, full-stack expense management platform built with Next.js 1
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/kharcho.git
-   cd kharcho
+   git clone https://github.com/yourusername/spendly.git
+   cd spendly
    ```
 
 2. Install dependencies:

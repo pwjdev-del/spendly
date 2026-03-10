@@ -1,6 +1,6 @@
 
 /**
- * Kharcho Semantic Design System
+ * Spendly Semantic Design System
  * 
  * This file serves as the source of truth for semantic color usage in the application.
  * It strictly maps to the Tailwind v4 tokens defined in app/globals.css.

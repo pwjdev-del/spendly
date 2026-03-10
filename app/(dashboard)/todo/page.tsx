@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { TodoList } from "@/components/todo/TodoList";
 
 export const metadata = {
-    title: "To-do | Kharcho",
+    title: "To-do | Spendly",
     description: "Your actionable items",
 };
 

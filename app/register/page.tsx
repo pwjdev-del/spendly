@@ -61,8 +61,8 @@ export default function RegisterPage() {
                             transition={{ delay: 0.2, duration: 0.4 }}
                         >
                             <Image
-                                src="/logo-icon-light.png"
-                                alt="Kharcho"
+                                src="/logo-icon-spendly-fixed.png"
+                                alt="Spendly"
                                 width={70}
                                 height={70}
                                 className="mb-3 object-contain"
@@ -70,7 +70,7 @@ export default function RegisterPage() {
                             />
                         </motion.div>
                         <h1 className="text-2xl font-bold text-white mb-1">Create Account</h1>
-                        <p className="text-[#64748B] text-sm">Join Kharcho today</p>
+                        <p className="text-[#64748B] text-sm">Join Spendly today</p>
                     </div>
 
                     {/* Form */}
@@ -186,7 +186,7 @@ export default function RegisterPage() {
 
                 {/* Footer Note */}
                 <p className="text-center text-[#64748B] text-xs mt-6">
-                    © 2024 Kharcho. All rights reserved.
+                    © 2024 Spendly. All rights reserved.
                 </p>
             </motion.div>
         </div>

@@ -35,7 +35,7 @@ export function AppShell({ children, userRole, canReconcile, trips, user, organi
     }, [])
 
     return (
-        <div className="flex h-screen w-full overflow-hidden bg-background relative">
+        <div className="flex h-[100dvh] w-full overflow-hidden bg-background relative">
             {/* Artistic Background with Whale Mascot */}
             <WhaleMascotBackground />
             {/* Desktop Sidebar */}
@@ -53,11 +53,12 @@ export function AppShell({ children, userRole, canReconcile, trips, user, organi
                 <Header user={user} userRole={userRole} canReconcile={canReconcile} organizationName={organizationName} />
 
                 {/* Main View Container (Flex Row for Desktop Panel) */}
-                <div className="flex-1 flex overflow-hidden relative">
+                <div className="flex-1 flex overflow-hidden relative z-10">
                     {/* Page Content */}
                     {/* Page Content */}
-                    <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pt-[env(safe-area-inset-top)] pb-32 md:pb-[env(safe-area-inset-bottom)] scrollbar-hide overscroll-contain">
+                    <main className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 lg:p-8 pt-[env(safe-area-inset-top)] pb-0 md:pb-[env(safe-area-inset-bottom)] scrollbar-hide">
                         {children}
+                        <div className="h-32 md:hidden shrink-0" />
                     </main>
 
                     {/* Desktop Expense Panel (Slide-in / Push) */}

@@ -7,11 +7,11 @@ import { ChevronDown } from "lucide-react"
 const faqs = [
     {
         question: "How does the AI receipt scanning work?",
-        answer: "Our AI uses advanced computer vision and natural language processing to extract key information from receipts and invoices. Simply snap a photo or upload an image, and Penny AI will automatically identify the merchant, amount, date, category, and even individual line items. It works with handwritten receipts, crumpled paper, and even partial images.",
+        answer: "Our AI uses advanced computer vision and natural language processing to extract key information from receipts and invoices. Simply snap a photo or upload an image, and Sia will automatically identify the merchant, amount, date, category, and even individual line items. It works with handwritten receipts, crumpled paper, and even partial images.",
     },
     {
-        question: "Can I integrate Kharcho with my existing accounting software?",
-        answer: "Absolutely! Kharcho integrates seamlessly with QuickBooks, Xero, NetSuite, SAP, Sage, and many more. We also offer a robust REST API for custom integrations. Data syncs in real-time, so your books are always up to date.",
+        question: "Can I integrate Spendly with my existing accounting software?",
+        answer: "Absolutely! Spendly integrates seamlessly with QuickBooks, Xero, NetSuite, SAP, Sage, and many more. We also offer a robust REST API for custom integrations. Data syncs in real-time, so your books are always up to date.",
     },
     {
         question: "Is my data secure?",
@@ -23,7 +23,7 @@ const faqs = [
     },
     {
         question: "Do you offer a mobile app?",
-        answer: "Yes! Kharcho is available as a native app for iOS and Android. You can submit expenses, scan receipts, approve requests, and view reports — all from your phone. The mobile experience is fully featured, not a watered-down version.",
+        answer: "Yes! Spendly is available as a native app for iOS and Android. You can submit expenses, scan receipts, approve requests, and view reports — all from your phone. The mobile experience is fully featured, not a watered-down version.",
     },
     {
         question: "How do approval workflows work?",
@@ -56,7 +56,7 @@ export function FAQSection() {
                         Frequently asked questions
                     </h2>
                     <p className="text-xl text-white/60">
-                        Everything you need to know about Kharcho.
+                        Everything you need to know about Spendly.
                     </p>
                 </motion.div>
 

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,189 +8,153 @@ datasource db {
 }
 
 model Organization {
-  id           String @id @default(cuid())
-  name         String
-  slug         String @unique
-  inviteCode   String? @unique
-  logoUrl      String?
-  primaryColor String? @default("#09090b") // Default black
-  currency     String  @default("USD")
-  requireApproval Boolean @default(true) // Default to secure
-
-  users        User[]
-  expenses     Expense[]
-  cards        Card[]
-  transactions Transaction[]
-  recurringExpenses RecurringExpense[]
-  trips        Trip[]
-  invites      Invite[]
-  
-  updatedAt    DateTime @updatedAt
-  createdAt    DateTime @default(now())
-
-  auditLogs    AuditLog[]
-
-  // Collaboration feature relations
-  savedSearches   SavedSearch[]
-  discussions     Discussion[]
-  todoItems       TodoItem[]
-  
-  // Innovation Features
-  subscriptionMonitoring Boolean @default(true)
-  smartLimits     SmartLimit[]
-  subscriptions   Subscription[]
+  id                     String             @id @default(cuid())
+  name                   String
+  slug                   String             @unique
+  inviteCode             String?            @unique
+  logoUrl                String?
+  primaryColor           String?            @default("#09090b")
+  currency               String             @default("USD")
+  requireApproval        Boolean            @default(true)
+  updatedAt              DateTime           @updatedAt
+  createdAt              DateTime           @default(now())
+  subscriptionMonitoring Boolean            @default(true)
+  auditLogs              AuditLog[]
+  cards                  Card[]
+  discussions            Discussion[]
+  expenses               Expense[]
+  invites                Invite[]
+  recurringExpenses      RecurringExpense[]
+  savedSearches          SavedSearch[]
+  smartLimits            SmartLimit[]
+  subscriptions          Subscription[]
+  todoItems              TodoItem[]
+  transactions           Transaction[]
+  trips                  Trip[]
+  users                  User[]
 }
 
 model User {
-  id             String @id @default(cuid())
-  name           String?
-  image          String? // NextAuth default for avatar
-  email          String @unique
-  emailVerified  DateTime?
-  password       String?
-  role           String @default("MEMBER") // ADMIN, MEMBER
-
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  
-  canReconcile   Boolean       @default(false)
-  dashboardLayout String? // JSON string for widget layout preferences
-  status         String        @default("ACTIVE") // ACTIVE, PENDING, SUSPENDED
-
-  expenses       Expense[]
-  incomes        Income[]
-  cards          Card[]
-  trips          Trip[]
-  approvedTrips  Trip[] @relation("TripApprover")
-  auditedTrips   Trip[] @relation("TripAuditor")
+  id                    String                @id @default(cuid())
+  name                  String?
+  image                 String?
+  email                 String                @unique
+  emailVerified         DateTime?
+  password              String?
+  role                  String                @default("MEMBER")
+  organizationId        String?
+  canReconcile          Boolean               @default(false)
+  dashboardLayout       String?
+  status                String                @default("ACTIVE")
+  payoutDay             Int?                  @default(15)
+  monthlyLimit          Int?                  @default(500000)
+  bio                   String?
+  avatarUrl             String?
+  phoneNumber           String?
+  preferences           String?               @default("{}")
+  resetToken            String?               @unique
+  resetTokenExpiry      DateTime?
+  encryptedDataKey      String?
+  updatedAt             DateTime              @updatedAt
+  createdAt             DateTime              @default(now())
+  rewardsBalance        Int                   @default(0)
+  gamificationEnabled   Boolean               @default(true)
+  accounts              Account[]
+  auditLogs             AuditLog[]
+  cards                 Card[]
+  expenses              Expense[]
+  incomes               Income[]
+  authoredMessages      Message[]             @relation("MessageAuthor")
+  mentionedIn           MessageMention[]      @relation("MentionedInMessage")
+  notifications         Notification[]
   reconciliationBatches ReconciliationBatch[]
-
-  transactions   Transaction[]
-  recurringExpenses RecurringExpense[]
-
-  payoutDay      Int?          @default(15) // Default to 15th
-  monthlyLimit   Int?        @default(500000) // Stored in Cents (Default $5000.00)
-
-  // Profile Fields
-  bio            String?
-  avatarUrl      String?
-  phoneNumber    String?
-  preferences    String?       @default("{}") // Stored as JSON string
-
-  resetToken     String?       @unique
-  resetTokenExpiry DateTime?
-  
-  encryptedDataKey String?   // DEK encrypted by Master KEK
-
-  updatedAt      DateTime @updatedAt
-  createdAt      DateTime @default(now())
-
-  auditLogs      AuditLog[]
-  accounts       Account[]
-
-  // Collaboration feature relations
-  savedSearches     SavedSearch[] @relation("SavedSearchOwner")
-  authoredMessages  Message[]     @relation("MessageAuthor")
-  mentionedIn       MessageMention[] @relation("MentionedInMessage")
-  notifications     Notification[]
-  todoItems         TodoItem[]
-  // Task Management
-  tasks         Task[]
-  taskLists     TaskList[]
-  tags          Tag[]
-  
-  // Innovation Features
-  rewardsBalance  Int           @default(0) // Points/Cents
-  gamificationEnabled Boolean   @default(true)
-  subscriptions   Subscription[]
+  recurringExpenses     RecurringExpense[]
+  savedSearches         SavedSearch[]         @relation("SavedSearchOwner")
+  subscriptions         Subscription[]
+  tags                  Tag[]
+  tasks                 Task[]
+  taskLists             TaskList[]
+  todoItems             TodoItem[]
+  transactions          Transaction[]
+  approvedTrips         Trip[]                @relation("TripApprover")
+  auditedTrips          Trip[]                @relation("TripAuditor")
+  trips                 Trip[]
+  organization          Organization?         @relation(fields: [organizationId], references: [id])
+  employeeProfile       EmployeeProfile?
+  leaveRecords          LeaveRecord[]
+  payslips              Payslip[]
+  performanceReviews    PerformanceReview[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model Income {
   id        String   @id @default(cuid())
-  amount    Int // Stored in Cents
+  amount    Int
   source    String   @default("Manual")
   date      DateTime @default(now())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Expense {
-  id             String @id @default(cuid())
-  amount         Int      // Stored in Cents
-  currency       String   @default("USD") // USD, EUR, GBP, INR
-  originalAmount Int?     // Amount in original currency (Cents)
-  originalCurrency String? // ISO Code of original currency
-  exchangeRate   Float?   // Rate used: Amount = Original * Rate
-  merchant       String
-  category       String
-  date           DateTime @default(now())
-  status         String @default("PENDING") // PENDING, APPROVED, REJECTED
-  
-  receiptUrl     String?
-  
-  userId         String
-  user           User @relation(fields: [userId], references: [id])
-  
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  tripId         String?
-  trip           Trip? @relation(fields: [tripId], references: [id])
-
-  transaction    Transaction?
-  reconciliationStatus String @default("UNRECONCILED") // UNRECONCILED, MATCHED, RECONCILED
-  
+  id                    String               @id @default(cuid())
+  amount                Int
+  currency              String               @default("USD")
+  merchant              String
+  category              String
+  date                  DateTime             @default(now())
+  status                String               @default("PENDING")
+  receiptUrl            String?
+  userId                String
+  organizationId        String
+  tripId                String?
+  reconciliationStatus  String               @default("UNRECONCILED")
   reconciliationBatchId String?
+  latitude              Float?
+  longitude             Float?
+  locationName          String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  isPerDiem             Boolean              @default(false)
+  autoApproved          Boolean              @default(false)
+  approvedBy            String?
+  approvedAt            DateTime?
+  rejectedBy            String?
+  rejectedAt            DateTime?
+  exchangeRate          Float?
+  originalAmount        Int?
+  originalCurrency      String?
+  organization          Organization         @relation(fields: [organizationId], references: [id])
   reconciliationBatch   ReconciliationBatch? @relation(fields: [reconciliationBatchId], references: [id])
+  trip                  Trip?                @relation(fields: [tripId], references: [id])
+  user                  User                 @relation(fields: [userId], references: [id])
+  transaction           Transaction?
 
-
-  latitude       Float?
-  longitude      Float?
-  locationName   String?
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  // Innovation Features
-  isPerDiem      Boolean  @default(false)
-  autoApproved   Boolean  @default(false)
-  
-  // Audit Trail
-  approvedBy     String?  
-  approvedAt     DateTime?
-  rejectedBy     String?  
-  rejectedAt     DateTime?
-
-  // Filtering indexes for power search
   @@index([status])
   @@index([category])
   @@index([merchant])
   @@index([createdAt])
   @@index([organizationId])
   @@index([userId])
-  
-  // Composite indexes for common query patterns
   @@index([userId, status])
   @@index([userId, createdAt])
   @@index([organizationId, status])
@@ -202,167 +163,137 @@ model Expense {
 }
 
 model Card {
-  id             String @id @default(cuid())
-  nickname       String? // e.g. "AWS Subscription"
+  id             String       @id @default(cuid())
+  nickname       String?
   last4          String
-  limit          Int // Stored in Cents
-  spent          Int @default(0) // Stored in Cents
-  
+  limit          Int
+  spent          Int          @default(0)
   userId         String
-  user           User @relation(fields: [userId], references: [id])
-  
   organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id])
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  user           User         @relation(fields: [userId], references: [id])
 }
 
 model Trip {
-  id              String    @id @default(cuid())
-  tripNumber      String    // Auto-generated: "TRIP-001", "TRIP-002"
-  name            String    // e.g., "NYC Business Trip"
-  description     String?
-  startDate       DateTime
-  endDate         DateTime?
-  budget          Int? // Stored in Cents
-  status          String    @default("PLANNING") // PLANNING, ACTIVE, COMPLETED
-  
-  expenses        Expense[]
-  documents       TripDocument[]
-  tasks           Task[]
-  
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-  organizationId  String?
-  organization    Organization? @relation(fields: [organizationId], references: [id])
+  id             String         @id @default(cuid())
+  tripNumber     String
+  name           String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime?
+  budget         Int?
+  status         String         @default("PLANNING")
+  userId         String
+  organizationId String?
+  approverId     String?
+  auditorId      String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  expenses       Expense[]
+  tasks          Task[]
+  approver       User?          @relation("TripApprover", fields: [approverId], references: [id])
+  auditor        User?          @relation("TripAuditor", fields: [auditorId], references: [id])
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  documents      TripDocument[]
 
-  approverId      String?
-  approver        User?     @relation("TripApprover", fields: [approverId], references: [id])
-  auditorId       String?
-  auditor         User?     @relation("TripAuditor", fields: [auditorId], references: [id])
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
   @@index([organizationId])
   @@index([userId])
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  date        DateTime
-  amount      Int    // Stored in Cents. Positive for deposit, Negative for charge/withdrawal
-  description String
-  source      String   // BANK, CREDIT_CARD, CASH_ADVANCE
-  status      String   @default("PENDING") // PENDING, RECONCILED
-  
-  expenseId   String?  @unique
-  expense     Expense? @relation(fields: [expenseId], references: [id])
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  
+  id             String       @id @default(cuid())
+  date           DateTime
+  amount         Int
+  description    String
+  source         String
+  status         String       @default("PENDING")
+  expenseId      String?      @unique
+  userId         String
   organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  expense        Expense?     @relation(fields: [expenseId], references: [id])
   organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
   @@index([userId])
   @@index([organizationId])
-
 }
 
 model Invite {
-  id             String   @id @default(cuid())
-  code           String   @unique
-  role           String   // ADMIN, MEMBER
+  id             String       @id @default(cuid())
+  code           String       @unique
+  role           String
   expiresAt      DateTime
-  
   organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt // Added for consistency
-  
 
   @@index([organizationId])
   @@index([code])
 }
 
 model ReconciliationBatch {
-  id        String   @id @default(cuid())
-  name      String   // Nickname
+  id        String    @id @default(cuid())
+  name      String
   fileName  String
-  date      DateTime @default(now())
-
+  date      DateTime  @default(now())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   expenses  Expense[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model TripDocument {
-  id        String   @id @default(cuid())
-  name      String   // Custom name or filename
-  url       String   // Path to file
-  type      String   // MIME type
-  size      Int      // Size in bytes
-  
-  tripId    String
-  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  name       String
+  url        String
+  type       String
+  size       Int
+  tripId     String
   uploadedBy String
-  
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }
 
-
 model RecurringExpense {
-  id             String   @id @default(cuid())
+  id             String        @id @default(cuid())
   merchant       String
-  amount         Int // Stored in Cents
-  currency       String   @default("USD")
+  amount         Int
+  currency       String        @default("USD")
   category       String
-  frequency      String   @default("MONTHLY") // WEEKLY, MONTHLY, YEARLY
-  status         String   @default("ACTIVE")  // ACTIVE, PAUSED
-  
+  frequency      String        @default("MONTHLY")
+  status         String        @default("ACTIVE")
   nextDueDate    DateTime
-  
   userId         String
-  user           User     @relation(fields: [userId], references: [id])
-  
   organizationId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  user           User          @relation(fields: [userId], references: [id])
+
   @@index([organizationId])
   @@index([userId])
 }
 
 model AuditLog {
-  id             String   @id @default(cuid())
-  action         String   // e.g. "USER_LOGIN", "ROLE_CHANGE", "VIEW_DECRYPTED_PII"
-  entityType     String   // e.g. "User", "Trip"
-  entityId       String?  // ID of the target entity
-  
-  actorId        String   // Who performed the action
-  actor          User     @relation(fields: [actorId], references: [id])
-  
+  id             String        @id @default(cuid())
+  action         String
+  entityType     String
+  entityId       String?
+  actorId        String
   organizationId String?
+  metadata       String?
+  encryptedData  String?
+  createdAt      DateTime      @default(now())
+  actor          User          @relation(fields: [actorId], references: [id])
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  
-  metadata       String?  // JSON string for extra details (IP, UserAgent, OldValue, NewValue)
-  encryptedData  String?  // New: Encrypted payload for sensitive info
-  
-  createdAt      DateTime @default(now())
-  
+
   @@index([actorId])
   @@index([organizationId])
   @@index([action])
@@ -371,7 +302,7 @@ model AuditLog {
 model SecurityEvent {
   id        String   @id @default(cuid())
   ipAddress String
-  type      String   // e.g. "ZOD_ERROR", "SQLI_ATTEMPT"
+  type      String
   details   String?
   createdAt DateTime @default(now())
 
@@ -387,299 +318,301 @@ model BlockedIp {
 }
 
 model IdempotencyKey {
-  key        String   @id
-  userId     String
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime
+  key       String   @id
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 
   @@index([userId])
 }
 
-// ============================================================
-// SAVED SEARCHES - Power filters with saved views
-// ============================================================
 model SavedSearch {
-  id          String   @id @default(cuid())
-  name        String
-  typeScope   String   @default("ALL") // EXPENSE, REPORT, TRIP, ALL
-  queryString String   // "status:pending amount>100"
-  uiStateJson String?  // Serialized UI filter state
-  isPinned    Boolean  @default(false)
-  isShared    Boolean  @default(false) // Org-level sharing
-  
+  id             String        @id @default(cuid())
+  name           String
+  typeScope      String        @default("ALL")
+  queryString    String
+  uiStateJson    String?
+  isPinned       Boolean       @default(false)
+  isShared       Boolean       @default(false)
   ownerId        String
-  owner          User         @relation("SavedSearchOwner", fields: [ownerId], references: [id])
   organizationId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  owner          User          @relation("SavedSearchOwner", fields: [ownerId], references: [id])
+
   @@index([ownerId])
   @@index([organizationId])
 }
 
-// ============================================================
-// DISCUSSIONS - Chat threads on expenses/reports/trips
-// ============================================================
 model Discussion {
-  id         String   @id @default(cuid())
-  entityType String   // EXPENSE, REPORT, TRIP
-  entityId   String
-  
+  id             String       @id @default(cuid())
+  entityType     String
+  entityId       String
   organizationId String
+  createdAt      DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  messages   Message[]
-  
-  createdAt  DateTime @default(now())
-  
+  messages       Message[]
+
   @@unique([entityType, entityId])
   @@index([organizationId])
 }
 
 model Message {
-  id              String   @id @default(cuid())
-  body            String
-  bodyHtml        String?
-  
-  discussionId    String
-  discussion      Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
-  
-  authorId        String
-  author          User     @relation("MessageAuthor", fields: [authorId], references: [id])
-  
-  parentId        String?  // For threaded replies
-  parent          Message? @relation("MessageReplies", fields: [parentId], references: [id])
-  replies         Message[] @relation("MessageReplies")
-  
-  mentions        MessageMention[]
-  attachments     MessageAttachment[]
-  
-  createdAt       DateTime @default(now())
-  editedAt        DateTime?
-  deletedAt       DateTime?
-  
+  id           String              @id @default(cuid())
+  body         String
+  bodyHtml     String?
+  discussionId String
+  authorId     String
+  parentId     String?
+  createdAt    DateTime            @default(now())
+  editedAt     DateTime?
+  deletedAt    DateTime?
+  author       User                @relation("MessageAuthor", fields: [authorId], references: [id])
+  discussion   Discussion          @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  parent       Message?            @relation("MessageReplies", fields: [parentId], references: [id])
+  replies      Message[]           @relation("MessageReplies")
+  attachments  MessageAttachment[]
+  mentions     MessageMention[]
+
   @@index([discussionId])
   @@index([authorId])
   @@index([parentId])
 }
 
 model MessageMention {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   messageId       String
-  message         Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
   mentionedUserId String
-  mentionedUser   User     @relation("MentionedInMessage", fields: [mentionedUserId], references: [id])
-  
+  mentionedUser   User    @relation("MentionedInMessage", fields: [mentionedUserId], references: [id])
+  message         Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
   @@unique([messageId, mentionedUserId])
 }
 
 model MessageAttachment {
   id        String   @id @default(cuid())
   messageId String
-  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
   fileName  String
   fileUrl   String
   fileType  String
   fileSize  Int
-  
   createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 }
 
-// ============================================================
-// NOTIFICATIONS - User notifications for mentions, comments, etc.
-// ============================================================
 model Notification {
-  id          String   @id @default(cuid())
-  type        String   // MENTION, COMMENT, APPROVAL_REQUEST, TODO
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  
-  entityType  String   // EXPENSE, REPORT, TRIP, MESSAGE
-  entityId    String
-  messageId   String?  // Link to specific message if applicable
-  
-  title       String
-  body        String?
-  
-  readAt      DateTime?
-  createdAt   DateTime @default(now())
-  
+  id         String    @id @default(cuid())
+  type       String
+  userId     String
+  entityType String
+  entityId   String
+  messageId  String?
+  title      String
+  body       String?
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id])
+
   @@index([userId])
   @@index([userId, readAt])
 }
 
-// ============================================================
-// TODO ITEMS - Aggregated actionable items
-// ============================================================
 model TodoItem {
-  id          String   @id @default(cuid())
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  
+  id             String        @id @default(cuid())
+  userId         String
   organizationId String?
+  entityType     String
+  entityId       String
+  kind           String
+  priority       Int           @default(0)
+  reason         String
+  primaryAction  String
+  createdAt      DateTime      @default(now())
+  resolvedAt     DateTime?
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  
-  entityType  String   // EXPENSE, REPORT, RECONCILIATION
-  entityId    String
-  
-  kind        String   // SUBMIT, APPROVE, RECONCILE, FIX_RECEIPT, RECATEGORIZE
-  priority    Int      @default(0) // Higher = more urgent
-  reason      String
-  
-  primaryAction String  // CTA label
-  
-  createdAt   DateTime @default(now())
-  resolvedAt  DateTime?
-  
+  user           User          @relation(fields: [userId], references: [id])
+
   @@index([userId])
   @@index([organizationId])
   @@index([resolvedAt])
 }
 
-// Merchant name mappings learned from user corrections
 model MerchantMapping {
-  id             String   @id @default(cuid())
-  bankName       String   // Raw name from bank statement (e.g., "AMZN MKTP")
-  mappedName     String   // Normalized name (e.g., "Amazon")
-  userId         String
-  usageCount     Int      @default(1) // How many times this mapping was used
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  id         String   @id @default(cuid())
+  bankName   String
+  mappedName String
+  userId     String
+  usageCount Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@unique([bankName, userId])
   @@index([userId])
   @@index([bankName])
 }
 
-// ============================================================
-// TASK MANAGEMENT
-// ============================================================
-
 model TaskList {
-  id          String   @id @default(cuid())
-  name        String
-  color       String?  // Hex code
-  icon        String?  // Icon name
-  isSystem    Boolean  @default(false) // Inbox, My Day, etc.
-  
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id])
-  
-  tasks       Task[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id        String   @id @default(cuid())
+  name      String
+  color     String?
+  icon      String?
+  isSystem  Boolean  @default(false)
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]
+  owner     User     @relation(fields: [ownerId], references: [id])
+
   @@index([ownerId])
 }
 
 model Tag {
-  id          String   @id @default(cuid())
-  name        String
-  color       String?
-  
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id])
-  
-  tasks       Task[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id        String   @id @default(cuid())
+  name      String
+  color     String?
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation(fields: [ownerId], references: [id])
+  tasks     Task[]   @relation("TagToTask")
+
   @@unique([name, ownerId])
   @@index([ownerId])
 }
 
 model Task {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  status      String   @default("TODO") // TODO, IN_PROGRESS, DONE
-  priority    Int      @default(4) // 1=High, 4=None
-  
-  dueDate     DateTime?
-  dueTime     String?  // "14:00"
-  
-  isRecurring Boolean  @default(false)
-  recurrenceRule String? // RRULE string
-  
-  listId      String?
-  list        TaskList? @relation(fields: [listId], references: [id])
-
-  tripId      String?
-  trip        Trip?     @relation(fields: [tripId], references: [id])
-    
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id])
-  
-  parentId    String?
-  parent      Task?    @relation("SubTasks", fields: [parentId], references: [id])
-  subTasks    Task[]   @relation("SubTasks")
-  
-  tags        Tag[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  status         String    @default("TODO")
+  priority       Int       @default(4)
+  dueDate        DateTime?
+  dueTime        String?
+  isRecurring    Boolean   @default(false)
+  recurrenceRule String?
+  listId         String?
+  tripId         String?
+  ownerId        String
+  parentId       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  list           TaskList? @relation(fields: [listId], references: [id])
+  owner          User      @relation(fields: [ownerId], references: [id])
+  parent         Task?     @relation("SubTasks", fields: [parentId], references: [id])
+  subTasks       Task[]    @relation("SubTasks")
+  trip           Trip?     @relation(fields: [tripId], references: [id])
+  tags           Tag[]     @relation("TagToTask")
 
   @@index([listId])
   @@index([dueDate])
 }
 
-// ============================================================
-// INNOVATION FEATURES (Blue Ocean)
-// ============================================================
-
 model SmartLimit {
-  id             String   @id @default(cuid())
-  name           String   // e.g., "London Per Diem"
-  amount         Int      // Daily limit in cents
-  currency       String   @default("USD")
-  
-  category       String?  // If null, applies to all
-  location       String?  // e.g., "London, UK"
-  
-  isEnabled      Boolean  @default(true)
-  
+  id             String       @id @default(cuid())
+  name           String
+  amount         Int
+  currency       String       @default("USD")
+  category       String?
+  location       String?
+  isEnabled      Boolean      @default(true)
   organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+
   @@index([organizationId])
 }
 
 model Subscription {
-  id             String   @id @default(cuid())
-  name           String   // Service name (e.g. "Figma")
-  amount         Int      // Recurring amount in cents
-  currency       String   @default("USD")
-  frequency      String   // MONTHLY, YEARLY
-  
-  status         String   @default("ACTIVE") // ACTIVE, CANCELLED, FLAGGED
-  
+  id              String       @id @default(cuid())
+  name            String
+  amount          Int
+  currency        String       @default("USD")
+  frequency       String
+  status          String       @default("ACTIVE")
   lastPaymentDate DateTime?
   nextPaymentDate DateTime?
-  
-  detectedBy     String   @default("MANUAL") // MANUAL, AI_AUDITOR
-  
-  userId         String
-  user           User     @relation(fields: [userId], references: [id])
-  
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
+  detectedBy      String       @default("MANUAL")
+  userId          String
+  organizationId  String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  user            User         @relation(fields: [userId], references: [id])
+
   @@index([organizationId])
+  @@index([userId])
+}
+
+// -----------------------------------------------------------------------------
+// HR & Employee Self-Service (ESS) Models
+// -----------------------------------------------------------------------------
+
+model EmployeeProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  dateOfBirth     DateTime?
+  joiningDate     DateTime?
+  jobTitle        String?
+  department      String?
+  managerId       String?
+  emergencyContact String?
+  taxIdNumber     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([managerId])
+}
+
+model LeaveRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // "SICK", "VACATION", "PERSONAL", "MATERNITY", "UNPAID"
+  startDate   DateTime
+  endDate     DateTime
+  status      String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  reason      String?
+  approverId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Payslip {
+  id          String   @id @default(cuid())
+  userId      String
+  month       Int
+  year        Int
+  grossPay    Int
+  netPay      Int
+  deductions  Int
+  documentUrl String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year])
+  @@index([userId])
+}
+
+model PerformanceReview {
+  id          String   @id @default(cuid())
+  userId      String
+  reviewerId  String?
+  periodStart DateTime
+  periodEnd   DateTime
+  rating      Int?
+  comments    String?
+  status      String   @default("DRAFT") // "DRAFT", "SUBMITTED", "ACKNOWLEDGED"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }

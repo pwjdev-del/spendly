@@ -1,6 +1,6 @@
 {
-  "name": "Kharcho Expense Manager",
-  "short_name": "Kharcho",
+  "name": "Spendly Expense Manager",
+  "short_name": "Spendly",
   "description": "Smart expense tracking for modern teams and families.",
   "start_url": "/",
   "display": "standalone",
