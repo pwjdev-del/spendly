@@ -4,7 +4,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm install --legacy-peer-deps
         - echo "DATABASE_URL=$DATABASE_URL" >> .env
         - echo "AUTH_SECRET=$AUTH_SECRET" >> .env
         - echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env
