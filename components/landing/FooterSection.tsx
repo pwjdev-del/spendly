@@ -60,11 +60,11 @@ export function FooterSection() {
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-3 mb-6">
                             <Image
-                                src="/logo-icon-spendly-fixed.png"
+                                src="/logo-icon-transparent.png"
                                 alt="Spendly"
-                                width={36}
-                                height={36}
-                                className="object-contain"
+                                width={48}
+                                height={48}
+                                className="object-contain drop-shadow-md"
                             />
                             <span className="text-white font-bold text-xl">Spendly</span>
                         </div>

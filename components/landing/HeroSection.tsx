@@ -77,11 +77,11 @@ export function HeroSection() {
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Image
-                            src="/logo-icon-spendly-fixed.png"
+                            src="/logo-icon-transparent.png"
                             alt="Spendly"
-                            width={40}
-                            height={40}
-                            className="object-contain"
+                            width={56}
+                            height={56}
+                            className="object-contain drop-shadow-lg"
                         />
                         <span className="text-white font-bold text-xl tracking-tight">Spendly</span>
                     </div>
