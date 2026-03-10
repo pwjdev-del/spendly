@@ -61,7 +61,7 @@ export default function RegisterPage() {
                             transition={{ delay: 0.2, duration: 0.4 }}
                         >
                             <Image
-                                src="/logo-icon-spendly-fixed.png"
+                                src="/sia-mascot.png"
                                 alt="Spendly"
                                 width={70}
                                 height={70}

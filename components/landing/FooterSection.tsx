@@ -60,7 +60,7 @@ export function FooterSection() {
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-3 mb-6">
                             <Image
-                                src="/logo-icon-transparent.png"
+                                src="/sia-mascot.png"
                                 alt="Spendly"
                                 width={48}
                                 height={48}
