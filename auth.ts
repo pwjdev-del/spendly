@@ -28,16 +28,16 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     session: { strategy: "jwt" }, // Force JWT to coexist with Credentials
     providers: [
         Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET,
         }),
         Facebook({
-            clientId: process.env.FACEBOOK_CLIENT_ID,
-            clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+            clientId: process.env.AUTH_FACEBOOK_ID || process.env.FACEBOOK_CLIENT_ID,
+            clientSecret: process.env.AUTH_FACEBOOK_SECRET || process.env.FACEBOOK_CLIENT_SECRET,
         }),
         Apple({
-            clientId: process.env.APPLE_CLIENT_ID,
-            clientSecret: process.env.APPLE_CLIENT_SECRET,
+            clientId: process.env.AUTH_APPLE_ID || process.env.APPLE_CLIENT_ID,
+            clientSecret: process.env.AUTH_APPLE_SECRET || process.env.APPLE_CLIENT_SECRET,
         }),
         Credentials({
             async authorize(credentials) {
